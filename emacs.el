@@ -26,11 +26,20 @@
 
 
 (when nil  ;; install the required packages automatically
-  (defvar frinkr/packages '(auto-complete
-                            cmake-mode 
+  (defvar frinkr/packages '(
+                            auto-complete
                             cmake-font-lock
+                            cmake-mode
+                            dash
                             dired+
+                            dired-details
+                            dired-details+
+                            dired-hacks-utils
+                            dired-k
+                            dired-rainbow
+                            dired-single
                             dos
+                            egg
                             fill-column-indicator
                             ghc
                             ghci-completion
@@ -38,7 +47,11 @@
                             hlinum
                             mouse3
                             p4
+                            phi-rectangle
+                            popup
+                            pos-tip
                             tabbar
+                            tabbar-ruler
                             )
     "Default packages")
 
@@ -252,8 +265,9 @@
 (define-key global-map [backspace] 'delete-backward-char)
 (define-key isearch-mode-map [backspace] 'isearch-delete-char)
 (define-key global-map "\M-o" 'ff-find-other-file)
-;;(define-key global-map [f5] 'eshell)
-(define-key global-map [(control f5)] 'eshell)
+;;(global-set-key (kbd "M-p") 'scroll-down)
+(global-set-key (kbd "M-n") (lambda () (interactive) (next-line 5)))
+(global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
 
 (when (eq system-type 'windows-nt)
   (define-key global-map [f1] 'help-command)
@@ -374,15 +388,6 @@
 ;;;;
 ;;;;           tabbar
 ;;;;
-(when nil
-  (setq tabbar-ruler-global-tabbar t) ; If you want tabbar
-  (setq tabbar-ruler-global-ruler t) ; if you want a global ruler
-  (setq tabbar-ruler-popup-menu t) ; If you want a popup menu.
-  (setq tabbar-ruler-popup-toolbar t) ; If you want a popup toolbar
-  (setq tabbar-ruler-popup-scrollbar t) ; If you want to only show the
-                                        ; scroll bar when your mouse is moving.
-  (require 'tabbar-ruler))
-
 (when t
   (when (display-graphic-p) 
     (require 'tabbar)
@@ -410,7 +415,7 @@
 ;;;;
 (when t
   (require 'dired+)
-
+  
   (toggle-diredp-find-file-reuse-dir t)
   (put 'dired-find-alternate-file 'disabled nil)
 
@@ -426,6 +431,44 @@
   (defun my-dired-mode-hook ()
     (local-set-key (kbd "<mouse-2>") 'diredp-mouse-find-file-reuse-dir-buffer)))
 
+
+;;;;
+;;;;            Mouse Scroll in terminal
+;;;;
+(when (not (display-graphic-p))
+
+  ;; Mousewheel
+  (defun sd-mousewheel-scroll-up (event)
+    "Scroll window under mouse up by five lines."
+    (interactive "e")
+    (let ((current-window (selected-window)))
+      (unwind-protect
+          (progn 
+            (select-window (posn-window (event-start event)))
+            (scroll-up 5))
+        (select-window current-window))))
+
+  (defun sd-mousewheel-scroll-down (event)
+    "Scroll window under mouse down by five lines."
+    (interactive "e")
+    (let ((current-window (selected-window)))
+      (unwind-protect
+          (progn 
+            (select-window (posn-window (event-start event)))
+            (scroll-down 5))
+        (select-window current-window))))
+
+  (global-set-key (kbd "<mouse-5>") 'sd-mousewheel-scroll-up)
+  (global-set-key (kbd "<mouse-4>") 'sd-mousewheel-scroll-down)
+  )
+
+
+;;;;
+;;;;           rectangular select
+;;;;
+(when t
+  (require 'phi-rectangle)
+  )
 
 ;;;;
 ;;;;           cmake
@@ -691,8 +734,8 @@
   ;; menu font
   (set-face-font 'ac-candidate-face "Consolas 13")
   (set-face-font 'ac-selection-face "Consolas 13")
-  
-  (global-set-key "\M-/" 'auto-complete)
+
+  (global-set-key [(control ?/)] 'auto-complete)
 
   ;; matching
   (setq ac-use-fuzzy t)
