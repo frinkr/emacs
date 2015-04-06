@@ -388,6 +388,15 @@
 ;;;;
 ;;;;           tabbar
 ;;;;
+(when nil
+  (setq tabbar-ruler-global-tabbar t) ; If you want tabbar
+  (setq tabbar-ruler-global-ruler t) ; if you want a global ruler
+  (setq tabbar-ruler-popup-menu t) ; If you want a popup menu.
+  (setq tabbar-ruler-popup-toolbar t) ; If you want a popup toolbar
+  (setq tabbar-ruler-popup-scrollbar t) ; If you want to only show the
+                                        ; scroll bar when your mouse is moving.
+  (require 'tabbar-ruler)
+  )
 (when t
   (when (display-graphic-p) 
     (require 'tabbar)
@@ -740,7 +749,39 @@
   ;; matching
   (setq ac-use-fuzzy t)
   (setq ac-ignore-case t)
+
   )
+
+;;;;
+;;;;           ecb
+;;;;
+(when t
+  ;; error when byte-compiling from melpa, nerver mind. It can just run
+  (require 'ecb)
+  (setq ecb-options-version "2.40")
+  
+  ;; activate at start up
+  (setq ecb-auto-activate t)
+
+  ;; no tip-of-day
+  (setq ecb-tip-of-the-day nil)
+
+  ;; layout
+  (setq ecb-layout-name "left13")  
+  (setq ecb-layout-window-sizes nil)
+  (setq ecb-fix-window-size (quote width)) ;; fixed witdh
+
+  ;; directories
+  (setq ecb-source-path (quote (("/usr/include" "c")
+                                ("/usr/include/c++/4.2.1" "std c++")
+                                ("/Data/P4/" "P4")
+                                ("/Users/frinkr/Desktop/Dropbox/Tech/" "Tech"))))
+  
+  (setq ecb-primary-secondary-mouse-buttons (quote mouse-1--C-mouse-1))
+  (setq ecb-use-speedbar-instead-native-tree-buffer nil)
+  )
+
+
 
 
 ;;;;---------------------------------------------------------------------------
@@ -748,6 +789,7 @@
 ;;;;---------------------------------------------------------------------------
 
 (which-func-mode 1)
+
 
 ;;;;
 ;;;;               Cedet
@@ -1068,11 +1110,11 @@
   ;; If there is more than one, they won't work right.
  '(column-number-mode t)
  '(display-time-mode t)
- '(ecb-fix-window-size (quote width))
- '(ecb-layout-name "left13")
- '(ecb-options-version "2.40")
- '(ecb-primary-secondary-mouse-buttons (quote mouse-1--C-mouse-1))
- '(ecb-source-path (quote (("/usr/include" "c") ("/usr/include/c++/4.2.1" "std c++") ("/Data/P4/" "P4") ("/Users/frinkr/Desktop/Dropbox/Tech/" "Tech"))))
+;; '(ecb-fix-window-size (quote width))
+;; '(ecb-layout-name "left13")
+;; '(ecb-options-version "2.40")
+;; '(ecb-primary-secondary-mouse-buttons (quote mouse-1--C-mouse-1))
+;; '(ecb-source-path (quote (("/usr/include" "c") ("/usr/include/c++/4.2.1" "std c++") ("/Data/P4/" "P4") ("/Users/frinkr/Desktop/Dropbox/Tech/" "Tech"))))
  '(semantic-idle-scheduler-idle-time 0.5)
  '(tool-bar-mode nil))
 
