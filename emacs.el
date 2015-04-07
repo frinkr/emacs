@@ -86,9 +86,12 @@
 (set-cursor-color "red")
 (set-face-foreground 'minibuffer-prompt "yellow")
 
+
 (when (not (display-graphic-p))
   (menu-bar-mode -1)
-  (set-face-background 'hl-line "color-235"))
+  (set-face-background 'hl-line "color-235")
+  (set-face-attribute 'region nil :background "color-19")
+  )
 
 ;; transparent
 (set-frame-parameter (selected-frame) 'alpha '(92 85))
@@ -100,9 +103,6 @@
 (column-number-mode t)
 (xterm-mouse-mode t)
 (tool-bar-mode nil)
-
-(when (eq system-type 'darwin)
-  (menu-bar-mode nil)) ;; no menu bar in OSX, Menubar is flashing
 
 ;; Font stuff for emacs versions that support it
 ;;  (this stuff seems to be the least portable, comment this stuff out if it
@@ -352,15 +352,13 @@
 ;;;;           fill column indicator
 ;;;;
 (when t
-  (when (display-graphic-p)
-    (require 'fill-column-indicator)
-    (setq fci-rule-width 1)
-    (if (display-graphic-p)
-        (setq fci-rule-color "darkblue")
-      (setq fci-rule-color "green"))
+  (require 'fill-column-indicator)
+  (setq fci-rule-width 1)
+  (if (display-graphic-p)
+      (setq fci-rule-color "darkblue")
+    (setq fci-rule-color "green"))
 
-    (add-hook 'after-change-major-mode-hook 'fci-mode))
-  )
+  (add-hook 'after-change-major-mode-hook 'fci-mode))
 
 
 ;;;;
@@ -368,7 +366,6 @@
 ;;;;
 (when t
   (require 'linum)
-;;  (require 'linum+)
   (add-hook 'find-file-hook (lambda () (linum-mode 1)))
   (linum-mode t))
 
@@ -776,6 +773,8 @@
   (setq ac-use-fuzzy t)
   (setq ac-ignore-case t)
 
+  (setq popup-use-optimized-column-computation nil)
+  (ac-linum-workaround)
   )
 
 ;;;;
@@ -835,6 +834,21 @@
   (global-ede-mode 1)
   (ede-enable-generic-projects)
 
+  ;; GNU global
+  (semanticdb-enable-gnu-global-databases 'c-mode t)
+  (semanticdb-enable-gnu-global-databases 'c++-mode t)
+
+  ;; No stick func mode, for case of overlapping with tabbar
+  ;; but replace with 'which-func-mode'
+  (global-semantic-stickyfunc-mode -1)
+  (global-semantic-highlight-edits-mode 1)
+  (which-func-mode 1)
+
+  ;; ac source
+  (defun frinkr/ac-cedet-hook ()
+    (add-to-list 'ac-sources 'ac-source-gtags)
+    (add-to-list 'ac-sources 'ac-source-semantic))
+  (add-hook 'c-mode-common-hook 'frinkr/ac-cedet-hook)
 
   ;; Keybinding
   (defun frinkr/cedet-hook ()
@@ -854,22 +868,14 @@
   (add-hook 'emacs-lisp-mode-hook 'frinkr/cedet-hook)
   (add-hook 'erlang-mode-hook 'frinkr/cedet-hook)
 
-  ;; GNU global
-  (semanticdb-enable-gnu-global-databases 'c-mode t)
-  (semanticdb-enable-gnu-global-databases 'c++-mode t)
-
-  ;; No stick func mode, for case of overlapping with tabbar
-  ;; but replace with 'which-func-mode'
-  (global-semantic-stickyfunc-mode -1)
-  (global-semantic-highlight-edits-mode 1)
-  (which-func-mode 1)
-
-  ;; ac source
-  (defun frinkr/ac-cedet-hook ()
-    (add-to-list 'ac-sources 'ac-source-gtags)
-    (add-to-list 'ac-sources 'ac-source-semantic))
-  (add-hook 'c-mode-common-hook 'frinkr/ac-cedet-hook)
-  
+  ;; Appearance
+  (if (display-graphic-p)
+      (progn
+        
+        )
+    (progn
+      (set-face-attribute 'semantic-highlight-func-current-tag-face  nil :background "color-234")
+      ))
   )
 
 
