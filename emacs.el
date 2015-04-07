@@ -2,28 +2,20 @@
 ;;;;                Global configs
 ;;;;
 (setq x_default_root "/Users/frinkr/Desktop")
-(setq x_mod_root "/Users/frinkr/.emacs.d/")
+(setq x_lisp_root "/Users/frinkr/.emacs.d/")
 (setq x_proj_root "/Data/P4/daji_dev_mac_dp121")
 
 ;;;;
 ;;;;                   melpa
 ;;;;
-(require 'package) ;; You might already have this line
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.org/packages/") t)
-(when (< emacs-major-version 24)
-  ;; For important compatibility libraries like cl-lib
-  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/")))
-
-(when nil
-  (when (>= emacs-major-version 24)
-    (require 'package)
-    (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
-    (add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
-    ))
-
-(package-initialize) ;; You might already have this line
-
+(when (>= emacs-major-version 24)
+  (require 'package)
+  (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+  ;;(add-to-list 'package-archives '("milkbox" . "http://melpa.milkbox.net/packages/") t)
+  ;;(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
+  ;;(add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
+  (package-initialize) ;; You might already have this line
+  )
 
 (when nil  ;; install the required packages automatically
   (defvar frinkr/packages '(
@@ -71,15 +63,11 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (when (eq system-type 'windows-nt)
-  (setq x_load_cedet nil)
-  (setq x_load_scsope nil)
   (add-to-list 'load-path "C:/emacs-23.3/lisp/emacs-lisp")
 )
 
-;;(add-to-list 'load-path x_mod_root)
-(setq x_load_cedet nil)
-(setq x_load_cscope nil)
-
+;; some package (gud.el) managed manually
+(add-to-list 'load-path x_lisp_root)
 (setq default-directory x_default_root)
 
 
@@ -265,7 +253,7 @@
 (define-key global-map [backspace] 'delete-backward-char)
 (define-key isearch-mode-map [backspace] 'isearch-delete-char)
 (define-key global-map "\M-o" 'ff-find-other-file)
-;;(global-set-key (kbd "M-p") 'scroll-down)
+;;(global-set-key (kbd "M-p") 'scroll-down-command)
 (global-set-key (kbd "M-n") (lambda () (interactive) (next-line 5)))
 (global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
 
@@ -287,7 +275,9 @@
     (interactive)
     (mapc 'kill-buffer 
           (delq (current-buffer) 
-                (remove-if-not 'buffer-file-name (buffer-list)))))
+                (remove-if-not '(lambda (x) (or (buffer-file-name x)
+                                                (eq 'dired-mode (buffer-local-value 'major-mode x))))
+                               (buffer-list)))))
 
 (global-set-key (kbd "C-x j") 'kill-other-buffers)
 
@@ -423,8 +413,26 @@
 ;;;;           Dired
 ;;;;
 (when t
+  ;; show details by default
+  (setq diredp-hide-details-initially-flag nil)
   (require 'dired+)
+  ;;(require 'dired-details+)
+
+  ;; show link
+  (setq dired-details-hide-link-targets nil)
+
+  ;; hide uninteresting files
+  (setq-default dired-omit-mode t)
+  ;;(setq-default dired-omit-files "^\\.?#\\|^\\.$\\|^\\.\\.$\\|^\\.")
+  (setq-default dired-omit-files "^\\.Spotlight-V100$\\|^\\.apdisk$\\|^\\.TemporaryItems$\\|^\\.Trashes$\\|^\\.fseventsd$\\|^\\.DocumentRevisions-V100$\\|^\\.#a\\|^\\.DS_Store$")
+  (add-to-list 'dired-omit-extensions ".Spotlight-V100")
+  (add-to-list 'dired-omit-extensions ".TemporaryItems")
+  (add-to-list 'dired-omit-extensions ".Trashes")
+  (add-to-list 'dired-omit-extensions ".apdisk")
+  (add-to-list 'dired-omit-extensions ".com.apple.timemachine.supported")
+  (add-to-list 'dired-omit-extensions ".fseventsd")
   
+  ;; reuse the buffer
   (toggle-diredp-find-file-reuse-dir t)
   (put 'dired-find-alternate-file 'disabled nil)
 
@@ -434,11 +442,21 @@
                 (lambda () (interactive) (find-alternate-file "..")))
                                         ; was dired-up-directory
               ))
-  (setq dired-details-hide-link-targets nil)
-  
+
   (add-hook 'dired-mode-hook 'my-dired-mode-hook)
   (defun my-dired-mode-hook ()
-    (local-set-key (kbd "<mouse-2>") 'diredp-mouse-find-file-reuse-dir-buffer)))
+    (local-set-key (kbd "<mouse-2>") 'diredp-mouse-find-file-reuse-dir-buffer))
+
+
+  ;; face
+  (custom-set-faces
+   '(diredp-dir-priv ((t (:foreground "cyan" :weight bold))))
+   '(diredp-file-name ((t (:foreground "green"))))
+   '(diredp-no-priv ((t (:background "black"))))
+   '(diredp-number ((t (:foreground "yellow"))))
+   )
+
+  )
 
 
 ;;;;
@@ -509,8 +527,8 @@
 ;;;;
 (when nil
   (when (display-graphic-p) 
-    (add-to-list 'load-path (concat x_mod_root "elscreen-1.4.6"))
-    (add-to-list 'load-path (concat x_mod_root "apel-10.8"))
+    (add-to-list 'load-path (concat x_lisp_root "elscreen-1.4.6"))
+    (add-to-list 'load-path (concat x_lisp_root "apel-10.8"))
     ;;(load "elscreen" "ElScreen" t)
     (global-set-key (kbd "C-. C-c") 'elscreen-create)
     (global-set-key (kbd "C-. C-k") 'elscreen-kill-screen-and-buffers)
@@ -531,7 +549,7 @@
 ;;;;
 (when t
   (require 'haskell-mode)
-  (add-to-list 'Info-default-directory-list (concat x_mod_root "haskell-mode"))
+  (add-to-list 'Info-default-directory-list (concat x_lisp_root "haskell-mode"))
   (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
   (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation))
 
@@ -592,7 +610,7 @@
     (setenv "PATH" (concat "C:/cygwin/bin;" (getenv "PATH")))
     (setq exec-path (cons "C:/cygwin/bin/" exec-path))
 
-    (load-file (concat x_mod_root "cygwin-mount.el"))
+    (load-file (concat x_lisp_root "cygwin-mount.el"))
     (require 'cygwin-mount)
     (cygwin-mount-activate)
 
@@ -662,7 +680,7 @@
 ;;;;
 (when nil
   (when (display-graphic-p)
-    (load-file (concat x_mod_root "sr-speedbar.el"))
+    (load-file (concat x_lisp_root "sr-speedbar.el"))
     (require 'sr-speedbar)
 
     ;; Setup speedbar, an additional frame for viewing source files
@@ -788,22 +806,60 @@
 ;;;;                     Programming Settings
 ;;;;---------------------------------------------------------------------------
 
-(which-func-mode 1)
-
 
 ;;;;
 ;;;;               Cedet
 ;;;;
-(when x_load_cedet
-  (load-file (concat x_mod_root "cedet-1.0/common/cedet.el"))
-  (require 'semantic-ia)
-  (require 'semantic-gcc)
+(when t
+  ;; select which submodes we want to activate
+  (add-to-list 'semantic-default-submodes 'global-semantic-mru-bookmark-mode)
+  (add-to-list 'semantic-default-submodes 'global-semanticdb-minor-mode)
+  (add-to-list 'semantic-default-submodes 'global-semantic-idle-scheduler-mode)
+  (add-to-list 'semantic-default-submodes 'global-semantic-stickyfunc-mode)
+  (add-to-list 'semantic-default-submodes 'global-semantic-highlight-func-mode)
+  (add-to-list 'semantic-default-submodes 'global-semanticdb-minor-mode)
+  
+  ;; Activate semantic
+  (semantic-mode 1)
+  
+  ;; EDE
+  (global-ede-mode 1)
+  (ede-enable-generic-projects)
+  
+  ;; customisation of modes
+  (defun alexott/cedet-hook ()
+    (local-set-key [(control return)] 'semantic-ia-complete-symbol-menu)
+    (local-set-key "\C-c?" 'semantic-ia-complete-symbol)
+    ;;
+    (local-set-key "\C-c>" 'semantic-complete-analyze-inline)
+    (local-set-key "\C-c=" 'semantic-decoration-include-visit)
+    
+    (local-set-key "\C-cj" 'semantic-ia-fast-jump)
+    (local-set-key "\C-cq" 'semantic-ia-show-doc)
+    (local-set-key "\C-cs" 'semantic-ia-show-summary)
+    (local-set-key "\C-cp" 'semantic-analyze-proto-impl-toggle)
+    )
+  (add-hook 'c-mode-common-hook 'alexott/cedet-hook)
+  (add-hook 'lisp-mode-hook 'alexott/cedet-hook)
+  (add-hook 'scheme-mode-hook 'alexott/cedet-hook)
+  (add-hook 'emacs-lisp-mode-hook 'alexott/cedet-hook)
+  (add-hook 'erlang-mode-hook 'alexott/cedet-hook)
+  
+  (semanticdb-enable-gnu-global-databases 'c-mode t)
+  (semanticdb-enable-gnu-global-databases 'c++-mode t)
+  
+  )
+
+(when nil
+  ;;(load-file (concat x_lisp_root "cedet-1.0/common/cedet.el"))
+  ;;(require 'semantic-ia)
+  ;;(require 'semantic-gcc)
 
   ;; Enable EDE (Project Management) features
   (global-ede-mode t)
 
   ;;to enable code folding
-  (global-semantic-tag-folding-mode)
+  ;;(global-semantic-tag-folding-mode)
 
   ;; Enable EDE for a pre-existing C++ project
   ;;(ede-cpp-root-project "PS" 
@@ -838,7 +894,7 @@
   ;; but replace with 'which-func-mode'
   (global-semantic-stickyfunc-mode -1)
   (global-semantic-highlight-edits-mode 1)
-  
+  (which-func-mode 1)
 
   ;; * This enables the use of Exuberent ctags if you have it installed.
   ;;   If you use C++ templates or boost, you should NOT enable it.
@@ -882,9 +938,9 @@
 
 
   ;; load auto-complete
-  (add-to-list 'load-path (concat x_mod_root "auto-complete-1.3.1"))
+  (add-to-list 'load-path (concat x_lisp_root "auto-complete-1.3.1"))
   (require 'auto-complete-config)
-  (add-to-list 'ac-dictionary-directories (concat x_mod_root "auto-complete-1.3.1/dict"))
+  (add-to-list 'ac-dictionary-directories (concat x_lisp_root "auto-complete-1.3.1/dict"))
   (ac-config-default)
   (ac-set-trigger-key "TAB")
 
@@ -894,46 +950,34 @@
   (add-hook 'c-mode-common-hook 'my-c-mode-cedet-hook)
 
 
-  ;; load ecb
-  (add-to-list 'load-path (concat x_mod_root "ecb-2.40"))
-  (require 'ecb)
-  (require 'ecb-autoloads)
-
-  ;; configure ecb
-  (setq ecb-auto-activate t)
-  (setq ecb-tip-of-the-day nil)
-  (setq ecb-layout-window-sizes nil)
-
-  (setq ecb-use-speedbar-instead-native-tree-buffer nil)
-  
-
   )
 
 
+;;;;
+;;;;           gdb many window
+;;;;
+(when t
+  (load-library "gud.el"))
 
-;;;;----------------------------GDB many window
-(add-to-list 'load-path (concat x_mod_root "gdb-many-window"))
-;;;(load-library "multi-gud.el")
-;;;(load-library "multi-gdb-ui.el")
-(load-library "gud.el")
-
-;;;;----------------------------cscope
-(when x_load_cscope 
-
-  (add-to-list 'load-path (concat x_mod_root "cscope-15.7a/contrib/xcscope"))
+;;;;
+;;;;           cscope
+;;;;
+(when t
   (require 'xcscope)
   (setq cscope-do-not-update-database t)
   ;; hotkey for cscope
-  (define-key global-map [(meta f2)]  'cscope-find-this-symbol)
-  (define-key global-map [(control f6)]  'cscope-find-global-definition)
-  (define-key global-map [(control f7)]  'cscope-find-global-definition-no-prompting)
-  (define-key global-map [(control f8)]  'cscope-pop-mark)
-  (define-key global-map [(control f9)]  'cscope-next-symbol)
-  (define-key global-map [(control f10)] 'cscope-find-this-file);;cscope-next-file)
-  (define-key global-map [(control f11)] 'cscope-find-this-symbol);;cscope-prev-symbol)
-  (define-key global-map [(control f12)] 'cscope-find-global-definition-no-prompting);;cscope-prev-file)
-  (define-key global-map [(meta f9)]  'cscope-display-buffer)
-  (define-key global-map [(meta f10)] 'cscope-display-buffer-toggle) 
+  (when nil
+    (define-key global-map [(meta f2)]  'cscope-find-this-symbol)
+    (define-key global-map [(control f6)]  'cscope-find-global-definition)
+    (define-key global-map [(control f7)]  'cscope-find-global-definition-no-prompting)
+    (define-key global-map [(control f8)]  'cscope-pop-mark)
+    (define-key global-map [(control f9)]  'cscope-next-symbol)
+    (define-key global-map [(control f10)] 'cscope-find-this-file);;cscope-next-file)
+    (define-key global-map [(control f11)] 'cscope-find-this-symbol);;cscope-prev-symbol)
+    (define-key global-map [(control f12)] 'cscope-find-global-definition-no-prompting);;cscope-prev-file)
+    (define-key global-map [(meta f9)]  'cscope-display-buffer)
+    (define-key global-map [(meta f10)] 'cscope-display-buffer-toggle)
+    )
   (global-set-key (kbd "M-s d") 'cscope-find-global-definition)
   (global-set-key (kbd "M-s s") 'cscope-find-this-symbol)
   (global-set-key (kbd "M-s f") 'cscope-find-this-file)
@@ -1087,13 +1131,6 @@
 ;(setq imenu-max-items 45)
 ;(define-key global-map "\C-cj" 'imenu)
 
-
-
-;; Setup ned mode
-(autoload 'ned-mode "ned" "NED mode" t)
-(setq auto-mode-alist (cons '("\\.ned\\'" . ned-mode) auto-mode-alist))
-(setq auto-mode-alist (cons '("\\.msg\\'" . ned-mode) auto-mode-alist))
-
 ;; Setup my own packages
 ;;(add-to-list 'load-path (expand-file-name "~/elisp/"))
 (autoload 'cpp-font-lock "cpp-mode" "CPP Font Lock mode" t)
@@ -1110,11 +1147,6 @@
   ;; If there is more than one, they won't work right.
  '(column-number-mode t)
  '(display-time-mode t)
-;; '(ecb-fix-window-size (quote width))
-;; '(ecb-layout-name "left13")
-;; '(ecb-options-version "2.40")
-;; '(ecb-primary-secondary-mouse-buttons (quote mouse-1--C-mouse-1))
-;; '(ecb-source-path (quote (("/usr/include" "c") ("/usr/include/c++/4.2.1" "std c++") ("/Data/P4/" "P4") ("/Users/frinkr/Desktop/Dropbox/Tech/" "Tech"))))
  '(semantic-idle-scheduler-idle-time 0.5)
  '(tool-bar-mode nil))
 
@@ -1128,10 +1160,6 @@
   ;; Your init file should contain only one such instance.
   ;; If there is more than one, they won't work right.
  '(custom-face-tag ((t (:foreground "brightblue"))))
- '(diredp-dir-priv ((t (:foreground "cyan" :weight bold))))
- '(diredp-file-name ((t (:foreground "green"))))
- '(diredp-no-priv ((t (:background "black"))))
- '(diredp-number ((t (:foreground "yellow"))))
  '(haskell-constructor-face ((t (:foreground "green"))))
  '(haskell-definition-face ((t (:foreground "magenta"))))
  '(link ((t (:foreground "green" :underline t))))
