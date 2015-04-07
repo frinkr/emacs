@@ -2,7 +2,7 @@
 ;;;;                Global configs
 ;;;;
 (setq x_default_root "/Users/frinkr/Desktop")
-(setq x_lisp_root "/Users/frinkr/.emacs.d/")
+(setq x_lisp_root "/Users/frinkr/.emacs.d/lisp")
 (setq x_proj_root "/Data/P4/daji_dev_mac_dp121")
 
 ;;;;
@@ -101,7 +101,8 @@
 ;; line & column number 
 (line-number-mode t)
 (column-number-mode t)
-(xterm-mouse-mode t)
+;; mouse in terminal
+(xterm-mouse-mode t)   
 (tool-bar-mode nil)
 
 ;; Font stuff for emacs versions that support it
@@ -762,8 +763,8 @@
   (setq ac-auto-start t)
 
   ;; menu font
-  (set-face-font 'ac-candidate-face "Consolas 13")
-  (set-face-font 'ac-selection-face "Consolas 13")
+  (set-face-font 'ac-candidate-face "Courier New 13")
+  (set-face-font 'ac-selection-face "Courier New 13")
 
   (if (display-graphic-p)
       (global-set-key [(control ?/)] 'auto-complete)
@@ -840,10 +841,13 @@
 
   ;; No stick func mode, for case of overlapping with tabbar
   ;; but replace with 'which-func-mode'
-  (global-semantic-stickyfunc-mode -1)
-  (global-semantic-highlight-edits-mode 1)
-  (which-func-mode 1)
+  (when (display-graphic-p)
+    (global-semantic-stickyfunc-mode -1)
+    (which-func-mode 1))
 
+  ;; highlight the editing
+  (global-semantic-highlight-edits-mode 1)
+  
   ;; ac source
   (defun frinkr/ac-cedet-hook ()
     (add-to-list 'ac-sources 'ac-source-gtags)
