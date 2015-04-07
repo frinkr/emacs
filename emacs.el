@@ -88,7 +88,7 @@
 
 (when (not (display-graphic-p))
   (menu-bar-mode -1)
-  (set-face-background 'hl-line "green"))
+  (set-face-background 'hl-line "color-235"))
 
 ;; transparent
 (set-frame-parameter (selected-frame) 'alpha '(92 85))
@@ -99,6 +99,7 @@
 (line-number-mode t)
 (column-number-mode t)
 (xterm-mouse-mode t)
+(tool-bar-mode nil)
 
 (when (eq system-type 'darwin)
   (menu-bar-mode nil)) ;; no menu bar in OSX, Menubar is flashing
@@ -108,7 +109,7 @@
 ;;   prevents the config file from loading)
 (when (eq system-type 'darwin)
   (set-face-attribute 'default nil :font "Courier New 14")   
-  (add-to-list 'default-frame-alist '(font . "Inconsolata 17"))
+  (add-to-list 'default-frame-alist '(font . "Courier New 15"))
   ;;(add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono 16"))
   )
 
@@ -175,6 +176,10 @@
 (setq-default indent-tabs-mode nil)
 (setq delete-key-deletes-forward t)
 (setq mouse-yank-at-point nil)
+
+;; upcase region is anoying
+(put 'upcase-region 'disabled nil)
+(put 'narrow-to-region 'disabled nil)
 
 ;; Setup time mode
 (autoload 'display-time "time" "Display Time" t)
@@ -701,6 +706,7 @@
 
     (global-set-key [(meta f4)] 'speedbar-get-focus)))
 
+
 ;;;;
 ;;;;           C++11
 ;;;;
@@ -762,7 +768,9 @@
   (set-face-font 'ac-candidate-face "Consolas 13")
   (set-face-font 'ac-selection-face "Consolas 13")
 
-  (global-set-key [(control ?/)] 'auto-complete)
+  (if (display-graphic-p)
+      (global-set-key [(control ?/)] 'auto-complete)
+    (ac-set-trigger-key "TAB"))
 
   ;; matching
   (setq ac-use-fuzzy t)
@@ -812,144 +820,56 @@
 ;;;;
 (when t
   ;; select which submodes we want to activate
-  (add-to-list 'semantic-default-submodes 'global-semantic-mru-bookmark-mode)
   (add-to-list 'semantic-default-submodes 'global-semanticdb-minor-mode)
-  (add-to-list 'semantic-default-submodes 'global-semantic-idle-scheduler-mode)
+  (add-to-list 'semantic-default-submodes 'global-semantic-mru-bookmark-mode)
   (add-to-list 'semantic-default-submodes 'global-semantic-stickyfunc-mode)
   (add-to-list 'semantic-default-submodes 'global-semantic-highlight-func-mode)
-  (add-to-list 'semantic-default-submodes 'global-semanticdb-minor-mode)
-  
+  (add-to-list 'semantic-default-submodes 'global-semantic-idle-scheduler-mode)
+  (add-to-list 'semantic-default-submodes 'global-semantic-idle-summary-mode)
+  ;;(add-to-list 'semantic-default-submodes 'global-semantic-idle-completions-mode) ;; fronzen?
+               
   ;; Activate semantic
   (semantic-mode 1)
   
   ;; EDE
   (global-ede-mode 1)
   (ede-enable-generic-projects)
-  
-  ;; customisation of modes
-  (defun alexott/cedet-hook ()
+
+
+  ;; Keybinding
+  (defun frinkr/cedet-hook ()
     (local-set-key [(control return)] 'semantic-ia-complete-symbol-menu)
     (local-set-key "\C-c?" 'semantic-ia-complete-symbol)
-    ;;
+    (local-set-key [(control ?/)] 'semantic-ia-complete-symbol-menu)
     (local-set-key "\C-c>" 'semantic-complete-analyze-inline)
     (local-set-key "\C-c=" 'semantic-decoration-include-visit)
-    
     (local-set-key "\C-cj" 'semantic-ia-fast-jump)
     (local-set-key "\C-cq" 'semantic-ia-show-doc)
     (local-set-key "\C-cs" 'semantic-ia-show-summary)
     (local-set-key "\C-cp" 'semantic-analyze-proto-impl-toggle)
     )
-  (add-hook 'c-mode-common-hook 'alexott/cedet-hook)
-  (add-hook 'lisp-mode-hook 'alexott/cedet-hook)
-  (add-hook 'scheme-mode-hook 'alexott/cedet-hook)
-  (add-hook 'emacs-lisp-mode-hook 'alexott/cedet-hook)
-  (add-hook 'erlang-mode-hook 'alexott/cedet-hook)
-  
+  (add-hook 'c-mode-common-hook 'frinkr/cedet-hook)
+  (add-hook 'lisp-mode-hook 'frinkr/cedet-hook)
+  (add-hook 'scheme-mode-hook 'frinkr/cedet-hook)
+  (add-hook 'emacs-lisp-mode-hook 'frinkr/cedet-hook)
+  (add-hook 'erlang-mode-hook 'frinkr/cedet-hook)
+
+  ;; GNU global
   (semanticdb-enable-gnu-global-databases 'c-mode t)
   (semanticdb-enable-gnu-global-databases 'c++-mode t)
-  
-  )
 
-(when nil
-  ;;(load-file (concat x_lisp_root "cedet-1.0/common/cedet.el"))
-  ;;(require 'semantic-ia)
-  ;;(require 'semantic-gcc)
-
-  ;; Enable EDE (Project Management) features
-  (global-ede-mode t)
-
-  ;;to enable code folding
-  ;;(global-semantic-tag-folding-mode)
-
-  ;; Enable EDE for a pre-existing C++ project
-  ;;(ede-cpp-root-project "PS" 
-  ;;                      :name "Deskpack"
-  ;;                      :file "/Data/xWork/P4/PS64/depot/PsAllPlugins/Private/Project/All.mk"
-  ;;                      )
-
-  ;; System includes
-  (semantic-add-system-include x_proj_root 'c++-mode)
-
-  ;; Enabling Semantic (code-parsing, smart completion) features
-  ;; Select one of the following:
-
-  ;; * This enables the database and idle reparse engines
-  ;;(semantic-load-enable-minimum-features)
-
-  ;; * This enables some tools useful for coding, such as summary mode
-  ;;   imenu support, and the semantic navigator
-  ;;(semantic-load-enable-code-helpers)
-
-  ;; * This enables even more coding tools such as intellisense mode
-  ;;   decoration mode, and stickyfunc mode (plus regular code helpers)
-  (semantic-load-enable-gaudy-code-helpers)
-  (semantic-load-enable-semantic-debugging-helpers)
-  (semantic-load-enable-excessive-code-helpers)
-
-  (global-semantic-idle-scheduler-mode 1) ;The idle scheduler with automatically reparse buffers in idle time.
-  (global-semantic-idle-completions-mode 1) ;Display a tooltip with a list of possible completions near the cursor.
-  (global-semantic-idle-summary-mode 1) ;Display a tag summary of the lexical token under the cursor.
-
-  ;; no stick func mode, for case of overlapping with tabbar
+  ;; No stick func mode, for case of overlapping with tabbar
   ;; but replace with 'which-func-mode'
   (global-semantic-stickyfunc-mode -1)
   (global-semantic-highlight-edits-mode 1)
   (which-func-mode 1)
 
-  ;; * This enables the use of Exuberent ctags if you have it installed.
-  ;;   If you use C++ templates or boost, you should NOT enable it.
-  ;; (semantic-load-enable-all-exuberent-ctags-support)
-  ;;   Or, use one of these two types of support.
-  ;;   Add support for new languges only via ctags.
-  ;; (semantic-load-enable-primary-exuberent-ctags-support)
-  ;;   Add support for using ctags as a backup parser.
-  ;; (semantic-load-enable-secondary-exuberent-ctags-support)
-
-  ;; Enable SRecode (Template management) minor-mode.
-  (global-srecode-minor-mode 1)
-
-  (global-set-key [(control ?/)] 'semantic-ia-complete-symbol-menu)
-
-  (defun my-semantic-hook ()
-    (imenu-add-to-menubar "TAGS"))
-  ;; (add-hook 'semantic-init-hooks 'my-semantic-hook)
-
-  ;; if you want to enable support for gnu global
-  (require 'semanticdb-global)
-  (semanticdb-enable-gnu-global-databases 'c-mode)
-  (semanticdb-enable-gnu-global-databases 'c++-mode)
-
-  ;; enable ctags for some languages:
-  ;;  Unix Shell, Perl, Pascal, Tcl, Fortran, Asm
-  ;;(semantic-load-enable-primary-exuberent-ctags-support)
-
-  (defun my-cedet-hook ()
-    (local-set-key [(control return)] 'semantic-ia-complete-symbol)
-    (local-set-key "\C-c?" 'semantic-ia-complete-symbol-menu)
-    (local-set-key "\C-c>" 'semantic-complete-analyze-inline)
-    (local-set-key "\C-cp" 'semantic-analyze-proto-impl-toggle))
-  (add-hook 'c-mode-common-hook 'my-cedet-hook)
-
-;;  (defun my-c-mode-cedet-hook ()
-;;    (local-set-key "." 'semantic-complete-self-insert)
-;;    (local-set-key "\C-." 'semantic-ia-complete-symbol-menu)
-;;    (local-set-key ">" 'semantic-complete-self-insert))
-;;  (add-hook 'c-mode-common-hook 'my-c-mode-cedet-hook)
-
-
-  ;; load auto-complete
-  (add-to-list 'load-path (concat x_lisp_root "auto-complete-1.3.1"))
-  (require 'auto-complete-config)
-  (add-to-list 'ac-dictionary-directories (concat x_lisp_root "auto-complete-1.3.1/dict"))
-  (ac-config-default)
-  (ac-set-trigger-key "TAB")
-
-  (defun my-c-mode-cedet-hook ()
+  ;; ac source
+  (defun frinkr/ac-cedet-hook ()
     (add-to-list 'ac-sources 'ac-source-gtags)
     (add-to-list 'ac-sources 'ac-source-semantic))
-  (add-hook 'c-mode-common-hook 'my-c-mode-cedet-hook)
-
-
+  (add-hook 'c-mode-common-hook 'frinkr/ac-cedet-hook)
+  
   )
 
 
@@ -1141,26 +1061,25 @@
 ;;;;---------------------------------------------------------------------------
 
 (custom-set-variables
-  ;; custom-set-variables was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
- '(column-number-mode t)
- '(display-time-mode t)
- '(semantic-idle-scheduler-idle-time 0.5)
- '(tool-bar-mode nil))
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ecb-options-version "2.40")
+ '(semantic-idle-scheduler-idle-time 0.5))
 
-;; Add final message so using C-h l I can see if .emacs failed
-(message ".emacs loaded successfully.")
-(put 'upcase-region 'disabled nil)
-(put 'narrow-to-region 'disabled nil)
 (custom-set-faces
-  ;; custom-set-faces was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(custom-face-tag ((t (:foreground "brightblue"))))
  '(haskell-constructor-face ((t (:foreground "green"))))
  '(haskell-definition-face ((t (:foreground "magenta"))))
  '(link ((t (:foreground "green" :underline t))))
  '(semantic-unmatched-syntax-face ((((class color) (background dark)) (:underline nil)))))
+
+
+
+;; Add final message so using C-h l I can see if .emacs failed
+(message ".emacs loaded successfully.")
