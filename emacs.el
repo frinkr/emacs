@@ -31,6 +31,7 @@
                             dired-rainbow
                             dired-single
                             dos
+                            ecb
                             egg
                             fill-column-indicator
                             ghc
@@ -253,12 +254,12 @@
 (define-key global-map "\C-xw" 'what-line)
 (define-key global-map "\C-z" 'undo)
 (define-key global-map "\M-g" 'goto-line)
+(define-key global-map "\C-o" 'ff-find-other-file)
 (define-key global-map "\C-q" 'save-buffers-kill-terminal)
 (define-key global-map [(meta m)] 'set-mark-command)
 (define-key global-map [delete] 'delete-char)
 (define-key global-map [backspace] 'delete-backward-char)
 (define-key isearch-mode-map [backspace] 'isearch-delete-char)
-(define-key global-map "\C-o" 'ff-find-other-file)
 ;;(global-set-key (kbd "M-p") 'scroll-down-command)
 (global-set-key (kbd "M-n") (lambda () (interactive) (next-line 5)))
 (global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
@@ -439,6 +440,7 @@
   (toggle-diredp-find-file-reuse-dir t)
   (put 'dired-find-alternate-file 'disabled nil)
 
+  ;; ^ to go up
   (add-hook 'dired-mode-hook
             (lambda ()
               (define-key dired-mode-map (kbd "^")
@@ -446,8 +448,8 @@
                                         ; was dired-up-directory
               ))
 
-  (add-hook 'dired-mode-hook 'my-dired-mode-hook)
-  (defun my-dired-mode-hook ()
+  (add-hook 'dired-mode-hook 'frinkr/dired-mode-hook)
+  (defun frinkr/dired-mode-hook ()
     (local-set-key (kbd "<mouse-2>") 'diredp-mouse-find-file-reuse-dir-buffer))
 
 
@@ -916,16 +918,6 @@
   (global-set-key (kbd "M-s k") 'sr-speedbar-toggle)
   (global-set-key (kbd "<C-down-mouse-1>") 'cscope-find-global-definition-no-prompting)
   )
-
-
-;; Setup psgml-mode
-(setq sgml-indent-step 2)
-(setq sgml-indent-data t)
-(setq sgml-warn-about-undefined-entities nil)
-(setq sgml-warn-about-undefined-elements nil)
-(defun user-mail-address() "user@gmail.com")
-(add-to-list 'auto-mode-alist '("\\.xsd$"    . xml-mode))
-
 
 ;; Setup Common Lisp mode
 (condition-case err
