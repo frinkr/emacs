@@ -257,7 +257,7 @@
 (define-key global-map [delete] 'delete-char)
 (define-key global-map [backspace] 'delete-backward-char)
 (define-key isearch-mode-map [backspace] 'isearch-delete-char)
-(define-key global-map "\M-o" 'ff-find-other-file)
+(define-key global-map "\C-o" 'ff-find-other-file)
 ;;(global-set-key (kbd "M-p") 'scroll-down-command)
 (global-set-key (kbd "M-n") (lambda () (interactive) (next-line 5)))
 (global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
@@ -892,7 +892,7 @@
   (require 'xcscope)
   (setq cscope-do-not-update-database t)
   ;; hotkey for cscope
-  (when nil
+  (when t
     (define-key global-map [(meta f2)]  'cscope-find-this-symbol)
     (define-key global-map [(control f6)]  'cscope-find-global-definition)
     (define-key global-map [(control f7)]  'cscope-find-global-definition-no-prompting)
