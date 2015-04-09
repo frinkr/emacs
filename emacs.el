@@ -392,25 +392,24 @@
   (require 'tabbar-ruler)
   )
 (when t
-  (when (display-graphic-p) 
-    (require 'tabbar)
-    (tabbar-mode 1)
-    (global-set-key (kbd "C-{") 'tabbar-backward)
-    (global-set-key (kbd "C-}") 'tabbar-forward)
-    (setq tabbar-buffer-groups-function
-          (lambda ()
-            (list "All Buffers")))
+  (require 'tabbar)
+  (tabbar-mode 1)
+  (global-set-key (kbd "C-{") 'tabbar-backward)
+  (global-set-key (kbd "C-}") 'tabbar-forward)
+  (setq tabbar-buffer-groups-function
+        (lambda ()
+          (list "All Buffers")))
 
-    ;; Remove buffer names from list
-    (setq *tabbar-ignore-buffers* '("*CEDET Global*" "*Compile-Log*" "*Messages*" "*etags tmp*" ))
-    (setq tabbar-buffer-list-function
-          (lambda ()
-            (remove-if
-             (lambda (buffer)
-               (and (not (eq (current-buffer) buffer)) ; Always include the current buffer.
-                    (loop for name in *tabbar-ignore-buffers* ;remove buffer name in this list.
-                          thereis (string-equal (buffer-name buffer) name))))
-             (tabbar-buffer-list)))))
+  ;; Remove buffer names from list
+  (setq *tabbar-ignore-buffers* '("*CEDET Global*" "*Compile-Log*" "*Messages*" "*etags tmp*" ))
+  (setq tabbar-buffer-list-function
+        (lambda ()
+          (remove-if
+           (lambda (buffer)
+             (and (not (eq (current-buffer) buffer)) ; Always include the current buffer.
+                  (loop for name in *tabbar-ignore-buffers* ;remove buffer name in this list.
+                        thereis (string-equal (buffer-name buffer) name))))
+           (tabbar-buffer-list))))
   )
 
 ;;;;
