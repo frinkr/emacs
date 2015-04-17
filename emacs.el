@@ -39,6 +39,7 @@
                             haskell-mode
                             hlinum
                             mouse3
+                            magit
                             p4
                             phi-rectangle
                             popup
@@ -377,6 +378,16 @@
 (when t
   (load-library "p4")
   (setenv "P4CONFIG" "p4.config"))
+
+
+;;;;
+;;;;           magit
+;;;;
+(when t
+  (require 'magit)
+  (setq magit-last-seen-setup-instructions "1.4.0")
+  (setq magit-auto-revert-mode nil)
+  )
 
 
 ;;;;
