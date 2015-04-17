@@ -396,6 +396,8 @@
   (tabbar-mode 1)
   (global-set-key (kbd "C-{") 'tabbar-backward)
   (global-set-key (kbd "C-}") 'tabbar-forward)
+  ;;(global-set-key (kbd "C-M-[") 'tabbar-backward)
+  ;;(global-set-key (kbd "C-M-]") 'tabbar-forward)
   (setq tabbar-buffer-groups-function
         (lambda ()
           (list "All Buffers")))
@@ -459,7 +461,16 @@
    '(diredp-no-priv ((t (:background "black"))))
    '(diredp-number ((t (:foreground "yellow"))))
    )
-
+  (when (not (display-graphic-p))
+    (custom-set-faces
+     '(diredp-dir-priv ((t (:foreground "cyan" :weight bold))))
+     '(diredp-exec-priv ((t (:background "Color-234" :foreground "brightred"))))
+     '(diredp-file-name ((t (:foreground "green"))))
+     '(diredp-no-priv ((t (:background "black"))))
+     '(diredp-number ((t (:foreground "yellow"))))
+     '(diredp-read-priv ((t (:background "Color-234" :foreground "color-34"))))
+     '(diredp-write-priv ((t (:background "color-234")))))
+    )
   )
 
 
@@ -823,7 +834,7 @@
   ;; select which submodes we want to activate
   (add-to-list 'semantic-default-submodes 'global-semanticdb-minor-mode)
   (add-to-list 'semantic-default-submodes 'global-semantic-mru-bookmark-mode)
-  (add-to-list 'semantic-default-submodes 'global-semantic-stickyfunc-mode)
+  ;;(add-to-list 'semantic-default-submodes 'global-semantic-stickyfunc-mode)
   (add-to-list 'semantic-default-submodes 'global-semantic-highlight-func-mode)
   (add-to-list 'semantic-default-submodes 'global-semantic-idle-scheduler-mode)
   (add-to-list 'semantic-default-submodes 'global-semantic-idle-summary-mode)
@@ -1075,9 +1086,17 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-face-tag ((t (:foreground "brightblue"))))
+ '(diredp-dir-priv ((t (:foreground "cyan" :weight bold))))
+ '(diredp-exec-priv ((t (:background "Color-234" :foreground "brightred"))))
+ '(diredp-file-name ((t (:foreground "green"))))
+ '(diredp-no-priv ((t (:background "black"))))
+ '(diredp-number ((t (:foreground "yellow"))))
+ '(diredp-read-priv ((t (:background "Color-234" :foreground "color-34"))))
+ '(diredp-write-priv ((t (:background "color-234"))))
  '(haskell-constructor-face ((t (:foreground "green"))))
  '(haskell-definition-face ((t (:foreground "magenta"))))
  '(link ((t (:foreground "green" :underline t))))
+ '(semantic-highlight-edits-face ((t (:background "color-234"))))
  '(semantic-unmatched-syntax-face ((((class color) (background dark)) (:underline nil)))))
 
 
