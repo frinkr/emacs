@@ -405,6 +405,10 @@
 (when t
   (require 'tabbar)
   (tabbar-mode 1)
+  
+  (when (not (display-graphic-p))
+    (global-set-key (kbd "M-,") 'tabbar-backward)
+    (global-set-key (kbd "M-.") 'tabbar-forward))
   (global-set-key (kbd "C-{") 'tabbar-backward)
   (global-set-key (kbd "C-}") 'tabbar-forward)
   ;;(global-set-key (kbd "C-M-[") 'tabbar-backward)
@@ -423,6 +427,67 @@
                   (loop for name in *tabbar-ignore-buffers* ;remove buffer name in this list.
                         thereis (string-equal (buffer-name buffer) name))))
            (tabbar-buffer-list))))
+
+  ;; Add a buffer modification state indicator in the tab label, and place a
+  ;; space around the label to make it looks less crowd.
+  (defadvice tabbar-buffer-tab-label (after fixup_tab_label_space_and_flag activate)
+    (setq ad-return-value
+          (if (and (buffer-modified-p (tabbar-tab-value tab))
+                   (buffer-file-name (tabbar-tab-value tab)))
+              (concat " > " (concat ad-return-value " "))
+            (concat " " (concat ad-return-value " ")))))
+  ;; Called each time the modification state of the buffer changed.
+  (defun ztl-modification-state-change ()
+    (tabbar-set-template tabbar-current-tabset nil)
+    (tabbar-display-update))
+  ;; First-change-hook is called BEFORE the change is made.
+  (defun ztl-on-buffer-modification ()
+    (set-buffer-modified-p t)
+    (ztl-modification-state-change))
+  (add-hook 'after-save-hook 'ztl-modification-state-change)
+  ;; This doesn't work for revert, I don't know.
+  ;;(add-hook 'after-revert-hook 'ztl-modification-state-change)
+  (add-hook 'first-change-hook 'ztl-on-buffer-modification)
+
+
+  ;; font & face
+  (when (not (display-graphic-p))
+    (set-face-attribute
+     'tabbar-default nil
+     :background "gray20"
+     :foreground "gray40"
+     :underline nil
+     :box '(:line-width 1 :color "gray20" :style nil))
+    (set-face-attribute
+     'tabbar-unselected nil
+     :background "gray20"
+     :foreground "gray60"
+     :box '(:line-width 1 :color "gray30" :style nil))
+    (set-face-attribute
+     'tabbar-selected nil
+     :background "color-18"
+     :foreground "brightwhite"
+     :underline t
+     :box '(:line-width 1 :color "gray75" :style nil))
+    (set-face-attribute
+     'tabbar-highlight nil
+     :background "white"
+     :foreground "black"
+     :underline nil
+     :box '(:line-width 5 :color "white" :style nil))
+    (set-face-attribute
+     'tabbar-button nil
+     :box '(:line-width 1 :color "gray20" :style nil))
+    (set-face-attribute
+     'tabbar-separator nil
+     :background "gray20"
+     :height 0.6)
+
+    ;; Change padding of the tabs
+    ;; we also need to set separator to avoid overlapping tabs by highlighted tabs
+    (custom-set-variables
+     '(tabbar-separator (quote (0.5))))
+    )
   )
 
 ;;;;
