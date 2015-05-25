@@ -179,6 +179,7 @@
 (setq-default indent-tabs-mode nil)
 (setq delete-key-deletes-forward t)
 (setq mouse-yank-at-point nil)
+(setq bookmark-save-flag 1)  ;; autosave bookmarks
 
 ;; upcase region is anoying
 (put 'upcase-region 'disabled nil)
@@ -289,6 +290,21 @@
 
 (global-set-key (kbd "C-x j") 'kill-other-buffers)
 
+
+;;;;
+;;;;           kill *Completions* buffer automatically
+;;;;
+(defun delete-completion-window-buffer (&optional output)
+  (interactive)
+  (dolist (win (window-list))
+    (when (string= (buffer-name (window-buffer win)) "*Completions*")
+      (delete-window win)
+      (kill-buffer "*Completions*")))
+  output)
+
+(add-hook 'comint-preoutput-filter-functions 'delete-completion-window-buffer)
+
+
 ;;;;
 ;;;;           reload the buffer
 ;;;;
@@ -349,6 +365,16 @@
 (when t
   (when (display-graphic-p)
     (require 'mouse3)))
+
+
+
+;;;;
+;;;;           yascroll
+;;;;
+(when t
+;;  (require 'yascroll)
+;;  (global-yascroll-bar-mode 1)
+  )
 
 
 ;;;;
@@ -881,7 +907,7 @@
   (setq ecb-tip-of-the-day nil)
 
   ;; layout
-  (setq ecb-layout-name "left13")  
+  (setq ecb-layout-name "left11")  
   (setq ecb-layout-window-sizes nil)
   (setq ecb-fix-window-size (quote width)) ;; fixed witdh
 
@@ -1154,6 +1180,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(ecb-options-version "2.40")
+ '(grep-command "grep -nH -i -e")
  '(semantic-idle-scheduler-idle-time 0.5))
 
 (custom-set-faces
@@ -1163,12 +1190,16 @@
  ;; If there is more than one, they won't work right.
  '(custom-face-tag ((t (:foreground "brightblue"))))
  '(diredp-dir-priv ((t (:foreground "cyan" :weight bold))))
- '(diredp-exec-priv ((t (:background "Color-234" :foreground "brightred"))))
+ '(diredp-exec-priv ((t (:background "Color-234" :foreground "OrangeRed3"))))
  '(diredp-file-name ((t (:foreground "green"))))
  '(diredp-no-priv ((t (:background "black"))))
  '(diredp-number ((t (:foreground "yellow"))))
- '(diredp-read-priv ((t (:background "Color-234" :foreground "color-34"))))
- '(diredp-write-priv ((t (:background "color-234"))))
+ '(diredp-read-priv ((t (:background "Color-234" :foreground "white"))))
+ '(diredp-write-priv ((t (:background "color-234" :foreground "cyan"))))
+ '(ecb-default-highlight-face ((t (:background "#3A8440"))))
+ '(ecb-history-bucket-node-face ((t (:inherit ecb-bucket-node-face :foreground "gray70"))))
+ '(ecb-history-dead-buffer-face ((t (:inherit ecb-history-general-face :foreground "gray30"))))
+ '(ecb-history-general-face ((t (:inherit ecb-default-general-face :height 1.0))))
  '(haskell-constructor-face ((t (:foreground "green"))))
  '(haskell-definition-face ((t (:foreground "magenta"))))
  '(link ((t (:foreground "green" :underline t))))
