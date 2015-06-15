@@ -20,6 +20,7 @@
 (when nil  ;; install the required packages automatically
   (defvar frinkr/packages '(
                             auto-complete
+                            cygwin-mount
                             cmake-font-lock
                             cmake-mode
                             dash
@@ -727,7 +728,6 @@
     (setenv "PATH" (concat "C:/cygwin/bin;" (getenv "PATH")))
     (setq exec-path (cons "C:/cygwin/bin/" exec-path))
 
-    (load-file (concat x_lisp_root "cygwin-mount.el"))
     (require 'cygwin-mount)
     (cygwin-mount-activate)
 
