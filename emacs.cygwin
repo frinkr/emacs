@@ -1,0 +1,24 @@
+export TERM=xterm-256color
+
+# good for emacs
+
+export PS1="daji% "
+    
+STARTFGCOLOR='\e[0;35m';
+STARTBGCOLOR="\e[40m"
+ENDCOLOR="\e[0m"
+     
+if [ "$PS" == "" ] ; then
+    export PS1="daji\$ "
+    if [ "$TERM" == "xterm" ] ; then
+        export PS1="\[$STARTFGCOLOR$STARTBGCOLOR\]daji:\W\$ \[$ENDCOLOR\]"
+    else 
+        export PS1="\[$STARTFGCOLOR$STARTBGCOLOR\]daji:\W\$ \[$ENDCOLOR\]"
+    fi
+fi
+
+if [ "$TERM" == "xterm"* ] ; then
+    PROMPT_COMMAND='echo -ne "\e]0;${HOSTNAME} - ${PWD}\007"'
+fi
+
+    

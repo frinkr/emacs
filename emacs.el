@@ -119,7 +119,7 @@
 
 (when (eq system-type 'windows-nt)
   (add-to-list 'default-frame-alist '(font . "Consolas 11"))
-  (set-face-attribute 'default nil :font "Catriel 11"))
+  (set-face-attribute 'default nil :font "Consolas 11"))
 
 
 ;; Color scheme is set in customize section at bottom (dark or light)
@@ -724,6 +724,15 @@
 ;;;;           cygwin in emacs
 ;;;;
 (when t
+  ;; Cgywin Emacs
+  (when (eq system-type 'cygwin)
+    (add-hook 'comint-output-filter-functions
+              'shell-strip-ctrl-m nil t)
+    (add-hook 'comint-output-filter-functions
+              'comint-watch-for-password-prompt nil t)
+    )
+
+  ;; NTEmacs
   (when (eq system-type 'windows-nt)
     (setenv "PATH" (concat "C:/cygwin/bin;" (getenv "PATH")))
     (setq exec-path (cons "C:/cygwin/bin/" exec-path))
@@ -731,17 +740,25 @@
     (require 'cygwin-mount)
     (cygwin-mount-activate)
 
+    ;; Remove the unsightly chars
     (add-hook 'comint-output-filter-functions
               'shell-strip-ctrl-m nil t)
     (add-hook 'comint-output-filter-functions
               'comint-watch-for-password-prompt nil t)
-    (setq explicit-shell-file-name "C:/cygwin/cygwin64.bat")
-    ;;(setq explicit-shell-file-name "C:/cygwin/cygwin.bat")
-    ;; For subprocesses invoked via the shell
-    ;; (e.g., "shell -c command")
-    (setq shell-file-name explicit-shell-file-name)
 
-
+    (when nil
+      (setq explicit-shell-file-name "C:/cygwin/Cygwin_x86_64 vc12.bat")
+      ;; For subprocesses invoked via the shell
+      ;; (e.g., "shell -c command")
+      (setq shell-file-name explicit-shell-file-name)
+      )
+    
+    (when t
+      ;; NT-emacs assumes a Windows shell. Change to bash.
+      (setq shell-file-name "bash")
+      (setenv "SHELL" shell-file-name) 
+      (setq explicit-shell-file-name shell-file-name)
+      )
     ;;   add more path for emacs (eshell)
     ;;
     ;;(when (string-equal system-type "windows-nt")
@@ -761,8 +778,9 @@
                     (file-name-nondirectory (eshell/pwd))
                     (if (= (user-uid) 0) " # " " $ "))))
 
-    ;; eshell-prompt not work for Windows. 
-    ;; We need fix .bash_rc for windows
+    ;; shell-prompt not work for Windows. 
+    ;; We need fix .bashrc for windows (NOT .bash_profile, which is not read
+    ;; by cygwin version of emacs)
     ;; export PS1="daji% "
     ;;
     ;; STARTFGCOLOR='\e[0;35m';
@@ -895,7 +913,7 @@
 ;;;;
 ;;;;           ecb
 ;;;;
-(when t
+(when (eq system-type 'darwin)
   ;; error when byte-compiling from melpa, nerver mind. It can just run
   (require 'ecb)
   (setq ecb-options-version "2.40")
@@ -1000,7 +1018,7 @@
 ;;;;
 ;;;;           gdb many window
 ;;;;
-(when t
+(when (eq system-type 'darwin)
   (load-library "gud.el"))
 
 ;;;;
