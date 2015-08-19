@@ -174,6 +174,11 @@
 (setq ps-n-up-printing 2)
 (setq ps-print-header nil)
 
+;; recent files
+(require 'recentf)
+(recentf-mode 1)
+(setq recentf-max-menu-items 2500)
+(global-set-key "\C-x\ \C-r" 'recentf-open-files)
 
 (setq inhibit-splash-screen t)
 (setq transient-mark-mode t)
@@ -291,6 +296,22 @@
 
 (global-set-key (kbd "C-x j") 'kill-other-buffers)
 
+;;;;
+;;;;           toggle shell buffer
+;;;;
+(defun toggle-shell-buffer (name)
+  "toggle *shell*/*eshell* buffer"
+  (interactive)
+  (if (string-equal name (buffer-name))
+      (previous-buffer)
+    (if (get-buffer name)
+        (switch-to-buffer name)
+      (message (format "buffer %s not exists!" name))
+      )))
+
+(if (eq system-type 'windows-nt)
+    (define-key global-map "\M-`" (lambda() (interactive) (toggle-shell-buffer "*shell*")))
+    (define-key global-map "\M-`" (lambda() (interactive) (toggle-shell-buffer "*eshell*"))))
 
 ;;;;
 ;;;;           kill *Completions* buffer automatically
