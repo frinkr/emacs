@@ -315,6 +315,14 @@
     (define-key global-map "\M-`" (lambda() (interactive) (toggle-shell-buffer "*eshell*"))))
 
 ;;;;
+;;;;           clear *shell* buffer
+;;;;
+(defun clear-shell-hook ()
+  (local-set-key "\C-l" 'erase-buffer))
+
+(add-hook 'shell-mode-hook 'clear-shell-hook)
+
+;;;;
 ;;;;           kill *Completions* buffer automatically
 ;;;;
 (defun delete-completion-window-buffer (&optional output)
