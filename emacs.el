@@ -317,8 +317,13 @@
 ;;;;
 ;;;;           clear *shell* buffer
 ;;;;
+(defun clear-shell ()
+  (interactive)
+  (let ((comint-buffer-maximum-size 0))
+    (comint-truncate-buffer)))
+
 (defun clear-shell-hook ()
-  (local-set-key "\C-l" 'erase-buffer))
+  (local-set-key "\C-l" 'clear-shell))
 
 (add-hook 'shell-mode-hook 'clear-shell-hook)
 
