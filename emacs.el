@@ -352,6 +352,15 @@
 (global-set-key (kbd "C-x r") 'reload)
 
 ;;;;
+;;;;           set buffer modified
+;;;;
+(defun touch()
+  "Touch the buffer"
+  (interactive)
+  (set-buffer-modified-p t))
+
+
+;;;;
 ;;;;           open file with sudo
 ;;;;
 (defun find-alternative-file-with-sudo ()
