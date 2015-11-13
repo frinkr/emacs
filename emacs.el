@@ -20,6 +20,7 @@
 (when nil  ;; install the required packages automatically
   (defvar frinkr/packages '(
                             auto-complete
+                            bm
                             cygwin-mount
                             cmake-font-lock
                             cmake-mode
@@ -46,6 +47,9 @@
                             phi-rectangle
                             popup
                             pos-tip
+                            on-screen
+                            smooth-scroll
+                            smooth-scrolling
                             tabbar
                             tabbar-ruler
                             )
@@ -281,6 +285,27 @@
   (define-key global-map [f12] 'revert-buffer)
   (define-key global-map [button4] 'previous-line)
   (define-key global-map [button5] 'next-line)
+  )
+
+;;;;
+;;;;          scrolling
+;;;;
+(when t
+  (require 'on-screen)
+  (on-screen-global-mode +1)
+
+  (require 'smooth-scroll)
+  (smooth-scroll-mode t)
+
+  (require 'smooth-scrolling)
+  )
+
+;;;;
+;;;;           bookmark
+;;;;
+(when t
+  (global-set-key (kbd "<left-margin> <mouse-1>") 'bm-toggle)
+  (require 'bm)
   )
 
 ;;;;
