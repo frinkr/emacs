@@ -32,6 +32,7 @@
                             dired-k
                             dired-rainbow
                             dired-single
+                            dockerfile-mode
                             dos
                             dtrace-script-mode
                             ecb
@@ -294,8 +295,8 @@
   (require 'on-screen)
   (on-screen-global-mode +1)
 
-  (require 'smooth-scroll)
-  (smooth-scroll-mode t)
+;;  (require 'smooth-scroll)
+;;  (smooth-scroll-mode t)
 
   (require 'smooth-scrolling)
   )
@@ -888,6 +889,13 @@
 (when t
   (autoload 'dos-mode "dos" "Edit Dos scripts." t)
   (add-to-list 'auto-mode-alist '("\\.bat$" . dos-mode)))
+
+;;;;
+;;;;           Dockerfile mode
+;;;;
+(when t
+  (require 'dockerfile-mode)
+  (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode)))
 
 ;;;;
 ;;;;           Speed Bar
