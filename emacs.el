@@ -310,6 +310,21 @@
   )
 
 ;;;;
+;;;;           formatter
+;;;;
+(require 'clang-format)
+(defun untabify-buffer ()
+  "indent & untabify the buffer"
+  (interactive)
+  (save-excursion
+    (delete-trailing-whitespace)
+    (indent-region (point-min) (point-max) nil)
+    (untabify (point-min) (point-max))
+    )
+  )
+
+
+;;;;
 ;;;;           kill all other buffers but current one
 ;;;;
 (defun kill-other-buffers ()
@@ -626,6 +641,8 @@
   (defun frinkr/dired-mode-hook ()
     (local-set-key (kbd "<mouse-2>") 'diredp-mouse-find-file-reuse-dir-buffer))
 
+  
+  ;; CVS
 
   ;; face
   (custom-set-faces
