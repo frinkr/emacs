@@ -1019,11 +1019,13 @@
 ;;;;
 (when (eq system-type 'darwin)
   ;; error when byte-compiling from melpa, nerver mind. It can just run
+
   (require 'ecb)
   (setq ecb-options-version "2.40")
-  
-  ;; activate at start up
-  (setq ecb-auto-activate t)
+
+  ;; activate at start up  
+  (when (display-graphic-p)
+    (setq ecb-auto-activate t))
 
   ;; no tip-of-day
   (setq ecb-tip-of-the-day nil)
