@@ -482,7 +482,18 @@
 (when t
   (require 'linum)
   (add-hook 'find-file-hook (lambda () (linum-mode 1)))
-  (linum-mode t))
+
+  ;; better appearance for terminal
+  (when (not (display-graphic-p))
+    (defun linum-format-func (line)
+      (let ((w (length (number-to-string (count-lines (point-min) (point-max))))))
+        (propertize (format (format "%%%dd| " w) line) 'face 'linum)))
+    (setq linum-format 'linum-format-func)
+    )
+
+  (global-linum-mode 1)
+  (linum-mode t)
+  )
 
 ;;;;
 ;;;;           P4
