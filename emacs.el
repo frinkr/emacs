@@ -25,7 +25,6 @@
                             cmake-font-lock
                             cmake-mode
                             company
-                            
                             dash
                             dired+
                             dired-details
@@ -1036,14 +1035,6 @@
 
 
 ;;;;
-;;;;           Company
-;;;;
-(when nil
-  (require 'company)
-  (add-hook 'after-init-hook 'global-company-mode)
-  )
-
-;;;;
 ;;;;           Auto Complete
 ;;;;
 (when t
@@ -1055,10 +1046,15 @@
   (ac-config-default)
   (setq ac-auto-start t)
 
+  ;; tooltip
+  (setq ac-use-quick-help t)
+  
   ;; menu font
-  (set-face-font 'ac-candidate-face "Courier New 13")
-  (set-face-font 'ac-selection-face "Courier New 13")
+  ;;(set-face-font 'ac-candidate-face "Courier New 13")
+  ;;(set-face-font 'ac-selection-face "Courier New 13")
 
+  ;; scroll bar font
+  (set-face-background 'popup-scroll-bar-foreground-face "red3")
   (if (display-graphic-p)
       (global-set-key [(control ?/)] 'auto-complete)
     (ac-set-trigger-key "TAB"))
@@ -1067,7 +1063,7 @@
   (setq ac-use-fuzzy t)
   (setq ac-ignore-case t)
 
-  (setq popup-use-optimized-column-computation nil)
+  ;;(setq popup-use-optimized-column-computation nil)
   (ac-linum-workaround)
   )
 
