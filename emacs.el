@@ -24,6 +24,8 @@
                             cygwin-mount
                             cmake-font-lock
                             cmake-mode
+                            company
+                            
                             dash
                             dired+
                             dired-details
@@ -309,19 +311,32 @@
   (require 'bm)
   )
 
+
+;;;;
+;;;;           proxy
+;;;;
+(when t
+  (setq url-proxy-services
+        '(("no_proxy" . "^\\(localhost\\|10.*\\)")
+          ("http" . "eglbeprx001:8080")
+          ("https" . "eglbeprx001:8080")))
+  )
+
+
 ;;;;
 ;;;;           formatter
 ;;;;
-(require 'clang-format)
-(defun untabify-buffer ()
-  "indent & untabify the buffer"
-  (interactive)
-  (save-excursion
-    (delete-trailing-whitespace)
-    (indent-region (point-min) (point-max) nil)
-    (untabify (point-min) (point-max))
-    )
-  )
+(when t
+  (require 'clang-format)
+  (defun untabify-buffer ()
+    "indent & untabify the buffer"
+    (interactive)
+    (save-excursion
+      (delete-trailing-whitespace)
+      (indent-region (point-min) (point-max) nil)
+      (untabify (point-min) (point-max))
+      )
+    ))
 
 
 ;;;;
@@ -473,7 +488,22 @@
       (setq fci-rule-color "darkblue")
     (setq fci-rule-color "green"))
 
-  (add-hook 'after-change-major-mode-hook 'fci-mode))
+  (add-hook 'after-change-major-mode-hook 'fci-mode)
+
+  ;; will disrupt the auto-complte menu, hide the indicator
+  ;; when popup is on
+  (defvar sanityinc/fci-mode-suppressed nil)
+  (defadvice popup-create (before suppress-fci-mode activate)
+    "Suspend fci-mode while popups are visible"
+    (set (make-local-variable 'sanityinc/fci-mode-suppressed) fci-mode)
+    (when fci-mode
+      (turn-off-fci-mode)))
+  (defadvice popup-delete (after restore-fci-mode activate)
+    "Restore fci-mode when all popups have closed"
+    (when (and (not popup-instances) sanityinc/fci-mode-suppressed)
+      (setq sanityinc/fci-mode-suppressed nil)
+      (turn-on-fci-mode)))
+  )
 
 
 ;;;;
@@ -777,10 +807,15 @@
 ;;;;           Haskell mode
 ;;;;
 (when t
+  ;; `cabal install ghc-mod` first
   (require 'haskell-mode)
   (add-to-list 'Info-default-directory-list (concat x_lisp_root "haskell-mode"))
+  (autoload 'ghc-init "ghc" nil t)
+  (autoload 'ghc-debug "ghc" nil t)
+  (add-hook 'haskell-mode-hook (lambda () (ghc-init)))
   (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
-  (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation))
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+  )
 
 
 ;;;;
@@ -999,6 +1034,14 @@
                ) t)
   )
 
+
+;;;;
+;;;;           Company
+;;;;
+(when nil
+  (require 'company)
+  (add-hook 'after-init-hook 'global-company-mode)
+  )
 
 ;;;;
 ;;;;           Auto Complete
