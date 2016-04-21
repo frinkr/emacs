@@ -121,7 +121,9 @@
 (when (eq system-type 'darwin)
   (set-face-attribute 'default nil :font "Courier New 14")   
   (add-to-list 'default-frame-alist '(font . "Courier New 15"))
-  ;;(add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono 16"))
+
+  ;; fix gap at top when maximized
+  (setq frame-resize-pixelwise t)
   )
 
 (when (eq system-type 'windows-nt)
