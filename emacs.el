@@ -5,6 +5,18 @@
 (setq x_lisp_root "/Users/frinkr/.emacs.d/lisp")
 (setq x_proj_root "/Data/P4/daji_dev_mac_dp121")
 
+
+;;;;
+;;;;           proxy
+;;;;
+(when t
+  (setq url-proxy-services
+        '(("no_proxy" . "^\\(localhost\\|10.*\\)")
+          ("http" . "eglbeprx001:8080")
+          ("https" . "eglbeprx001:8080")))
+  )
+
+
 ;;;;
 ;;;;                   melpa
 ;;;;
@@ -17,14 +29,14 @@
   (package-initialize) ;; You might already have this line
   )
 
-(when nil  ;; install the required packages automatically
-  (defvar frinkr/packages '(
+(when t  ;; install the required packages automatically
+  (setq package-list '(
                             auto-complete
                             bm
                             cygwin-mount
                             cmake-font-lock
                             cmake-mode
-                            company
+                            clang-format
                             dash
                             dired+
                             dired-details
@@ -37,8 +49,11 @@
                             dos
                             dtrace-script-mode
                             ecb
-                            egg
                             fill-column-indicator
+                            flycheck
+                            flycheck-haskell
+                            flycheck-ghcmod
+                            flycheck-irony
                             ghc
                             ghci-completion
                             haskell-mode
@@ -55,19 +70,16 @@
                             tabbar
                             tabbar-ruler
                             )
-    "Default packages")
+    )
 
-  (defun frinkr/packages-installed-p ()
-    (cl-loop for pkg in frinkr/packages
-             when (not (package-installed-p pkg)) do (return nil)
-             finally (return t)))
 
-  (unless (frinkr/packages-installed-p)
-    (message "%s" "Refreshing package database...")
-    (package-refresh-contents)
-    (dolist (pkg frinkr/packages)
-      (when (not (package-installed-p pkg))
-        (package-install pkg))))
+  (unless package-archive-contents
+    (package-refresh-contents))
+
+  (dolist (package package-list)
+    (unless (package-installed-p package)
+      (package-install package)))
+
   )
 
 
@@ -119,8 +131,8 @@
 ;;  (this stuff seems to be the least portable, comment this stuff out if it
 ;;   prevents the config file from loading)
 (when (eq system-type 'darwin)
-  (set-face-attribute 'default nil :font "Courier New 14")   
-  (add-to-list 'default-frame-alist '(font . "Courier New 15"))
+  (set-face-attribute 'default nil :font "Menlo 12")   
+  (add-to-list 'default-frame-alist '(font . "Menlo 13"))
 
   ;; fix gap at top when maximized
   (setq frame-resize-pixelwise t)
@@ -313,16 +325,6 @@
   )
 
 
-;;;;
-;;;;           proxy
-;;;;
-(when t
-  (setq url-proxy-services
-        '(("no_proxy" . "^\\(localhost\\|10.*\\)")
-          ("http" . "eglbeprx001:8080")
-          ("https" . "eglbeprx001:8080")))
-  )
-
 
 ;;;;
 ;;;;           formatter
@@ -348,7 +350,7 @@
     (interactive)
     (mapc 'kill-buffer 
           (delq (current-buffer) 
-                (remove-if-not '(lambda (x) (or (buffer-file-name x)
+                (cl-remove-if-not '(lambda (x) (or (buffer-file-name x)
                                                 (eq 'dired-mode (buffer-local-value 'major-mode x))))
                                (buffer-list)))))
 
@@ -578,10 +580,10 @@
   (setq *tabbar-ignore-buffers* '("*CEDET Global*" "*Compile-Log*" "*Messages*" "*etags tmp*" ))
   (setq tabbar-buffer-list-function
         (lambda ()
-          (remove-if
+          (cl-remove-if
            (lambda (buffer)
              (and (not (eq (current-buffer) buffer)) ; Always include the current buffer.
-                  (loop for name in *tabbar-ignore-buffers* ;remove buffer name in this list.
+                  (cl-loop for name in *tabbar-ignore-buffers* ;remove buffer name in this list.
                         thereis (string-equal (buffer-name buffer) name))))
            (tabbar-buffer-list))))
 
@@ -786,6 +788,14 @@
     (global-set-key (kbd "C-. C-n") 'elscreen-next))
   )
 
+;;;;
+;;;;           Flycheck
+;;;;
+(when t
+  (global-flycheck-mode)
+  (add-hook 'flycheck-mode-hook #'flycheck-haskell-setup)
+  (eval-after-load 'flycheck '(require 'flycheck-ghcmod))
+  )
 
 ;;;;
 ;;;;           D mode
@@ -808,6 +818,8 @@
 ;;;;           Haskell mode
 ;;;;
 (when t
+  (setq exec-path (append exec-path '("/Users/frinkr/.cabal/bin")))
+  
   ;; `cabal install ghc-mod` first
   (require 'haskell-mode)
   (add-to-list 'Info-default-directory-list (concat x_lisp_root "haskell-mode"))
@@ -816,6 +828,27 @@
   (add-hook 'haskell-mode-hook (lambda () (ghc-init)))
   (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
   (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+  (add-hook 'haskell-mode-hook 'turn-on-font-lock)
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-ghci)
+
+  (eval-after-load 'haskell-mode '(progn
+                                    (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-or-reload)
+                                    (define-key haskell-mode-map (kbd "C-`") 'haskell-interactive-bring)
+                                    (define-key haskell-mode-map (kbd "C-c C-n C-t") 'haskell-process-do-type)
+                                    (define-key haskell-mode-map (kbd "C-c C-n C-i") 'haskell-process-do-info)
+                                    (define-key haskell-mode-map (kbd "C-c C-n C-c") 'haskell-process-cabal-build)
+                                    (define-key haskell-mode-map (kbd "C-c C-n c") 'haskell-process-cabal)))
+  (eval-after-load 'haskell-cabal '(progn
+                                     (define-key haskell-cabal-mode-map (kbd "C-`") 'haskell-interactive-bring)
+                                     (define-key haskell-cabal-mode-map (kbd "C-c C-k") 'haskell-interactive-ode-clear)
+                                     (define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
+                                     (define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)))
+
+  (custom-set-variables
+   '(haskell-interactive-mode-hide-multi-line-errors nil)
+   '(haskell-process-log t)
+    '(haskell-process-type (quote cabal-repl)))
   )
 
 
@@ -1076,7 +1109,7 @@
   ;; error when byte-compiling from melpa, nerver mind. It can just run
 
   (require 'ecb)
-  (setq ecb-options-version "2.40")
+  (custom-set-variables '(ecb-options-version "2.40"))
 
   ;; activate at start up  
   (when (display-graphic-p)
