@@ -2,7 +2,7 @@
 export CLICOLOR=1
 export LSCOLORS=GxFxCxDxBxegedabagacad
 export PS1="\e[0;33m\u@\h:\W\e[m\$ "
-export PS1='\[\e[1;31m\]\u@\h:\W\$\[\e[0m\] '  # fix the command wrapping problem
+export PS1='\[\e[0;33m\]\u@\h:\W\$\[\e[0m\] '  # fix the command wrapping problem
 
 #export PS1="\e[0;33m\h:\W \u\$ \e[m"
 # Tell grep to highlight matches
@@ -13,7 +13,7 @@ export LC_CTYPE=en_US.UTF-8
 #export LANG=en_US.UTF8
 
 # emacs without init file
-alias emacsq='emacs -q'
+# alias emacsq='emacs -q'
 
 # cscope editor
 export EDITOR=emacsq
@@ -56,11 +56,38 @@ export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python2.7/site-packages
 #source $(brew --prefix nvm)/nvm.sh
 #alias electron="/Applications/Electron.app/Contents/MacOS/Electron"
 
+# auto env
+
+auto_env()
+{
+    if [ -f .env/bin/activate ]; then
+        source .env/bin/activate
+    else
+        root=`which python`
+        root=${root%/.env/bin/python}
+        if [[ $PWD == $root* ]]; then
+            return
+        fi
+        if (type deactivate > /dev/null 2>&1); then
+            deactivate
+        fi
+    fi
+}
+
+function cd
+{
+    builtin cd "$@"
+    auto_env
+}
+
+export PROMMPT_COMMAND="auto_env"
+alias brew='ALL_PROXY=http://eglbeprx001.esko-graphics.com:8080 brew'
 
 # Docker
 function docker-env()
 {
     eval "$(docker-machine env $1)"
     export DOCKER_OPTS="-H $DOCKER_HOST --tls --tlskey $DOCKER_CERT_PATH/server-key.pem --tlscert $DOCKER_CERT_PATH/server.pem --tlsverify --tlscacert $DOCKER_CERT_PATH/ca.pem"
+    #export DOCKER_OPTS="-H $DOCKER_HOST --insecure-registry atlantis:5000 --tls --tlskey $DOCKER_CERT_PATH/server-key.pem --tlscert $DOCKER_CERT_PATH/server.pem --tlsverify --tlscacert $DOCKER_CERT_PATH/ca.pem"
     alias docker="docker $DOCKER_OPTS"
 }
