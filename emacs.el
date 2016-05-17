@@ -1170,7 +1170,7 @@
   ;; but replace with 'which-func-mode'
   (when (display-graphic-p)
     (global-semantic-stickyfunc-mode -1)
-    (which-func-mode 1))
+    (which-function-mode 1))
 
   ;; highlight the editing
   (global-semantic-highlight-edits-mode 1)
