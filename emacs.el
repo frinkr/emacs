@@ -69,6 +69,7 @@
                             smooth-scrolling
                             tabbar
                             tabbar-ruler
+                            xcscope
                             )
     )
 
@@ -1119,7 +1120,7 @@
   (setq ecb-tip-of-the-day nil)
 
   ;; layout
-  (setq ecb-layout-name "left11")  
+  (setq ecb-layout-name "left15")  
   (setq ecb-layout-window-sizes nil)
   (setq ecb-fix-window-size (quote width)) ;; fixed witdh
 
