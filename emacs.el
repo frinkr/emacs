@@ -32,6 +32,7 @@
 (when t  ;; install the required packages automatically
   (setq package-list '(
                        auto-complete
+                       auto-virtualenv
                        bm
                        cygwin-mount
                        cmake-font-lock
@@ -49,6 +50,7 @@
                        dos
                        dtrace-script-mode
                        ecb
+                       elpy
                        fill-column-indicator
                        flycheck
                        flycheck-haskell
@@ -62,6 +64,7 @@
                        magit
                        p4
                        phi-rectangle
+                       py-autopep8
                        popup
                        pos-tip
                        on-screen
@@ -78,6 +81,7 @@
                        alect-themes
                        monokai-theme
                        moe-theme
+                       material-theme
                        )
         )
 
@@ -312,6 +316,14 @@
   (define-key global-map [button5] 'next-line)
   )
 
+
+;;;;
+;;;;          ido
+;;;;
+(when nil
+  (require 'ido)
+  (ido-mode t)
+  )
 ;;;;
 ;;;;          scrolling
 ;;;;
@@ -860,6 +872,30 @@
     '(haskell-process-type (quote cabal-repl)))
   )
 
+
+;;;;
+;;;;                        python
+;;;;
+(when t
+  ;; auto env
+  (require 'auto-virtualenv)
+  (add-hook 'python-mode-hook 'auto-virtualenv-set-virtualenv)
+
+  ;; python shell
+  (setq gud-pdb-command-name "python -m pdb ")
+  (defalias 'python 'run-python)
+
+  (elpy-enable)
+
+  (when (require 'flycheck nil t)
+    (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+    (add-hook 'elpy-mode-hook 'flycheck-mode))
+
+  (require 'py-autopep8)
+  (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
+
+  
+  )
 
 ;;;;
 ;;;;                        pseudocode mode
