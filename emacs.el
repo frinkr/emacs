@@ -31,47 +31,55 @@
 
 (when t  ;; install the required packages automatically
   (setq package-list '(
-                            auto-complete
-                            bm
-                            cygwin-mount
-                            cmake-font-lock
-                            cmake-mode
-                            clang-format
-                            dash
-                            dired+
-                            dired-details
-                            dired-details+
-                            dired-hacks-utils
-                            dired-k
-                            dired-rainbow
-                            dired-single
-                            dockerfile-mode
-                            dos
-                            dtrace-script-mode
-                            ecb
-                            fill-column-indicator
-                            flycheck
-                            flycheck-haskell
-                            flycheck-ghcmod
-                            flycheck-irony
-                            ghc
-                            ghci-completion
-                            haskell-mode
-                            hlinum
-                            mouse3
-                            magit
-                            p4
-                            phi-rectangle
-                            popup
-                            pos-tip
-                            on-screen
-                            smooth-scroll
-                            smooth-scrolling
-                            tabbar
-                            tabbar-ruler
-                            xcscope
-                            )
-    )
+                       auto-complete
+                       bm
+                       cygwin-mount
+                       cmake-font-lock
+                       cmake-mode
+                       clang-format
+                       dash
+                       dired+
+                       dired-details
+                       dired-details+
+                       dired-hacks-utils
+                       dired-k
+                       dired-rainbow
+                       dired-single
+                       dockerfile-mode
+                       dos
+                       dtrace-script-mode
+                       ecb
+                       fill-column-indicator
+                       flycheck
+                       flycheck-haskell
+                       flycheck-ghcmod
+                       flycheck-irony
+                       ghc
+                       ghci-completion
+                       haskell-mode
+                       hlinum
+                       mouse3
+                       magit
+                       p4
+                       phi-rectangle
+                       popup
+                       pos-tip
+                       on-screen
+                       smooth-scroll
+                       smooth-scrolling
+                       tabbar
+                       tabbar-ruler
+                       xcscope
+
+
+                       ;; top themes
+                       zenburn-theme
+                       solarized-theme
+                       alect-themes
+                       monokai-theme
+                       moe-theme
+                       )
+        )
 
 
   (unless package-archive-contents
@@ -117,8 +125,8 @@
   )
 
 ;; transparent
-(set-frame-parameter (selected-frame) 'alpha '(92 85))
-(add-to-list 'default-frame-alist '(alpha 92 85))
+(set-frame-parameter (selected-frame) 'alpha '(95 90))
+(add-to-list 'default-frame-alist '(alpha 95 90))
 
 
 ;; line & column number 
@@ -1392,8 +1400,13 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-enabled-themes (quote (zenburn)))
+ '(custom-safe-themes t)
  '(ecb-options-version "2.40")
  '(grep-command "grep -nH -i -e")
+ '(haskell-interactive-mode-hide-multi-line-errors nil)
+ '(haskell-process-log t)
+ '(haskell-process-type (quote cabal-repl))
  '(semantic-idle-scheduler-idle-time 0.5))
 
 (custom-set-faces
