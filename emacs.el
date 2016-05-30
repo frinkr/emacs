@@ -74,7 +74,6 @@
                        tabbar-ruler
                        xcscope
 
-
                        ;; top themes
                        zenburn-theme
                        solarized-theme
@@ -116,7 +115,7 @@
 ;;;;           Appearance Settings
 ;;;;
 (global-hl-line-mode 1)
-(setq default-cursor-type 'box)
+(setq default-cursor-type 'bar)
 (set-face-background hl-line-face "gray13")
 (set-cursor-color "red")
 (set-face-foreground 'minibuffer-prompt "yellow")
@@ -244,6 +243,8 @@
 (setq indent-line-function 'insert-tab)
 (setq tab-stop-list (quote (4 8 12 16 20 24 28 32 36 40 44 48 52 56 60 64 68 72 76 80 84 88 92 96 100 104 108 112 116 120)))
 
+;; Auto close bracket insertion
+(electric-pair-mode 1)
 
 ;;;;
 ;;;;           format title bar to show full path of current file
@@ -316,6 +317,16 @@
   (define-key global-map [button5] 'next-line)
   )
 
+
+(when t
+  (defun new-scratch ()
+    "open up a guaranteed new scratch buffer"
+    (interactive)
+    (switch-to-buffer (loop for num from 0
+                            for name = (format "*scratch-%03i*" num)
+                            while (get-buffer name)
+                          finally return name)))
+)
 
 ;;;;
 ;;;;          ido
@@ -566,7 +577,8 @@
   (setq magit-last-seen-setup-instructions "1.4.0")
   (setq magit-auto-revert-mode nil)
   
-  (global-set-key (kbd "C-x g") 'magit-status)  
+  (global-set-key (kbd "C-x g") 'magit-status)
+  (defalias 'magit 'magit-status)
   )
 
 
@@ -591,6 +603,7 @@
     (global-set-key (kbd "M-.") 'tabbar-forward))
   (global-set-key (kbd "C-{") 'tabbar-backward)
   (global-set-key (kbd "C-}") 'tabbar-forward)
+  (global-set-key (kbd "C-t") 'new-scratch)
   ;;(global-set-key (kbd "C-M-[") 'tabbar-backward)
   ;;(global-set-key (kbd "C-M-]") 'tabbar-forward)
   (setq tabbar-buffer-groups-function
