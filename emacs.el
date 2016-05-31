@@ -127,6 +127,10 @@
   (set-face-attribute 'region nil :background "color-19")
   )
 
+(when (display-graphic-p)
+  (set-face-background 'region "SeaGreen4")
+  )
+
 ;; transparent
 (set-frame-parameter (selected-frame) 'alpha '(95 90))
 (add-to-list 'default-frame-alist '(alpha 95 90))
@@ -680,6 +684,10 @@
     ;; we also need to set separator to avoid overlapping tabs by highlighted tabs
     (custom-set-variables
      '(tabbar-separator (quote (0.5))))
+    )
+
+  (when (display-graphic-p)
+    (set-face-foreground 'tabbar-selected "green")
     )
   )
 
