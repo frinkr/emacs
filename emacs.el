@@ -62,11 +62,14 @@
                        hlinum
                        mouse3
                        magit
+                       nyan-mode
+                       neotree
                        p4
                        phi-rectangle
                        py-autopep8
                        popup
                        pos-tip
+                       icicles
                        on-screen
                        smooth-scroll
                        smooth-scrolling
@@ -361,6 +364,13 @@
   )
 
 
+;;;;
+;;;;
+;;;;
+(when t
+  (require 'nyan-mode)
+  (nyan-mode t)
+  )
 
 ;;;;
 ;;;;           formatter
@@ -516,6 +526,23 @@
 ;;  (global-yascroll-bar-mode 1)
   )
 
+
+;;;;
+;;;;           neotree
+;;;;
+(when t
+  (require 'neotree)
+  (neotree-show)
+  )
+
+
+;;;;
+;;;;           icicles
+;;;;
+(when t
+  (require 'icicles)
+  (icy-mode t)
+  )
 
 ;;;;
 ;;;;           fill column indicator
@@ -914,8 +941,22 @@
 
   (require 'py-autopep8)
   (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
+  )
 
-  
+;;;;
+;;;;                        yasnippets
+;;;;
+(when t
+  (require 'yasnippet)
+  (yas-global-mode t)
+
+  ;; Remove Yasnippet's default tab key binding
+  (define-key yas-minor-mode-map (kbd "<tab>") nil)
+  (define-key yas-minor-mode-map (kbd "TAB") nil)
+  ;; Set Yasnippet's key binding to shift+tab
+  (define-key yas-minor-mode-map (kbd "<backtab>") 'yas-expand)
+  ;; Alternatively use Control-c + tab
+  (define-key yas-minor-mode-map (kbd "\C-c TAB") 'yas-expand)
   )
 
 ;;;;
@@ -1181,6 +1222,8 @@
   (when (display-graphic-p)
     (setq ecb-auto-activate t))
 
+  (setq ecb-auto-activate nil)
+  
   ;; no tip-of-day
   (setq ecb-tip-of-the-day nil)
 
