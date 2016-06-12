@@ -311,7 +311,8 @@
 (define-key global-map [delete] 'delete-char)
 (define-key global-map [backspace] 'delete-backward-char)
 (define-key isearch-mode-map [backspace] 'isearch-delete-char)
-;;(global-set-key (kbd "M-p") 'scroll-down-command)
+
+(global-set-key (kbd "M-SPC") 'set-mark-command)
 (global-set-key (kbd "M-n") (lambda () (interactive) (next-line 5)))
 (global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
 
@@ -339,10 +340,12 @@
 ;;;;
 ;;;;          ido
 ;;;;
-(when nil
+(when t
   (require 'ido)
   (require 'ido-vertical-mode)
 
+  (setq ido-everywhere t)
+  
   (ido-mode t)
   (ido-vertical-mode 1)
   )
@@ -545,6 +548,7 @@
 (when nil
   (require 'icicles)
   (icy-mode t)
+  (setq icicle-touche-pas-aux-menus-flag t)
   )
 
 ;;;;
@@ -792,29 +796,7 @@
   (add-hook 'dired-mode-hook 'frinkr/dired-mode-hook)
   (defun frinkr/dired-mode-hook ()
     (local-set-key (kbd "<mouse-2>") 'diredp-mouse-find-file-reuse-dir-buffer))
-
   
-  ;; CVS
-
-  (when nil
-    ;; face
-    (custom-set-faces
-     '(diredp-dir-priv ((t (:foreground "cyan" :weight bold))))
-     '(diredp-file-name ((t (:foreground "green"))))
-     '(diredp-no-priv ((t (:background "black"))))
-     '(diredp-number ((t (:foreground "yellow"))))
-     )
-    (when (not (display-graphic-p))
-      (custom-set-faces
-       '(diredp-dir-priv ((t (:foreground "cyan" :weight bold))))
-       '(diredp-exec-priv ((t (:background "Color-234" :foreground "brightred"))))
-       '(diredp-file-name ((t (:foreground "green"))))
-       '(diredp-no-priv ((t (:background "black"))))
-       '(diredp-number ((t (:foreground "yellow"))))
-       '(diredp-read-priv ((t (:background "Color-234" :foreground "color-34"))))
-       '(diredp-write-priv ((t (:background "color-234")))))
-      )
-    )
   )
 
 
@@ -849,6 +831,36 @@
   )
 
 
+;;;;
+;;;;           fast-nav mode
+(when t
+  (defvar fast-nav-mode-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map (kbd "M-n") (lambda () (interactive) (next-line 5)))
+      (define-key map (kbd "M-p") (lambda () (interactive) (previous-line 5)))
+      (define-key map (kbd "M-b") (lambda () (interactive) (backward-word)))
+      
+      (global-set-key (kbd "C-{") 'tabbar-backward)
+      (global-set-key (kbd "C-}") 'tabbar-forward)
+      (global-set-key (kbd "C-t") 'new-scratch)
+
+      (define-key global-map [(meta m)] 'set-mark-command)
+      map)
+    "fast-nav-mode keymap.")
+
+  (define-minor-mode fast-nav-mode
+    "A minor mode so that my key settings override annoying major modes."
+    :init-value t
+    :lighter " my-keys")
+
+  (defun fast-nav/minibuffer-setup-hook ()
+    (fast-nav-mode 0))
+  (add-hook 'minibuffer-setup-hook 'fast-nav/minibuffer-setup-hook)
+  
+  (fast-nav-mode 1)
+  
+  )
+;;;;
 ;;;;
 ;;;;           rectangular select
 ;;;;
@@ -1550,33 +1562,16 @@
  '(haskell-process-type (quote cabal-repl))
  '(package-selected-packages
    (quote
-    (zenburn-theme xkcd xcscope tabbar-ruler sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme magit ido-vertical-mode icicles hlinum helm ghci-completion ghc flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dos dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
- '(semantic-idle-scheduler-idle-time 0.5))
+    (fold-this origami fold-dwim yafolding zenburn-theme xkcd xcscope tabbar-ruler sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme magit ido-vertical-mode icicles hlinum helm ghci-completion ghc flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dos dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
+ '(semantic-idle-scheduler-idle-time 0.5)
+ '(tabbar-separator (quote (0.2))))
 
-(when nil
-  (custom-set-faces
-   ;; custom-set-faces was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   '(custom-face-tag ((t (:foreground "brightblue"))))
-   '(diredp-dir-priv ((t (:foreground "cyan" :weight bold))))
-   '(diredp-exec-priv ((t (:background "Color-234" :foreground "OrangeRed3"))))
-   '(diredp-file-name ((t (:foreground "green"))))
-   '(diredp-no-priv ((t (:background "black"))))
-   '(diredp-number ((t (:foreground "yellow"))))
-   '(diredp-read-priv ((t (:background "Color-234" :foreground "white"))))
-   '(diredp-write-priv ((t (:background "color-234" :foreground "cyan"))))
-   '(ecb-default-highlight-face ((t (:background "#3A8440"))))
-   '(ecb-history-bucket-node-face ((t (:inherit ecb-bucket-node-face :foreground "gray70"))))
-   '(ecb-history-dead-buffer-face ((t (:inherit ecb-history-general-face :foreground "gray30"))))
-   '(ecb-history-general-face ((t (:inherit ecb-default-general-face :height 1.0))))
-   '(haskell-constructor-face ((t (:foreground "green"))))
-   '(haskell-definition-face ((t (:foreground "magenta"))))
-   '(link ((t (:foreground "green" :underline t))))
-   '(semantic-highlight-edits-face ((t (:background "color-234"))))
-   '(semantic-unmatched-syntax-face ((((class color) (background dark)) (:underline nil)))))
-  )
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
 
 ;; Add final message so using C-h l I can see if .emacs failed
 (message ".emacs loaded successfully.")
