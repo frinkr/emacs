@@ -118,11 +118,12 @@
 ;;;;           Appearance Settings
 ;;;;
 (global-hl-line-mode 1)
+(desktop-save-mode 1)  ;; save session
 (setq default-cursor-type 'bar)
 (set-face-background hl-line-face "gray13")
 (set-cursor-color "red")
 (set-face-foreground 'minibuffer-prompt "yellow")
-
+;;(set-face-foreground 'custom-face-tag "cyan")
 
 (when (not (display-graphic-p))
   (menu-bar-mode -1)
@@ -340,7 +341,10 @@
 ;;;;
 (when nil
   (require 'ido)
+  (require 'ido-vertical-mode)
+
   (ido-mode t)
+  (ido-vertical-mode 1)
   )
 ;;;;
 ;;;;          scrolling
@@ -532,14 +536,13 @@
 ;;;;
 (when t
   (require 'neotree)
-  (neotree-show)
   )
 
 
 ;;;;
 ;;;;           icicles
 ;;;;
-(when t
+(when nil
   (require 'icicles)
   (icy-mode t)
   )
@@ -616,15 +619,6 @@
 ;;;;
 ;;;;           tabbar
 ;;;;
-(when nil
-  (setq tabbar-ruler-global-tabbar t) ; If you want tabbar
-  (setq tabbar-ruler-global-ruler t) ; if you want a global ruler
-  (setq tabbar-ruler-popup-menu t) ; If you want a popup menu.
-  (setq tabbar-ruler-popup-toolbar t) ; If you want a popup toolbar
-  (setq tabbar-ruler-popup-scrollbar t) ; If you want to only show the
-                                        ; scroll bar when your mouse is moving.
-  (require 'tabbar-ruler)
-  )
 (when t
   (require 'tabbar)
   (tabbar-mode 1)
@@ -674,6 +668,8 @@
   (add-hook 'first-change-hook 'ztl-on-buffer-modification)
 
 
+  (setq tabbar-use-images nil)
+  
   ;; font & face
   (when (not (display-graphic-p))
     (set-face-attribute
@@ -714,7 +710,47 @@
     )
 
   (when (display-graphic-p)
-    (set-face-foreground 'tabbar-selected "green")
+    (defvar tabbar-fg              "#DCDCCC")
+    (defvar tabbar-bg              "#073642")    
+    (defvar tabbar-bg-selected     "#002b36")
+    (defvar tabbar-bg-hightlight   "#eee8d5")
+    
+    (set-face-attribute
+     'tabbar-default nil
+     :background tabbar-bg
+     :foreground tabbar-fg
+     :height 2
+     :underline nil
+     :box nil
+     )
+    (set-face-attribute
+     'tabbar-unselected nil
+     :foreground tabbar-fg
+     :background tabbar-bg
+     :box nil
+     )
+    (set-face-attribute
+     'tabbar-selected nil
+     :foreground "green"
+     :background tabbar-bg-selected
+     :box '(:line-width -1 :style pressed-button))
+    (set-face-attribute
+     'tabbar-highlight nil
+     :background tabbar-bg-hightlight
+     :foreground "black"
+     :underline nil
+     :box '(:line-width 3 :color "#eee8d5" :style nil))
+    (set-face-attribute
+     'tabbar-button nil
+     :foreground tabbar-fg
+     :background tabbar-bg
+     :box nil)
+    (set-face-attribute
+     'tabbar-separator nil
+     :background tabbar-bg
+     :height 0.6)    
+    (custom-set-variables
+     '(tabbar-separator (quote (0.2))))
     )
   )
 
@@ -760,22 +796,24 @@
   
   ;; CVS
 
-  ;; face
-  (custom-set-faces
-   '(diredp-dir-priv ((t (:foreground "cyan" :weight bold))))
-   '(diredp-file-name ((t (:foreground "green"))))
-   '(diredp-no-priv ((t (:background "black"))))
-   '(diredp-number ((t (:foreground "yellow"))))
-   )
-  (when (not (display-graphic-p))
+  (when nil
+    ;; face
     (custom-set-faces
      '(diredp-dir-priv ((t (:foreground "cyan" :weight bold))))
-     '(diredp-exec-priv ((t (:background "Color-234" :foreground "brightred"))))
      '(diredp-file-name ((t (:foreground "green"))))
      '(diredp-no-priv ((t (:background "black"))))
      '(diredp-number ((t (:foreground "yellow"))))
-     '(diredp-read-priv ((t (:background "Color-234" :foreground "color-34"))))
-     '(diredp-write-priv ((t (:background "color-234")))))
+     )
+    (when (not (display-graphic-p))
+      (custom-set-faces
+       '(diredp-dir-priv ((t (:foreground "cyan" :weight bold))))
+       '(diredp-exec-priv ((t (:background "Color-234" :foreground "brightred"))))
+       '(diredp-file-name ((t (:foreground "green"))))
+       '(diredp-no-priv ((t (:background "black"))))
+       '(diredp-number ((t (:foreground "yellow"))))
+       '(diredp-read-priv ((t (:background "Color-234" :foreground "color-34"))))
+       '(diredp-write-priv ((t (:background "color-234")))))
+      )
     )
   )
 
@@ -862,6 +900,9 @@
 ;;;;
 (when t
   (global-flycheck-mode)
+  (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++11")))
+  (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++11")))
+  
   (add-hook 'flycheck-mode-hook #'flycheck-haskell-setup)
   (eval-after-load 'flycheck '(require 'flycheck-ghcmod))
   )
@@ -1134,7 +1175,7 @@
 ;;;;
 ;;;;           C++11
 ;;;;
-(when t
+(when nil ;; depricated in emacs 25
   (require 'font-lock)
 
   (defun --copy-face (new-face face)
@@ -1500,39 +1541,42 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes (quote (zenburn)))
+ '(custom-enabled-themes (quote (solarized-dark)))
  '(custom-safe-themes t)
  '(ecb-options-version "2.40")
  '(grep-command "grep -nH -i -e")
  '(haskell-interactive-mode-hide-multi-line-errors nil)
  '(haskell-process-log t)
  '(haskell-process-type (quote cabal-repl))
+ '(package-selected-packages
+   (quote
+    (zenburn-theme xkcd xcscope tabbar-ruler sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme magit ido-vertical-mode icicles hlinum helm ghci-completion ghc flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dos dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
  '(semantic-idle-scheduler-idle-time 0.5))
 
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-face-tag ((t (:foreground "brightblue"))))
- '(diredp-dir-priv ((t (:foreground "cyan" :weight bold))))
- '(diredp-exec-priv ((t (:background "Color-234" :foreground "OrangeRed3"))))
- '(diredp-file-name ((t (:foreground "green"))))
- '(diredp-no-priv ((t (:background "black"))))
- '(diredp-number ((t (:foreground "yellow"))))
- '(diredp-read-priv ((t (:background "Color-234" :foreground "white"))))
- '(diredp-write-priv ((t (:background "color-234" :foreground "cyan"))))
- '(ecb-default-highlight-face ((t (:background "#3A8440"))))
- '(ecb-history-bucket-node-face ((t (:inherit ecb-bucket-node-face :foreground "gray70"))))
- '(ecb-history-dead-buffer-face ((t (:inherit ecb-history-general-face :foreground "gray30"))))
- '(ecb-history-general-face ((t (:inherit ecb-default-general-face :height 1.0))))
- '(haskell-constructor-face ((t (:foreground "green"))))
- '(haskell-definition-face ((t (:foreground "magenta"))))
- '(link ((t (:foreground "green" :underline t))))
- '(semantic-highlight-edits-face ((t (:background "color-234"))))
- '(semantic-unmatched-syntax-face ((((class color) (background dark)) (:underline nil)))))
-
-
+(when nil
+  (custom-set-faces
+   ;; custom-set-faces was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(custom-face-tag ((t (:foreground "brightblue"))))
+   '(diredp-dir-priv ((t (:foreground "cyan" :weight bold))))
+   '(diredp-exec-priv ((t (:background "Color-234" :foreground "OrangeRed3"))))
+   '(diredp-file-name ((t (:foreground "green"))))
+   '(diredp-no-priv ((t (:background "black"))))
+   '(diredp-number ((t (:foreground "yellow"))))
+   '(diredp-read-priv ((t (:background "Color-234" :foreground "white"))))
+   '(diredp-write-priv ((t (:background "color-234" :foreground "cyan"))))
+   '(ecb-default-highlight-face ((t (:background "#3A8440"))))
+   '(ecb-history-bucket-node-face ((t (:inherit ecb-bucket-node-face :foreground "gray70"))))
+   '(ecb-history-dead-buffer-face ((t (:inherit ecb-history-general-face :foreground "gray30"))))
+   '(ecb-history-general-face ((t (:inherit ecb-default-general-face :height 1.0))))
+   '(haskell-constructor-face ((t (:foreground "green"))))
+   '(haskell-definition-face ((t (:foreground "magenta"))))
+   '(link ((t (:foreground "green" :underline t))))
+   '(semantic-highlight-edits-face ((t (:background "color-234"))))
+   '(semantic-unmatched-syntax-face ((((class color) (background dark)) (:underline nil)))))
+  )
 
 ;; Add final message so using C-h l I can see if .emacs failed
 (message ".emacs loaded successfully.")
