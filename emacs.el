@@ -76,6 +76,7 @@
                        tabbar
                        tabbar-ruler
                        xcscope
+                       yascroll
 
                        ;; top themes
                        zenburn-theme
@@ -114,106 +115,29 @@
 ;;;;---------------------------------------------------------------------------
 
 
-;;;;    
-;;;;           Appearance Settings
 ;;;;
+;;;;        Behavior Settings
+;;;;
+
 (global-hl-line-mode 1)
 (desktop-save-mode 1)  ;; save session
-(setq default-cursor-type 'bar)
-(set-face-background hl-line-face "gray13")
-(set-cursor-color "red")
-(set-face-foreground 'minibuffer-prompt "yellow")
-;;(set-face-foreground 'custom-face-tag "cyan")
-
-(when (not (display-graphic-p))
-  (menu-bar-mode -1)
-  (set-face-background 'hl-line "color-235")
-  (set-face-attribute 'region nil :background "color-19")
-  )
-
-(when (display-graphic-p)
-  (set-face-background 'region "SeaGreen4")
-  )
 
 ;; transparent
 (set-frame-parameter (selected-frame) 'alpha '(95 90))
 (add-to-list 'default-frame-alist '(alpha 95 90))
 
-
-;; line & column number 
+;; line & column number
 (line-number-mode t)
 (column-number-mode t)
+
 ;; mouse in terminal
-(xterm-mouse-mode t)   
+(xterm-mouse-mode t)
 (tool-bar-mode nil)
-
-;; Font stuff for emacs versions that support it
-;;  (this stuff seems to be the least portable, comment this stuff out if it
-;;   prevents the config file from loading)
-(when (eq system-type 'darwin)
-  (set-face-attribute 'default nil :font "Menlo 12")   
-  (add-to-list 'default-frame-alist '(font . "Menlo 13"))
-
-  ;; fix gap at top when maximized
-  (setq frame-resize-pixelwise t)
-  )
-
-(when (eq system-type 'windows-nt)
-  (add-to-list 'default-frame-alist '(font . "Consolas 11"))
-  (set-face-attribute 'default nil :font "Consolas 11"))
-
-
-;; Color scheme is set in customize section at bottom (dark or light)
-(defconst foreground-color "white")
-(defconst background-color "black")
-(defconst pointer-color "red")
-(defconst cursor-color "red3")
-
-(if (featurep 'xemacs)
-    (let ((frame (selected-frame)))
-      (set-face-foreground 'default foreground-color)
-      (set-face-background 'default background-color))
-  (progn 
-    (add-to-list 'default-frame-alist 
-		 (cons 'foreground-color foreground-color))
-    (add-to-list 'default-frame-alist 
-		 (cons 'background-color background-color))
-    (add-to-list 'default-frame-alist (cons 'cursor-color cursor-color))
-    (set-cursor-color cursor-color)
-    (set-mouse-color pointer-color)
-    (if window-system
-        (tool-bar-mode 0))) 
-)
-
-;; XEmacs specific setup
-(if (featurep 'xemacs) 
-    (progn (set-specifier default-toolbar-visible-p nil)
-           (setq font-lock-use-default-colors nil)
-           (setq font-lock-use-fonts t)
-           (setq font-lock-use-colors t)
-           (setq font-lock-maximum-decoration t)))
-
-
-;; GNU specific general setup
-(if (not (featurep 'xemacs))
-  (condition-case err
-      (progn (set-scroll-bar-mode 'right)
-             (global-font-lock-mode t))
-    (error (message "Not running GNU emacs 20.4 or above."))))
-
-
-;;;;
-;;;;        Behavior Settings
-;;;;
 
 ;; Setup save options (auto and backup) -- still buggy need new Replace func
 ;; Disable backup and autosave
 (setq backup-inhibited t)
 (setq auto-save-default nil)
-
-;; Printing setup
-(setq ps-n-up-printing 2)
-(setq ps-print-header nil)
 
 ;; recent files
 (require 'recentf)
@@ -223,23 +147,20 @@
 
 (setq inhibit-splash-screen t)
 (setq transient-mark-mode t)
-(setq-default indent-tabs-mode nil)
 (setq delete-key-deletes-forward t)
 (setq mouse-yank-at-point nil)
 (setq bookmark-save-flag 1)  ;; autosave bookmarks
+(setq-default indent-tabs-mode nil)
 
 ;; upcase region is anoying
 (put 'upcase-region 'disabled nil)
 (put 'narrow-to-region 'disabled nil)
 
 ;; Setup time mode
-(autoload 'display-time "time" "Display Time" t)
-(condition-case err
-    (display-time)
-  (error (message "Unable to load Time package.")))
-(setq display-time-24hr-format nil)
 (setq display-time-day-and-date t)
-(setq display-time-mode t)
+(setq display-time-format "%I:%M %p %m/%d")
+(setq display-time-default-load-average nil)
+(display-time-mode t)
 
 ;; Setup text mode
 (add-hook 'text-mode-hook '(lambda() (auto-fill-mode 1)))
@@ -327,6 +248,10 @@
   )
 
 
+;;;;
+;;;;          new scratch
+;;;;
+
 (when t
   (defun new-scratch ()
     "open up a guaranteed new scratch buffer"
@@ -349,6 +274,8 @@
   (ido-mode t)
   (ido-vertical-mode 1)
   )
+
+
 ;;;;
 ;;;;          scrolling
 ;;;;
@@ -362,6 +289,7 @@
   (require 'smooth-scrolling)
   )
 
+
 ;;;;
 ;;;;           bookmark
 ;;;;
@@ -372,12 +300,13 @@
 
 
 ;;;;
-;;;;
+;;;;           nyan
 ;;;;
 (when t
   (require 'nyan-mode)
   (nyan-mode t)
   )
+
 
 ;;;;
 ;;;;           formatter
@@ -409,11 +338,12 @@
 
 (global-set-key (kbd "C-x j") 'kill-other-buffers)
 
+
 ;;;;
 ;;;;           toggle shell buffer
 ;;;;
 (defun toggle-shell-buffer (name)
-  "toggle *shell*/*eshell* buffer"
+  "Toggle *shell*/*eshell* (`NAME')buffer."
   (interactive)
   (if (string-equal name (buffer-name))
       (previous-buffer)
@@ -426,18 +356,22 @@
     (define-key global-map "\M-`" (lambda() (interactive) (toggle-shell-buffer "*shell*")))
     (define-key global-map "\M-`" (lambda() (interactive) (toggle-shell-buffer "*eshell*"))))
 
+
 ;;;;
 ;;;;           clear *shell* buffer
 ;;;;
 (defun clear-shell ()
+  "Clear eshell."
   (interactive)
   (let ((comint-buffer-maximum-size 0))
     (comint-truncate-buffer)))
 
 (defun clear-shell-hook ()
+  "Hook of shell mode."
   (local-set-key "\C-l" 'clear-shell))
 
 (add-hook 'shell-mode-hook 'clear-shell-hook)
+
 
 ;;;;
 ;;;;           kill *Completions* buffer automatically
@@ -457,11 +391,12 @@
 ;;;;           reload the buffer
 ;;;;
 (defun reload ()
-  "Reload the buffer"
+  "Reload the buffer."
   (interactive)
   (revert-buffer))
 
 (global-set-key (kbd "C-x r") 'reload)
+
 
 ;;;;
 ;;;;           set buffer modified
@@ -524,13 +459,15 @@
     (require 'mouse3)))
 
 
-
 ;;;;
 ;;;;           yascroll
 ;;;;
-(when t
-;;  (require 'yascroll)
-;;  (global-yascroll-bar-mode 1)
+(when nil
+  (require 'yascroll)
+  (global-yascroll-bar-mode 1)
+  (setq yascroll:delay-to-hide nil)
+  
+  (scroll-bar-mode -1)
   )
 
 
@@ -671,92 +608,9 @@
   ;;(add-hook 'after-revert-hook 'ztl-modification-state-change)
   (add-hook 'first-change-hook 'ztl-on-buffer-modification)
 
-
   (setq tabbar-use-images nil)
-  
-  ;; font & face
-  (when (not (display-graphic-p))
-    (set-face-attribute
-     'tabbar-default nil
-     :background "gray20"
-     :foreground "gray40"
-     :underline nil
-     :box '(:line-width 1 :color "gray20" :style nil))
-    (set-face-attribute
-     'tabbar-unselected nil
-     :background "gray20"
-     :foreground "gray60"
-     :box '(:line-width 1 :color "gray30" :style nil))
-    (set-face-attribute
-     'tabbar-selected nil
-     :background "color-18"
-     :foreground "brightwhite"
-     :underline t
-     :box '(:line-width 1 :color "gray75" :style nil))
-    (set-face-attribute
-     'tabbar-highlight nil
-     :background "white"
-     :foreground "black"
-     :underline nil
-     :box '(:line-width 5 :color "white" :style nil))
-    (set-face-attribute
-     'tabbar-button nil
-     :box '(:line-width 1 :color "gray20" :style nil))
-    (set-face-attribute
-     'tabbar-separator nil
-     :background "gray20"
-     :height 0.6)
-
-    ;; Change padding of the tabs
-    ;; we also need to set separator to avoid overlapping tabs by highlighted tabs
-    (custom-set-variables
-     '(tabbar-separator (quote (0.5))))
-    )
-
-  (when (display-graphic-p)
-    (defvar tabbar-fg              "#DCDCCC")
-    (defvar tabbar-bg              "#073642")    
-    (defvar tabbar-bg-selected     "#002b36")
-    (defvar tabbar-bg-hightlight   "#eee8d5")
-    
-    (set-face-attribute
-     'tabbar-default nil
-     :background tabbar-bg
-     :foreground tabbar-fg
-     :height 2
-     :underline nil
-     :box nil
-     )
-    (set-face-attribute
-     'tabbar-unselected nil
-     :foreground tabbar-fg
-     :background tabbar-bg
-     :box nil
-     )
-    (set-face-attribute
-     'tabbar-selected nil
-     :foreground "green"
-     :background tabbar-bg-selected
-     :box '(:line-width -1 :style pressed-button))
-    (set-face-attribute
-     'tabbar-highlight nil
-     :background tabbar-bg-hightlight
-     :foreground "black"
-     :underline nil
-     :box '(:line-width 3 :color "#eee8d5" :style nil))
-    (set-face-attribute
-     'tabbar-button nil
-     :foreground tabbar-fg
-     :background tabbar-bg
-     :box nil)
-    (set-face-attribute
-     'tabbar-separator nil
-     :background tabbar-bg
-     :height 0.6)    
-    (custom-set-variables
-     '(tabbar-separator (quote (0.2))))
-    )
   )
+
 
 ;;;;
 ;;;;           Dired
@@ -860,13 +714,15 @@
   (fast-nav-mode 1)
   
   )
-;;;;
+
+
 ;;;;
 ;;;;           rectangular select
 ;;;;
 (when t
   (require 'phi-rectangle)
   )
+
 
 ;;;;
 ;;;;           cmake
@@ -885,6 +741,7 @@
   (add-hook 'cmake-mode-hook 'cmake-font-lock-activate)
   )
 
+
 ;;;;
 ;;;;           ansi color
 ;;;;
@@ -892,6 +749,7 @@
   (autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
   (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
   )
+
 
 ;;;;
 ;;;;           elscreen
@@ -907,6 +765,7 @@
     (global-set-key (kbd "C-. C-n") 'elscreen-next))
   )
 
+
 ;;;;
 ;;;;           Flycheck
 ;;;;
@@ -918,6 +777,7 @@
   (add-hook 'flycheck-mode-hook #'flycheck-haskell-setup)
   (eval-after-load 'flycheck '(require 'flycheck-ghcmod))
   )
+
 
 ;;;;
 ;;;;           D mode
@@ -935,6 +795,7 @@
   (add-to-list 'auto-mode-alist '("\\.d\\'" . dtrace-script-mode))
   (add-hook 'dtrace-script-mode-hook 'imenu-add-menubar-index)
   (add-hook 'dtrace-script-mode-hook 'font-lock-mode))
+
 
 ;;;;
 ;;;;           Haskell mode
@@ -995,6 +856,7 @@
   (require 'py-autopep8)
   (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
   )
+
 
 ;;;;
 ;;;;                        yasnippets
@@ -1157,6 +1019,7 @@
   (require 'dockerfile-mode)
   (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode)))
 
+
 ;;;;
 ;;;;           Speed Bar
 ;;;;
@@ -1262,6 +1125,7 @@
   (ac-linum-workaround)
   )
 
+
 ;;;;
 ;;;;           ecb
 ;;;;
@@ -1296,6 +1160,130 @@
   )
 
 
+;;;;
+;;;;                     theme
+;;;;
+(when t
+  (when t ;; basic
+    (if (display-graphic-p)
+        (progn
+          (setq default-cursor-type 'box)
+          ;;(set-face-background hl-line-face "gray13")
+          ;;(set-cursor-color "red")
+          ;;(set-face-foreground 'minibuffer-prompt "yellow")
+          ;;(set-face-foreground 'custom-face-tag "cyan")
+          ;;(set-face-background 'region "SeaGreen4")
+          )
+      (progn
+        (menu-bar-mode -1)
+        (set-face-background 'hl-line "color-235")
+        (set-face-attribute 'region nil :background "color-19")        
+        )
+      )
+    )
+
+  (when t
+    
+    ;; Font stuff for emacs versions that support it
+    ;;  (this stuff seems to be the least portable, comment this stuff out if it
+    ;;   prevents the config file from loading)
+    (when (eq system-type 'darwin)
+      (set-face-attribute 'default nil :font "Menlo 12")   
+      (add-to-list 'default-frame-alist '(font . "Menlo 13"))
+      ;; fix gap at top when maximized
+      (setq frame-resize-pixelwise t)
+      )
+
+    (when (eq system-type 'windows-nt)
+      (add-to-list 'default-frame-alist '(font . "Consolas 11"))
+      (set-face-attribute 'default nil :font "Consolas 11"))
+    )
+
+  ;; tabbar face
+  (when t
+    (when (not (display-graphic-p))
+      (set-face-attribute
+       'tabbar-default nil
+       :background "gray20"
+       :foreground "gray40"
+       :underline nil
+       :box '(:line-width 1 :color "gray20" :style nil))
+      (set-face-attribute
+       'tabbar-unselected nil
+       :background "gray20"
+       :foreground "gray60"
+       :box '(:line-width 1 :color "gray30" :style nil))
+      (set-face-attribute
+       'tabbar-selected nil
+       :background "color-18"
+       :foreground "brightwhite"
+       :underline t
+       :box '(:line-width 1 :color "gray75" :style nil))
+      (set-face-attribute
+       'tabbar-highlight nil
+       :background "white"
+       :foreground "black"
+       :underline nil
+       :box '(:line-width 5 :color "white" :style nil))
+      (set-face-attribute
+       'tabbar-button nil
+       :box '(:line-width 1 :color "gray20" :style nil))
+      (set-face-attribute
+       'tabbar-separator nil
+       :background "gray20"
+       :height 0.6)
+
+      ;; Change padding of the tabs
+      ;; we also need to set separator to avoid overlapping tabs by highlighted tabs
+      (custom-set-variables
+       '(tabbar-separator (quote (0.5))))
+      )
+
+    (when (display-graphic-p)
+      (defvar tabbar-fg              "#DCDCCC")
+      (defvar tabbar-bg              "#073642")    
+      (defvar tabbar-bg-selected     "#002b36")
+      (defvar tabbar-bg-hightlight   "#eee8d5")
+      
+      (set-face-attribute
+       'tabbar-default nil
+       :background tabbar-bg
+       :foreground tabbar-fg
+       :height 2
+       :underline nil
+       :box nil
+       )
+      (set-face-attribute
+       'tabbar-unselected nil
+       :foreground tabbar-fg
+       :background tabbar-bg
+       :box nil
+       )
+      (set-face-attribute
+       'tabbar-selected nil
+       :foreground "green"
+       :background tabbar-bg-selected
+       :box '(:line-width -1 :style pressed-button))
+      (set-face-attribute
+       'tabbar-highlight nil
+       :background tabbar-bg-hightlight
+       :foreground "black"
+       :underline nil
+       :box '(:line-width 3 :color "#eee8d5" :style nil))
+      (set-face-attribute
+       'tabbar-button nil
+       :foreground tabbar-fg
+       :background tabbar-bg
+       :box nil)
+      (set-face-attribute
+       'tabbar-separator nil
+       :background tabbar-bg
+       :height 0.6)    
+      (custom-set-variables
+       '(tabbar-separator (quote (0.2))))
+      )
+    )
+  )
 
 
 ;;;;---------------------------------------------------------------------------
@@ -1377,6 +1365,7 @@
 (when (eq system-type 'darwin)
   (load-library "gud.el"))
 
+
 ;;;;
 ;;;;           cscope
 ;;;;
@@ -1402,7 +1391,7 @@
   (global-set-key (kbd "M-s t") 'cscope-find-this-text-string)
   (global-set-key (kbd "M-s u") 'sr-speedbar-select-window)
   (global-set-key (kbd "M-s k") 'sr-speedbar-toggle)
-  (global-set-key (kbd "<C-down-mouse-1>") 'cscope-find-global-definition-no-prompting)
+  (global-set-key (kbd "<M-down-mouse-1>") 'cscope-find-global-definition-no-prompting)
   )
 
 ;; Setup Common Lisp mode
@@ -1425,9 +1414,33 @@
 
 ;; Create my own coding style
 ;; No space before { and function sig indents 4 if argument overflow
-(setq bws-c-style
+(setq frinkr/c4-style
       '((c-auto-newline                 . nil)
         (c-basic-offset                 . 4)
+        (c-comment-only-line-offset     . 0)
+        (c-echo-syntactic-information-p . nil)
+        (c-hungry-delete-key            . t)
+        (c-tab-always-indent            . t)
+        (c-toggle-hungry-state          . t)
+        (c-hanging-braces-alist         . ((substatement-open after)
+                                          (brace-list-open)))
+        (c-offsets-alist                . ((arglist-close . c-lineup-arglist)
+                                           (case-label . 4)
+                                           (substatement-open . 0)
+                                           (block-open . 0) ; no space before {
+                                           (knr-argdecl-intro . -)))
+        (c-hanging-colons-alist         . ((member-init-intro before)
+                                           (inher-intro)
+                                           (case-label after)
+                                           (label after)
+                                           (access-label after)))
+        (c-cleanup-list                 . (scope-operator
+                                           empty-defun-braces
+                                           defun-close-semi))))
+
+(setq frinkr/c2-style
+      '((c-auto-newline                 . nil)
+        (c-basic-offset                 . 2)
         (c-comment-only-line-offset     . 0)
         (c-echo-syntactic-information-p . nil)
         (c-hungry-delete-key            . t)
@@ -1465,22 +1478,12 @@
 
 (add-hook 'c++-mode-hook 'vlad-cc-style)
 
-
 ;; Construct a hook to be called when entering C mode
 (defun lconfig-c-mode ()
   (progn (define-key c-mode-base-map "\C-l" 'newline-and-indent)
-         (define-key c-mode-base-map "\C-z" 'undo)
-         (define-key c-mode-base-map [delete] 'c-hungry-delete-forward)
-         (define-key c-mode-base-map [backspace] 'c-hungry-delete-backwards)
-         (define-key c-mode-base-map [f4] 'speedbar-get-focus)
-         (define-key c-mode-base-map [f5] 'next-error)
-         (define-key c-mode-base-map [f6] 'run-program)
-         (define-key c-mode-base-map [f7] 'compile)
-         (define-key c-mode-base-map [f8] 'set-mark-command)
-         (define-key c-mode-base-map [f9] 'insert-breakpoint)
-         (define-key c-mode-base-map [f10] 'step-over)
-         (define-key c-mode-base-map [f11] 'step-into)
-         (c-add-style "Brad's Coding Style" bws-c-style t)))
+         (c-add-style "frinkr4" frinkr/c4-style t)
+         (c-add-style "frinrk2" frinkr/c2-style t))
+  )
 (add-hook 'c-mode-common-hook 'lconfig-c-mode)
 
 
@@ -1508,39 +1511,6 @@
 (add-to-list 'auto-mode-alist '("\\.s$" . asm-mode))
 (add-to-list 'auto-mode-alist '("\\.asm$" . asm-mode))
 
-
-;; Setup imenu
-(add-hook 'c-mode-common-hook 'imenu-add-menubar-index)
-
-
-;; Setup func-menu, the function menu quicklink package (XEmacs only)
-(autoload 'function-menu "func-menu" "Load the parsing package" t)
-(autoload 'fume-add-menubar-entry "func-menu" "Add function menu" t)
-(autoload 'fume-list-functions "func-menu" "List functions in window" t)
-(autoload 'fume-prompt-function-goto "func-menu" "Goto function" t)
-(setq fume-max-items 35)
-(setq fume-fn-window-position 3)
-(setq fume-auto-position-popup t)
-(setq fume-display-in-modeline-p t)
-(setq fume-menubar-menu-location "Info")
-(setq fume-buffer-name "Function List*")
-(setq fume-no-prompt-on-valid-default nil)
-;(global-set-key [f8] 'function-menu)
-;(define-key global-map "\C-cl" 'fume-list-functions)
-;(define-key global-map "\C-cg" 'fume-prompt-function-goto)
-(condition-case err
-    (progn (function-menu)
-           (add-hook 'c-mode-common-hook 'fume-add-menubar-entry))
-  (error (message "Unable to load Function Menu package")))
-
-
-;; Setup imenu
-;(setq imenu-sort-function 'imenu--sort-by-name)
-;(setq imenu-max-items 45)
-;(define-key global-map "\C-cj" 'imenu)
-
-;; Setup my own packages
-;;(add-to-list 'load-path (expand-file-name "~/elisp/"))
 (autoload 'cpp-font-lock "cpp-mode" "CPP Font Lock mode" t)
 
 
@@ -1560,9 +1530,6 @@
  '(haskell-interactive-mode-hide-multi-line-errors nil)
  '(haskell-process-log t)
  '(haskell-process-type (quote cabal-repl))
- '(package-selected-packages
-   (quote
-    (fold-this origami fold-dwim yafolding zenburn-theme xkcd xcscope tabbar-ruler sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme magit ido-vertical-mode icicles hlinum helm ghci-completion ghc flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dos dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
  '(semantic-idle-scheduler-idle-time 0.5)
  '(tabbar-separator (quote (0.2))))
 
