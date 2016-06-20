@@ -46,6 +46,7 @@
                        dired-k
                        dired-rainbow
                        dired-single
+                       diminish
                        dockerfile-mode
                        dos
                        dtrace-script-mode
@@ -59,6 +60,7 @@
                        ghc
                        ghci-completion
                        haskell-mode
+                       helm
                        hlinum
                        mouse3
                        magit
@@ -71,6 +73,7 @@
                        pos-tip
                        icicles
                        on-screen
+                       osx-dictionary
                        smooth-scroll
                        smooth-scrolling
                        tabbar
@@ -488,6 +491,18 @@
   (setq icicle-touche-pas-aux-menus-flag t)
   )
 
+
+;;;;
+;;;;           helm
+;;;;
+(when nil
+  (require 'helm-config)
+  (global-set-key (kbd "C-x b") 'helm-buffers-list)
+
+  (global-set-key (kbd "C-x m") 'helm-M-x)
+  (global-set-key (kbd "C-x C-f") 'helm-find-files)
+  )
+
 ;;;;
 ;;;;           fill column indicator
 ;;;;
@@ -584,7 +599,7 @@
            (lambda (buffer)
              (and (not (eq (current-buffer) buffer)) ; Always include the current buffer.
                   (cl-loop for name in *tabbar-ignore-buffers* ;remove buffer name in this list.
-                        thereis (string-equal (buffer-name buffer) name))))
+                           thereis (string-equal (buffer-name buffer) name))))
            (tabbar-buffer-list))))
 
   ;; Add a buffer modification state indicator in the tab label, and place a
@@ -705,7 +720,7 @@
   (define-minor-mode fast-nav-mode
     "A minor mode so that my key settings override annoying major modes."
     :init-value t
-    :lighter " my-keys")
+    :lighter " fast-nav")
 
   (defun fast-nav/minibuffer-setup-hook ()
     (fast-nav-mode 0))
@@ -714,6 +729,22 @@
   (fast-nav-mode 1)
   
   )
+
+
+;;;;
+;;;;           mode line
+;;;;
+(when t
+  (require 'diminish)
+
+  (eval-after-load "flycheck" '(diminish 'flycheck-mode nil))
+  (eval-after-load "auto-complete" '(diminish 'auto-complete-mode nil))
+  (eval-after-load "p4" '(diminish 'p4-mode nil))
+  (eval-after-load "abbrev" '(diminish 'abbrev-mode nil))
+  
+  (diminish 'fast-nav-mode nil)
+  )
+
 
 
 ;;;;
@@ -1391,7 +1422,7 @@
   (global-set-key (kbd "M-s t") 'cscope-find-this-text-string)
   (global-set-key (kbd "M-s u") 'sr-speedbar-select-window)
   (global-set-key (kbd "M-s k") 'sr-speedbar-toggle)
-  (global-set-key (kbd "<M-down-mouse-1>") 'cscope-find-global-definition-no-prompting)
+  (global-set-key (kbd "<M-down-mouse-1>") 'cscope-find-this-symbol)
   )
 
 ;; Setup Common Lisp mode
@@ -1481,8 +1512,7 @@
 ;; Construct a hook to be called when entering C mode
 (defun lconfig-c-mode ()
   (progn (define-key c-mode-base-map "\C-l" 'newline-and-indent)
-         (c-add-style "frinkr4" frinkr/c4-style t)
-         (c-add-style "frinrk2" frinkr/c2-style t))
+         (c-add-style "frinkr4" frinkr/c4-style t))
   )
 (add-hook 'c-mode-common-hook 'lconfig-c-mode)
 
@@ -1530,7 +1560,11 @@
  '(haskell-interactive-mode-hide-multi-line-errors nil)
  '(haskell-process-log t)
  '(haskell-process-type (quote cabal-repl))
+ '(package-selected-packages
+   (quote
+    (delight diminish osx-browse osx-dictionary zenburn-theme yascroll yafolding xkcd xcscope tabbar-ruler swiper sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 origami on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme magit ido-vertical-mode icicles hlinum helm ghci-completion ghc fold-this fold-dwim flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dos dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
  '(semantic-idle-scheduler-idle-time 0.5)
+ '(send-mail-function (quote sendmail-send-it))
  '(tabbar-separator (quote (0.2))))
 
 (custom-set-faces
