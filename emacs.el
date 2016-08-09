@@ -239,6 +239,7 @@
 (global-set-key (kbd "M-SPC") 'set-mark-command)
 (global-set-key (kbd "M-n") (lambda () (interactive) (next-line 5)))
 (global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
+(global-set-key (kbd "C-4") 'p4-edit)
 
 (when (eq system-type 'windows-nt)
   (define-key global-map [f1] 'help-command)
@@ -361,6 +362,20 @@
 
 
 ;;;;
+;;;;           drag on Mac OSX
+;;;;
+
+(global-set-key [ns-drag-file] 'ns-find-file)
+(setq ns-pop-up-frames nil)
+(when nil
+  (define-key global-map [ns-drag-file] 'my-ns-open-files)
+  (defun my-ns-open-files ()
+    "Open files in the list `ns-input-file'."
+    (interactive)
+    (mapc 'find-file ns-input-file)
+    (setq ns-input-file nil))
+  )
+;;;;
 ;;;;           clear *shell* buffer
 ;;;;
 (defun clear-shell ()
@@ -373,8 +388,17 @@
   "Hook of shell mode."
   (local-set-key "\C-l" 'clear-shell))
 
-(add-hook 'shell-mode-hook 'clear-shell-hook)
+;;(add-hook 'shell-mode-hook 'clear-shell-hook)
 
+(defun eshell-clear-buffer ()
+  "Clear terminal."
+  (interactive)
+  (let ((inhibit-read-only t))
+    (erase-buffer)
+    (eshell-send-input)))
+(add-hook 'eshell-mode-hook
+      '(lambda()
+         (local-set-key (kbd "C-l") 'eshell-clear-buffer)))
 
 ;;;;
 ;;;;           kill *Completions* buffer automatically
@@ -714,13 +738,18 @@
       (global-set-key (kbd "C-t") 'new-scratch)
 
       (define-key global-map [(meta m)] 'set-mark-command)
+      (global-set-key (kbd "<mouse-2>") (lambda () (interactive) (kill-buffer (current-buffer))))
+      (global-set-key (kbd "<mouse-3>") 'tabbar-forward)
+      (global-set-key (kbd "<mouse-5>") 'tabbar-backward)
+
       map)
     "fast-nav-mode keymap.")
 
   (define-minor-mode fast-nav-mode
     "A minor mode so that my key settings override annoying major modes."
     :init-value t
-    :lighter " fast-nav")
+    :lighter " fast-nav"
+    :keymap fast-nav-mode-map)
 
   (defun fast-nav/minibuffer-setup-hook ()
     (fast-nav-mode 0))
@@ -804,8 +833,11 @@
   (global-flycheck-mode)
   (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++11")))
   (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++11")))
-  
   (add-hook 'flycheck-mode-hook #'flycheck-haskell-setup)
+
+  ;;(add-hook 'text-mode-hook 'flyspell-mode)
+  ;;(add-hook 'prog-mode-hook 'flyspell-prog-mode)
+
   (eval-after-load 'flycheck '(require 'flycheck-ghcmod))
   )
 
