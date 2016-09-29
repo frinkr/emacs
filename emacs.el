@@ -74,6 +74,7 @@
                        icicles
                        on-screen
                        osx-dictionary
+                       reveal-in-osx-finder
                        smooth-scroll
                        smooth-scrolling
                        tabbar
@@ -167,7 +168,7 @@
 
 ;; Setup text mode
 (add-hook 'text-mode-hook '(lambda() (auto-fill-mode 1)))
-(add-hook 'text-mode-hook '(lambda() (setq fill-column 80)))
+(add-hook 'text-mode-hook '(lambda() (setq fill-column 70)))
 
 ;; Tab stop
 (setq-default indent-tabs-mode nil)
@@ -279,6 +280,13 @@
   (ido-vertical-mode 1)
   )
 
+;;;;
+;;;;          ibuffer
+;;;;
+(when t
+  (global-set-key (kbd "C-x C-b") 'ibuffer)
+  (autoload 'ibuffer "ibuffer" "List buffers." t)
+  )
 
 ;;;;
 ;;;;          scrolling
@@ -375,6 +383,17 @@
     (mapc 'find-file ns-input-file)
     (setq ns-input-file nil))
   )
+
+
+;;;;
+;;;;          reveal in Finder  
+;;;;
+(when t
+  (require 'reveal-in-osx-finder)
+  (defalias 'open-in-finder 'reveal-in-osx-finder)
+ )
+
+
 ;;;;
 ;;;;           clear *shell* buffer
 ;;;;
@@ -533,6 +552,7 @@
 (when t
   (require 'fill-column-indicator)
   (setq fci-rule-width 1)
+  (setq fci-rule-column 90)
   (if (display-graphic-p)
       (setq fci-rule-color "darkblue")
     (setq fci-rule-color "green"))
