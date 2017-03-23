@@ -62,6 +62,7 @@
                        haskell-mode
                        helm
                        hlinum
+                       lua-mode
                        mouse3
                        magit
                        nyan-mode
@@ -81,7 +82,7 @@
                        tabbar-ruler
                        xcscope
                        yascroll
-
+                       yaml-mode
                        ;; top themes
                        zenburn-theme
                        solarized-theme
@@ -370,6 +371,39 @@
 
 
 ;;;;
+;;;;           lua
+;;;;
+(when t
+  (autoload 'lua-mode "lua-mode" "Lua editing mode." t)
+  (add-to-list 'auto-mode-alist '("\\.lua$" . lua-mode))
+  (add-to-list 'interpreter-mode-alist '("lua" . lua-mode))
+  )
+
+;;;;
+;;;;           yaml mode
+;;;;
+(when t
+  (require 'yaml-mode)
+  (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
+  )
+
+
+;;;;
+;;;;
+;;;;
+(when t
+  (require 'markdown-mode)
+  (autoload 'markdown-mode "markdown-mode"
+    "Major mode for editing Markdown files" t)
+  (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
+  (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+
+  (autoload 'gfm-mode "markdown-mode"
+    "Major mode for editing GitHub Flavored Markdown files" t)
+  (add-to-list 'auto-mode-alist '("README\\.md\\'" . gfm-mode))
+  )
+
+;;;;
 ;;;;           drag on Mac OSX
 ;;;;
 
@@ -615,6 +649,37 @@
   (defalias 'magit 'magit-status)
   )
 
+
+;;;;
+;;;;           octave
+;;;;
+(when t
+  (setq auto-mode-alist
+        (cons '("\\.m$" . octave-mode) auto-mode-alist))
+
+  (setq inferior-octave-prompt ">> ")
+  
+  (add-hook 'octave-mode-hook
+            (lambda ()
+              (abbrev-mode 1)
+              (auto-fill-mode 1)
+              (font-lock-mode 1)))
+
+  (require 'ac-octave)
+;;  (ac-octave-init)
+  (defun ac-octave-mode-setup ()
+    (setq ac-sources '(ac-source-octave)))
+  (add-hook 'octave-mode-hook
+            '(lambda () (ac-octave-mode-setup)))
+
+  (add-hook 'inferior-octave-mode-hook
+            (lambda ()
+              (turn-on-font-lock)
+              (define-key inferior-octave-mode-map [up]
+                'comint-previous-input)
+              (define-key inferior-octave-mode-map [down]
+                'comint-next-input)))
+  )
 
 ;;;;
 ;;;;           tabbar
@@ -921,11 +986,13 @@
 ;;;;
 ;;;;                        python
 ;;;;
-(when t
+(when nil
   ;; auto env
-  (require 'auto-virtualenv)
-  (add-hook 'python-mode-hook 'auto-virtualenv-set-virtualenv)
-
+  (when nil
+    (require 'auto-virtualenv)
+    (add-hook 'python-mode-hook 'auto-virtualenv-set-virtualenv)
+    )
+  
   ;; python shell
   (setq gud-pdb-command-name "python -m pdb ")
   (defalias 'python 'run-python)
@@ -944,7 +1011,7 @@
 ;;;;
 ;;;;                        yasnippets
 ;;;;
-(when t
+(when nil
   (require 'yasnippet)
   (yas-global-mode t)
 
@@ -1493,7 +1560,7 @@
 ;; Associate extensions with modes
 (add-to-list 'auto-mode-alist '("\\.h$" . c++-mode))
 (add-to-list 'auto-mode-alist '("\\.mm\\'" . objc-mode))
-(add-to-list 'auto-mode-alist '("\\.m\\'" . objc-mode))
+;;(add-to-list 'auto-mode-alist '("\\.m\\'" . objc-mode))
 
 ;; Create my own coding style
 ;; No space before { and function sig indents 4 if argument overflow
@@ -1607,6 +1674,7 @@
  ;; If there is more than one, they won't work right.
  '(custom-enabled-themes (quote (solarized-dark)))
  '(custom-safe-themes t)
+ '(ecb-layout-window-sizes nil)
  '(ecb-options-version "2.40")
  '(grep-command "grep -nH -i -e")
  '(haskell-interactive-mode-hide-multi-line-errors nil)
@@ -1614,7 +1682,7 @@
  '(haskell-process-type (quote cabal-repl))
  '(package-selected-packages
    (quote
-    (delight diminish osx-browse osx-dictionary zenburn-theme yascroll yafolding xkcd xcscope tabbar-ruler swiper sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 origami on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme magit ido-vertical-mode icicles hlinum helm ghci-completion ghc fold-this fold-dwim flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dos dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
+    (markdown-mode lua-mode ac-octave dark-souls col-highlight better-shell delight diminish osx-browse osx-dictionary zenburn-theme yascroll yafolding xkcd xcscope tabbar-ruler swiper sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 origami on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme magit ido-vertical-mode icicles hlinum helm ghci-completion ghc fold-this fold-dwim flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dos dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
  '(semantic-idle-scheduler-idle-time 0.5)
  '(send-mail-function (quote sendmail-send-it))
  '(tabbar-separator (quote (0.2))))
