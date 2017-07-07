@@ -16,7 +16,6 @@
           ("https" . "eglbeprx001:8080")))
   )
 
-
 ;;;;
 ;;;;                   melpa
 ;;;;
@@ -135,6 +134,10 @@
 ;; transparent
 (set-frame-parameter (selected-frame) 'alpha '(95 90))
 (add-to-list 'default-frame-alist '(alpha 95 90))
+
+;; dark theme
+
+(setq dark-theme t)
 
 ;; line & column number
 (line-number-mode t)
@@ -582,21 +585,28 @@
   (global-set-key [double-mouse-1] 'highlight-symbol)
 ;;  (global-set-key [mouse-1] 'highlight-symbol-remove-all)
 
-  (setq highlight-symbol-color-pairs
-        '(
-          ("white" . "SpringGreen3")
-          ("white" . "MediumPurple1")
-          ("white" . "DarkOrchid4")
-          ("white" . "DeepPink")
-          ("white" . "DarkOrange")
-          ("white" . "OliveDrab4")
-          ("white" . "HotPink1")          
-          ("white" . "IndianRed3")
-          ("white" . "RoyalBlue1")
-          ("white" . "cyan3")
-          ("white" . "RoyalBlue4")
+  (if dark-theme
+      (setq highlight-symbol-color-pairs
+            '(
+              ("white" . "SpringGreen3")
+              ("white" . "MediumPurple1")
+              ("white" . "DarkOrchid4")
+              ("white" . "DeepPink")
+              ("white" . "DarkOrange")
+              ("white" . "OliveDrab4")
+              ("white" . "HotPink1")          
+              ("white" . "IndianRed3")
+              ("white" . "RoyalBlue1")
+              ("white" . "cyan3")
+              ("white" . "RoyalBlue4")
+              ))
+    (setq highlight-symbol-colors
+          '(
+            ("black" . "SpringGreen3")
+            ("white" . "DarkOrange")
           ))
-  
+    )
+
   (defun highlight-symbol-next-color-pair ()
     "Step to and return next color from the color ring."
     (let ((color (nth highlight-symbol-color-index
