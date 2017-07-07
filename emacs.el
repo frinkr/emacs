@@ -63,6 +63,7 @@
                        haskell-mode
                        helm
                        hlinum
+                       highlight-thing
                        lua-mode
                        mouse3
                        magit
@@ -571,6 +572,14 @@
   (setq icicle-touche-pas-aux-menus-flag t)
   )
 
+
+;;;;
+;;;;           highlight-thing
+;;;;
+(when t
+  (require 'highlight-thing)
+  (global-highlight-thing-mode)
+  )
 
 ;;;;
 ;;;;           helm
@@ -1692,7 +1701,7 @@
  '(haskell-process-type (quote cabal-repl))
  '(package-selected-packages
    (quote
-    (markdown-mode lua-mode ac-octave dark-souls col-highlight better-shell delight diminish osx-browse osx-dictionary zenburn-theme yascroll yafolding xkcd xcscope tabbar-ruler swiper sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 origami on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme ido-vertical-mode icicles hlinum helm ghci-completion ghc fold-this fold-dwim flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
+    (highlight-thing rainbow-delimiters highlight-symbol markdown-mode lua-mode ac-octave dark-souls col-highlight better-shell delight diminish osx-browse osx-dictionary zenburn-theme yascroll yafolding xkcd xcscope tabbar-ruler swiper sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 origami on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme ido-vertical-mode icicles hlinum helm ghci-completion ghc fold-this fold-dwim flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
  '(semantic-idle-scheduler-idle-time 0.5)
  '(send-mail-function (quote sendmail-send-it))
  '(tabbar-separator (quote (0.2))))
