@@ -64,6 +64,7 @@
                        helm
                        hlinum
                        highlight-thing
+                       highlight-symbol
                        lua-mode
                        mouse3
                        magit
@@ -577,8 +578,27 @@
 ;;;;           highlight-thing
 ;;;;
 (when t
-  (require 'highlight-thing)
-  (global-highlight-thing-mode)
+  (require 'highlight-symbol)
+  (global-set-key [double-mouse-1] 'highlight-symbol)
+;;  (global-set-key [mouse-1] 'highlight-symbol-remove-all)
+  
+  (defun highlight-symbol-add-symbol (symbol &optional color)
+    "Override this function for support convenience set foreground and background"
+    (unless (highlight-symbol-symbol-highlighted-p symbol)
+      (when (equal symbol highlight-symbol)
+        (highlight-symbol-mode-remove-temp))
+      (setq color `((background-color . ,"sea green")
+                    (foreground-color . ,"white")
+                    ))
+
+      (highlight-symbol-remove-all) ;; remove others
+      
+      (highlight-symbol-add-symbol-with-face symbol color)
+      ))
+  
+;;  (require 'highlight-thing)
+;;  (global-highlight-thing-mode)
+;;  (setq highlight-thing-delay-seconds 0.2)
   )
 
 ;;;;
@@ -1706,12 +1726,6 @@
  '(send-mail-function (quote sendmail-send-it))
  '(tabbar-separator (quote (0.2))))
 
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-
 ;; Add final message so using C-h l I can see if .emacs failed
 (message ".emacs loaded successfully.")
+
