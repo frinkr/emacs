@@ -31,6 +31,7 @@
 
 (when t  ;; install the required packages automatically
   (setq package-list '(
+                       ac-octave
                        auto-complete
                        auto-virtualenv
                        bm
@@ -48,7 +49,7 @@
                        dired-single
                        diminish
                        dockerfile-mode
-                       dos
+                       ;;dos ;; use builtin bat-mode
                        dtrace-script-mode
                        ecb
                        elpy
@@ -65,6 +66,7 @@
                        lua-mode
                        mouse3
                        magit
+                       markdown-mode
                        nyan-mode
                        neotree
                        p4
@@ -73,6 +75,7 @@
                        popup
                        pos-tip
                        icicles
+                       ido-vertical-mode
                        on-screen
                        osx-dictionary
                        reveal-in-osx-finder
@@ -642,7 +645,6 @@
 (when t
   (require 'magit)
 
-  (setq magit-last-seen-setup-instructions "1.4.0")
   (setq magit-auto-revert-mode nil)
   
   (global-set-key (kbd "C-x g") 'magit-status)
@@ -1159,8 +1161,8 @@
 ;;;;           DOS mode for batch
 ;;;;
 (when t
-  (autoload 'dos-mode "dos" "Edit Dos scripts." t)
-  (add-to-list 'auto-mode-alist '("\\.bat$" . dos-mode)))
+  (require 'bat-mode)
+  (add-to-list 'auto-mode-alist '("\\.bat$" . bat-mode)))
 
 ;;;;
 ;;;;           Dockerfile mode
@@ -1307,6 +1309,15 @@
   
   (setq ecb-primary-secondary-mouse-buttons (quote mouse-1--C-mouse-1))
   (setq ecb-use-speedbar-instead-native-tree-buffer nil)
+
+  (defun ecb-toggle-windows ()
+    "toggle ecb-activaty"
+    (interactive)
+    (ecb-toggle-ecb-windows)
+    )
+  
+  (global-set-key (kbd "M-SPC") 'ecb-toggle-windows)
+  
   )
 
 
@@ -1439,7 +1450,6 @@
 ;;;;---------------------------------------------------------------------------
 ;;;;                     Programming Settings
 ;;;;---------------------------------------------------------------------------
-
 
 ;;;;
 ;;;;               Cedet
@@ -1682,7 +1692,7 @@
  '(haskell-process-type (quote cabal-repl))
  '(package-selected-packages
    (quote
-    (markdown-mode lua-mode ac-octave dark-souls col-highlight better-shell delight diminish osx-browse osx-dictionary zenburn-theme yascroll yafolding xkcd xcscope tabbar-ruler swiper sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 origami on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme magit ido-vertical-mode icicles hlinum helm ghci-completion ghc fold-this fold-dwim flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dos dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
+    (markdown-mode lua-mode ac-octave dark-souls col-highlight better-shell delight diminish osx-browse osx-dictionary zenburn-theme yascroll yafolding xkcd xcscope tabbar-ruler swiper sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 origami on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme ido-vertical-mode icicles hlinum helm ghci-completion ghc fold-this fold-dwim flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
  '(semantic-idle-scheduler-idle-time 0.5)
  '(send-mail-function (quote sendmail-send-it))
  '(tabbar-separator (quote (0.2))))
