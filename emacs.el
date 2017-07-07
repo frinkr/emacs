@@ -581,22 +581,54 @@
   (require 'highlight-symbol)
   (global-set-key [double-mouse-1] 'highlight-symbol)
 ;;  (global-set-key [mouse-1] 'highlight-symbol-remove-all)
+
+  (setq highlight-symbol-color-pairs
+        '(
+          ("white" . "SpringGreen3")
+          ("white" . "MediumPurple1")
+          ("white" . "DarkOrchid4")
+          ("white" . "DeepPink")
+          ("white" . "DarkOrange")
+          ("white" . "OliveDrab4")
+          ("white" . "HotPink1")          
+          ("white" . "IndianRed3")
+          ("white" . "RoyalBlue1")
+          ("white" . "cyan3")
+          ("white" . "RoyalBlue4")
+          ))
   
+  (defun highlight-symbol-next-color-pair ()
+    "Step to and return next color from the color ring."
+    (let ((color (nth highlight-symbol-color-index
+                      highlight-symbol-color-pairs)))
+      (if color ;; wrap
+          (incf highlight-symbol-color-index)
+        (setq highlight-symbol-color-index 1
+              color (car highlight-symbol-color-pairs)))
+      color))
+
   (defun highlight-symbol-add-symbol (symbol &optional color)
     "Override this function for support convenience set foreground and background"
     (unless (highlight-symbol-symbol-highlighted-p symbol)
       (when (equal symbol highlight-symbol)
         (highlight-symbol-mode-remove-temp))
-      (setq color `((background-color . ,"sea green")
-                    (foreground-color . ,"white")
-                    ))
+      (let ((color (or color (highlight-symbol-next-color-pair)))
+            f-color b-color)
+        (unless (facep color)
+          (if (consp color)
+              (setq f-color (car color)
+                    b-color (cdr color))
+            (setq f-color highlight-symbol-foreground-color
+                  b-color color))
+          (setq color `((background-color . ,b-color)
+                        (foreground-color . ,f-color))))
+        ;; (highlight-symbol-remove-all) ;; remove others
+        ;; highlight
+        (highlight-symbol-add-symbol-with-face symbol color)
+        ;;(push symbol highlight-symbol-list)
+        )))
 
-      (highlight-symbol-remove-all) ;; remove others
-      
-      (highlight-symbol-add-symbol-with-face symbol color)
-      ))
-  
-;;  (require 'highlight-thing)
+  ;;  (require 'highlight-thing)
 ;;  (global-highlight-thing-mode)
 ;;  (setq highlight-thing-delay-seconds 0.2)
   )
@@ -1721,7 +1753,7 @@
  '(haskell-process-type (quote cabal-repl))
  '(package-selected-packages
    (quote
-    (highlight-thing rainbow-delimiters highlight-symbol markdown-mode lua-mode ac-octave dark-souls col-highlight better-shell delight diminish osx-browse osx-dictionary zenburn-theme yascroll yafolding xkcd xcscope tabbar-ruler swiper sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 origami on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme ido-vertical-mode icicles hlinum helm ghci-completion ghc fold-this fold-dwim flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
+    (rainbow-mode highlight-thing rainbow-delimiters highlight-symbol markdown-mode lua-mode ac-octave dark-souls col-highlight better-shell delight diminish osx-browse osx-dictionary zenburn-theme yascroll yafolding xkcd xcscope tabbar-ruler swiper sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 origami on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme ido-vertical-mode icicles hlinum helm ghci-completion ghc fold-this fold-dwim flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
  '(semantic-idle-scheduler-idle-time 0.5)
  '(send-mail-function (quote sendmail-send-it))
  '(tabbar-separator (quote (0.2))))
@@ -1729,3 +1761,9 @@
 ;; Add final message so using C-h l I can see if .emacs failed
 (message ".emacs loaded successfully.")
 
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
