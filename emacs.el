@@ -306,7 +306,13 @@
 ;;  (smooth-scroll-mode t)
 
   (require 'smooth-scrolling)
-  (setq mouse-wheel-progressive-speed nil) ;; make the scrolling slower
+  (when t
+    (setq mouse-wheel-progressive-speed nil) ;; make the scrolling slower
+    (setq mouse-wheel-scroll-amount '(3 ((shift) . 3))) ;; 3 lines at a time
+    (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+    (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+    (setq scroll-step 3) ;; keyboard scroll 3 lines at a time
+    )
   )
 
 
@@ -355,7 +361,7 @@
                 ;; keep eshell and shell
                 (cl-remove-if '(lambda (x) (member (buffer-local-value 'major-mode x)
                                                    '(eshell-mode shell-mode)))
-                               (buffer-list))))
+                               (buffer-list)))))
 
 (global-set-key (kbd "C-x j") 'kill-other-buffers)
 
