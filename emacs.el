@@ -1,10 +1,9 @@
 ;;;;               
 ;;;;                Global configs
 ;;;;
-(setq x_default_root "/Users/frinkr/Desktop")
-(setq x_lisp_root "/Users/frinkr/.emacs.d/lisp")
-(setq x_proj_root "/Data/P4/daji_dev_mac_dp121")
-
+(setq is-macos (eq system-type 'darwin))
+(setq is-windows (eq system-type 'windows-nt))
+(setq user-lisp-root (expand-file-name "~/.emacs.d/lisp"))
 
 ;;;;
 ;;;;           proxy
@@ -109,13 +108,12 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(when (eq system-type 'windows-nt)
+(when is-windows
   (add-to-list 'load-path "C:/emacs-23.3/lisp/emacs-lisp")
 )
 
 ;; some package (gud.el) managed manually
-(add-to-list 'load-path x_lisp_root)
-(setq default-directory x_default_root)
+(add-to-list 'load-path user-lisp-root)
 
 
 
@@ -204,7 +202,7 @@
 ;;;;
 (defun set-frame-size-according-to-resolution ()
   (interactive)
-  (if window-system
+  (if is-windows
   (progn
     ;; use 120 char wide window for largeish displays
     ;; and smaller 80 column windows for smaller displays
@@ -251,7 +249,7 @@
 (global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
 (global-set-key (kbd "C-4") 'p4-edit)
 
-(when (eq system-type 'windows-nt)
+(when is-windows
   (define-key global-map [f1] 'help-command)
   (define-key global-map [f2] 'undo)
   (define-key global-map [f3] 'isearch-forward)
@@ -373,7 +371,7 @@
       (message (format "buffer %s not exists!" name))
       )))
 
-(if (eq system-type 'windows-nt)
+(if is-windows
     (define-key global-map "\M-`" (lambda() (interactive) (toggle-shell-buffer "*shell*")))
     (define-key global-map "\M-`" (lambda() (interactive) (toggle-shell-buffer "*eshell*"))))
 
@@ -518,13 +516,13 @@
         (shell-command-to-string "$SHELL -l -c 'echo $PATH'"))))
     (setenv "PATH" path-from-shell)
     (setq exec-path (split-string path-from-shell path-separator))))
-(when (equal system-type 'darwin) (set-exec-path-from-shell-PATH))
+(when is-macos
+  (set-exec-path-from-shell-PATH))
 
 
 ;;;;
 ;;;;           emacs prompt for eshell
 ;;;;
-;;(if (eq system-type 'darwin)
 (setq eshell-prompt-function
       (lambda ()
         (concat (getenv "USER") "@"
@@ -974,8 +972,8 @@
 ;;;;
 (when nil
   (when (display-graphic-p) 
-    (add-to-list 'load-path (concat x_lisp_root "elscreen-1.4.6"))
-    (add-to-list 'load-path (concat x_lisp_root "apel-10.8"))
+    (add-to-list 'load-path (concat user-lisp-root "elscreen-1.4.6"))
+    (add-to-list 'load-path (concat user-lisp-root "apel-10.8"))
     ;;(load "elscreen" "ElScreen" t)
     (global-set-key (kbd "C-. C-c") 'elscreen-create)
     (global-set-key (kbd "C-. C-k") 'elscreen-kill-screen-and-buffers)
@@ -1026,7 +1024,7 @@
   
   ;; `cabal install ghc-mod` first
   (require 'haskell-mode)
-  (add-to-list 'Info-default-directory-list (concat x_lisp_root "haskell-mode"))
+  (add-to-list 'Info-default-directory-list (concat user-lisp-root "haskell-mode"))
   (autoload 'ghc-init "ghc" nil t)
   (autoload 'ghc-debug "ghc" nil t)
   (add-hook 'haskell-mode-hook (lambda () (ghc-init)))
@@ -1158,7 +1156,7 @@
     )
 
   ;; NTEmacs
-  (when (eq system-type 'windows-nt)
+  (when is-windows
     (setenv "PATH" (concat "C:/cygwin/bin;" (getenv "PATH")))
     (setq exec-path (cons "C:/cygwin/bin/" exec-path))
 
@@ -1248,7 +1246,7 @@
 ;;;;
 (when nil
   (when (display-graphic-p)
-    (load-file (concat x_lisp_root "sr-speedbar.el"))
+    (load-file (concat user-lisp-root "sr-speedbar.el"))
     (require 'sr-speedbar)
 
     ;; Setup speedbar, an additional frame for viewing source files
@@ -1352,7 +1350,7 @@
 ;;;;
 ;;;;           ecb
 ;;;;
-(when (eq system-type 'darwin)
+(when is-macos
   ;; error when byte-compiling from melpa, nerver mind. It can just run
 
   (require 'ecb)
@@ -1419,14 +1417,14 @@
     ;; Font stuff for emacs versions that support it
     ;;  (this stuff seems to be the least portable, comment this stuff out if it
     ;;   prevents the config file from loading)
-    (when (eq system-type 'darwin)
+    (when is-macos
       (set-face-attribute 'default nil :font "Menlo 12")   
       (add-to-list 'default-frame-alist '(font . "Menlo 13"))
       ;; fix gap at top when maximized
       (setq frame-resize-pixelwise t)
       )
 
-    (when (eq system-type 'windows-nt)
+    (when is-windows
       (add-to-list 'default-frame-alist '(font . "Consolas 11"))
       (set-face-attribute 'default nil :font "Consolas 11"))
     )
@@ -1593,7 +1591,7 @@
 ;;;;
 ;;;;           gdb many window
 ;;;;
-(when (eq system-type 'darwin)
+(when is-macos
   (load-library "gud.el"))
 
 
@@ -1756,7 +1754,7 @@
  '(custom-enabled-themes (quote (solarized-dark)))
  '(custom-safe-themes t)
  '(ecb-layout-window-sizes nil)
- '(ecb-options-version "2.40")
+ '(ecb-options-version "2.50")
  '(grep-command "grep -nH -i -e")
  '(haskell-interactive-mode-hide-multi-line-errors nil)
  '(haskell-process-log t)
