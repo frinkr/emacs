@@ -306,6 +306,7 @@
 ;;  (smooth-scroll-mode t)
 
   (require 'smooth-scrolling)
+  (setq mouse-wheel-progressive-speed nil) ;; make the scrolling slower
   )
 
 
