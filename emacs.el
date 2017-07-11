@@ -348,13 +348,14 @@
 ;;;;           kill all other buffers but current one
 ;;;;
 (defun kill-other-buffers ()
-    "Kill all other buffers."
+    "Kill all other buffers, but eshell and shell."
     (interactive)
     (mapc 'kill-buffer 
-          (delq (current-buffer) 
-                (cl-remove-if-not '(lambda (x) (or (buffer-file-name x)
-                                                (eq 'dired-mode (buffer-local-value 'major-mode x))))
-                               (buffer-list)))))
+          (delq (current-buffer)
+                ;; keep eshell and shell
+                (cl-remove-if '(lambda (x) (member (buffer-local-value 'major-mode x)
+                                                   '(eshell-mode shell-mode)))
+                               (buffer-list))))
 
 (global-set-key (kbd "C-x j") 'kill-other-buffers)
 
