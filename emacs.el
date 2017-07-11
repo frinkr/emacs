@@ -313,6 +313,16 @@
     (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
     (setq scroll-step 3) ;; keyboard scroll 3 lines at a time
     )
+
+  
+  ;; yascroll
+  (when t
+    (require 'yascroll)
+    (global-yascroll-bar-mode 1)
+    (setq yascroll:delay-to-hide nil)
+    
+    (scroll-bar-mode -1)
+    )
   )
 
 
@@ -553,16 +563,6 @@
     (require 'mouse3)))
 
 
-;;;;
-;;;;           yascroll
-;;;;
-(when nil
-  (require 'yascroll)
-  (global-yascroll-bar-mode 1)
-  (setq yascroll:delay-to-hide nil)
-  
-  (scroll-bar-mode -1)
-  )
 
 
 ;;;;
