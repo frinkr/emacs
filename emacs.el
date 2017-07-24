@@ -778,8 +778,7 @@
   (global-set-key (kbd "C-{") 'tabbar-backward)
   (global-set-key (kbd "C-}") 'tabbar-forward)
   (global-set-key (kbd "C-t") 'new-scratch)
-  ;;(global-set-key (kbd "C-M-[") 'tabbar-backward)
-  ;;(global-set-key (kbd "C-M-]") 'tabbar-forward)
+
   (setq tabbar-buffer-groups-function
         (lambda ()
           (list "All Buffers")))
@@ -817,6 +816,7 @@
   (add-hook 'first-change-hook 'ztl-on-buffer-modification)
 
   (setq tabbar-use-images nil)
+  (setq tabbar-separator (quote (0.2)))
   )
 
 
@@ -1429,8 +1429,8 @@
           )
       (progn
         (menu-bar-mode -1)
-        (set-face-background 'hl-line "color-235")
-        (set-face-attribute 'region nil :background "color-19")        
+;;        (set-face-background 'hl-line "color-235")
+;;        (set-face-attribute 'region nil :background "color-19")        
         )
       )
     )
@@ -1459,94 +1459,65 @@
 
 
   (load-theme 'dracula t)
-;;  (load-theme 'solarized-dark t)
-  
-  ;; tabbar face
-  (when enable-tabbar
-    (when (not (display-graphic-p))
-      (set-face-attribute
-       'tabbar-default nil
-       :background "gray20"
-       :foreground "gray40"
-       :underline nil
-       :box '(:line-width 1 :color "gray20" :style nil))
-      (set-face-attribute
-       'tabbar-unselected nil
-       :background "gray20"
-       :foreground "gray60"
-       :box '(:line-width 1 :color "gray30" :style nil))
-      (set-face-attribute
-       'tabbar-selected nil
-       :background "color-18"
-       :foreground "brightwhite"
-       :underline t
-       :box '(:line-width 1 :color "gray75" :style nil))
-      (set-face-attribute
-       'tabbar-highlight nil
-       :background "white"
-       :foreground "black"
-       :underline nil
-       :box '(:line-width 5 :color "white" :style nil))
-      (set-face-attribute
-       'tabbar-button nil
-       :box '(:line-width 1 :color "gray20" :style nil))
-      (set-face-attribute
-       'tabbar-separator nil
-       :background "gray20"
-       :height 0.6)
+  (load-theme 'solarized-light t)
 
-      ;; Change padding of the tabs
-      ;; we also need to set separator to avoid overlapping tabs by highlighted tabs
-      (custom-set-variables
-       '(tabbar-separator (quote (0.5))))
-      )
+  (when t
+    (set-face-attribute
+     'tabbar-default nil
+     :inherit 'default
+     ;;:foreground (face-attribute 'font-lock-builtin-face :foreground)
+     :background (face-attribute 'hl-line :background)
+     :underline nil
+     :box nil)
 
-    (when (display-graphic-p)
-      (defvar tabbar-fg              "#DCDCCC")
-      (defvar tabbar-bg              "#073642")    
-      (defvar tabbar-bg-selected     "#002b36")
-      (defvar tabbar-bg-hightlight   "#eee8d5")
-      
-      (set-face-attribute
-       'tabbar-default nil
-       :background tabbar-bg
-       :foreground tabbar-fg
-       :family "Courier"
-       :height 2
-       :underline nil
-       :box nil
-       )
-      (set-face-attribute
-       'tabbar-unselected nil
-       :foreground tabbar-fg
-       :background tabbar-bg
-       :box nil
-       )
-      (set-face-attribute
-       'tabbar-selected nil
-       :foreground "green"
-       :background tabbar-bg-selected
-       :box '(:line-width -1 :style pressed-button))
-      (set-face-attribute
-       'tabbar-highlight nil
-       :background tabbar-bg-hightlight
-       :foreground "black"
-       :underline nil
-       :box '(:line-width 3 :color "#eee8d5" :style nil))
-      (set-face-attribute
-       'tabbar-button nil
-       :foreground tabbar-fg
-       :background tabbar-bg
-       :box nil)
-      (set-face-attribute
-       'tabbar-separator nil
-       :background tabbar-bg
-       :height 0.6)    
-      (custom-set-variables
-       '(tabbar-separator (quote (0.2))))
-      )
+    (set-face-attribute
+     'tabbar-unselected nil
+     :inherit 'tabbar-default
+     :box '(:line-width 1 :style released-button)
+     )
+
+    (set-face-attribute
+     'tabbar-modified nil
+     :inherit 'tabbar-default
+     :weight 'bold
+     :slant 'italic)
+
+    (set-face-attribute
+     'tabbar-selected nil
+     :inherit 'tabbar-default
+     :foreground (face-attribute 'font-lock-keyword-face :foreground)
+     :background (face-attribute 'font-lock-keyword-face :background)
+     :weight 'bold
+     :height 110
+     :slant 'italic
+     :box '(:line-width 1 :style pressed-button))
+    
+    (set-face-attribute
+     'tabbar-selected-modified nil
+     :inherit 'tabbar-default
+     :slant 'italic
+     :weight 'bold
+     :height 110
+     :box '(:line-width 1 :style pressed-button))
+        
+    (set-face-attribute
+     'tabbar-highlight nil
+     :inherit 'highlight
+     :underline nil
+     :box '(:line-width 1 :style nil))
+
+    (set-face-attribute
+     'tabbar-button nil
+     :inherit 'tabbar-default
+     :box '(:line-width 1 :style released-button)
+     )
+    
+    (set-face-attribute
+     'tabbar-separator nil
+     :inherit 'default)
     )
   )
+
 
 
 ;;;;---------------------------------------------------------------------------
@@ -1779,33 +1750,8 @@
 ;;;;                     More variable settings
 ;;;;---------------------------------------------------------------------------
 
-;;(setq custom-file "~/.emacs.d/package-selected-packages.el")
-;;(load custom-file)
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ecb-layout-window-sizes nil)
- '(ecb-options-version "2.50")
- '(grep-command "grep -nH -i -e")
- '(haskell-interactive-mode-hide-multi-line-errors nil)
- '(haskell-process-log t)
- '(haskell-process-type (quote cabal-repl))
- '(package-selected-packages
-   (quote
-    (dracula-theme bison-mode rainbow-mode highlight-thing rainbow-delimiters highlight-symbol markdown-mode lua-mode ac-octave dark-souls col-highlight better-shell delight diminish osx-browse osx-dictionary zenburn-theme yascroll yafolding xkcd xcscope tabbar-ruler swiper sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 origami on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme ido-vertical-mode icicles hlinum helm ghci-completion ghc fold-this fold-dwim flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
- '(semantic-idle-scheduler-idle-time 0.5)
- '(send-mail-function (quote sendmail-send-it))
- '(tabbar-separator (quote (0.2))))
+(setq custom-file "~/.emacs.d/package-selected-packages.el")
+(load custom-file)
 
 ;; Add final message so using C-h l I can see if .emacs failed
 (message ".emacs loaded successfully.")
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
