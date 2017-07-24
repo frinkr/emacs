@@ -3,6 +3,7 @@
 ;;;;
 (setq is-macos (eq system-type 'darwin))
 (setq is-windows (eq system-type 'windows-nt))
+(setq is-wsl (eq system-type 'gnu/linux))  ;; windows subsystem for linux
 (setq user-lisp-root (expand-file-name "~/.emacs.d/lisp"))
 
 ;;;;
@@ -904,8 +905,8 @@
 
       (define-key global-map [(meta m)] 'set-mark-command)
       (global-set-key (kbd "<mouse-2>") (lambda () (interactive) (kill-buffer (current-buffer))))
-      (global-set-key (kbd "<mouse-3>") 'tabbar-forward)
-      (global-set-key (kbd "<mouse-5>") 'tabbar-backward)
+;;      (global-set-key (kbd "<mouse-3>") 'tabbar-forward)
+;;      (global-set-key (kbd "<mouse-5>") 'tabbar-backward)
 
       map)
     "fast-nav-mode keymap.")
@@ -1447,7 +1448,13 @@
     (when is-windows
       (add-to-list 'default-frame-alist '(font . "Consolas 11"))
       (set-face-attribute 'default nil :font "Consolas 11"))
-    )
+
+    (when is-wsl
+      (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-14"))
+      (set-face-attribute 'default nil :font "DejaVu Sans Mono-14"))
+    )  
+
+
 
   ;; tabbar face
   (when t
@@ -1499,6 +1506,7 @@
        'tabbar-default nil
        :background tabbar-bg
        :foreground tabbar-fg
+       :family "Courier"
        :height 2
        :underline nil
        :box nil
