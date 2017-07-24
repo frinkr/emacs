@@ -33,6 +33,7 @@
                        auto-complete
                        auto-virtualenv
                        bm
+                       bison-mode
                        cygwin-mount
                        cmake-font-lock
                        cmake-mode
@@ -316,7 +317,7 @@
 
   
   ;; yascroll
-  (when t
+  (when nil
     (require 'yascroll)
     (global-yascroll-bar-mode 1)
     (setq yascroll:delay-to-hide nil)
@@ -967,6 +968,15 @@
 
 
 ;;;;
+;;;;           yacc and lex
+;;;;
+(when t
+  (require 'bison-mode)
+  (add-to-list 'auto-mode-alist '("\\.lm\\'" . bison-mode))
+  (add-to-list 'auto-mode-alist '("\\.ym\\'" . bison-mode))
+  )
+
+;;;;
 ;;;;           ansi color
 ;;;;
 (when t
@@ -1405,7 +1415,8 @@
   (when t ;; basic
     (if (display-graphic-p)
         (progn
-          (setq default-cursor-type 'box)
+          (setq default-cursor-type '(bar . 2))
+          (setq cursor-in-non-selected-windows 'hollow)
           ;;(set-face-background hl-line-face "gray13")
           ;;(set-cursor-color "red")
           ;;(set-face-foreground 'minibuffer-prompt "yellow")
@@ -1426,8 +1437,9 @@
     ;;  (this stuff seems to be the least portable, comment this stuff out if it
     ;;   prevents the config file from loading)
     (when is-macos
-      (set-face-attribute 'default nil :font "Menlo 12")   
-      (add-to-list 'default-frame-alist '(font . "Menlo 13"))
+      ;;(set-face-attribute 'default nil :font "Menlo 12")
+      (set-face-attribute 'default nil :font "Anonymous Pro-14")
+      (add-to-list 'default-frame-alist '(font . "Anonymous Pro-14"))
       ;; fix gap at top when maximized
       (setq frame-resize-pixelwise t)
       )
@@ -1769,7 +1781,7 @@
  '(haskell-process-type (quote cabal-repl))
  '(package-selected-packages
    (quote
-    (rainbow-mode highlight-thing rainbow-delimiters highlight-symbol markdown-mode lua-mode ac-octave dark-souls col-highlight better-shell delight diminish osx-browse osx-dictionary zenburn-theme yascroll yafolding xkcd xcscope tabbar-ruler swiper sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 origami on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme ido-vertical-mode icicles hlinum helm ghci-completion ghc fold-this fold-dwim flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
+    (bison-mode rainbow-mode highlight-thing rainbow-delimiters highlight-symbol markdown-mode lua-mode ac-octave dark-souls col-highlight better-shell delight diminish osx-browse osx-dictionary zenburn-theme yascroll yafolding xkcd xcscope tabbar-ruler swiper sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 origami on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme ido-vertical-mode icicles hlinum helm ghci-completion ghc fold-this fold-dwim flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
  '(semantic-idle-scheduler-idle-time 0.5)
  '(send-mail-function (quote sendmail-send-it))
  '(tabbar-separator (quote (0.2))))
