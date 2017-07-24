@@ -1459,7 +1459,7 @@
 
 
   (load-theme 'dracula t)
-  (load-theme 'solarized-light t)
+  ;;(load-theme 'solarized-light t)
 
   (when t
     (set-face-attribute
@@ -1468,12 +1468,12 @@
      ;;:foreground (face-attribute 'font-lock-builtin-face :foreground)
      :background (face-attribute 'hl-line :background)
      :underline nil
-     :box nil)
+     :box '(:line-width 1 :style released-button))
+
 
     (set-face-attribute
      'tabbar-unselected nil
      :inherit 'tabbar-default
-     :box '(:line-width 1 :style released-button)
      )
 
     (set-face-attribute
@@ -1490,7 +1490,7 @@
      :weight 'bold
      :height 110
      :slant 'italic
-     :box '(:line-width 1 :style pressed-button))
+     :box '(:style pressed-button))
     
     (set-face-attribute
      'tabbar-selected-modified nil
@@ -1498,19 +1498,17 @@
      :slant 'italic
      :weight 'bold
      :height 110
-     :box '(:line-width 1 :style pressed-button))
+     :box '(:style pressed-button))
         
     (set-face-attribute
      'tabbar-highlight nil
      :inherit 'highlight
-     :underline nil
-     :box '(:line-width 1 :style nil))
+     :underline nil)
+
 
     (set-face-attribute
      'tabbar-button nil
-     :inherit 'tabbar-default
-     :box '(:line-width 1 :style released-button)
-     )
+     :inherit 'tabbar-default)
     
     (set-face-attribute
      'tabbar-separator nil
