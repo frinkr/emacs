@@ -95,6 +95,7 @@
                        monokai-theme
                        moe-theme
                        material-theme
+                       dracula-theme
                        )
         )
 
@@ -765,7 +766,9 @@
 ;;;;
 ;;;;           tabbar
 ;;;;
-(when t
+(setq enable-tabbar t)
+
+(when enable-tabbar
   (require 'tabbar)
   (tabbar-mode 1)
   
@@ -1455,9 +1458,11 @@
     )  
 
 
-
+  (load-theme 'dracula t)
+;;  (load-theme 'solarized-dark t)
+  
   ;; tabbar face
-  (when t
+  (when enable-tabbar
     (when (not (display-graphic-p))
       (set-face-attribute
        'tabbar-default nil
@@ -1774,13 +1779,14 @@
 ;;;;                     More variable settings
 ;;;;---------------------------------------------------------------------------
 
+;;(setq custom-file "~/.emacs.d/package-selected-packages.el")
+;;(load custom-file)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes (quote (solarized-dark)))
- '(custom-safe-themes t)
  '(ecb-layout-window-sizes nil)
  '(ecb-options-version "2.50")
  '(grep-command "grep -nH -i -e")
@@ -1789,7 +1795,7 @@
  '(haskell-process-type (quote cabal-repl))
  '(package-selected-packages
    (quote
-    (bison-mode rainbow-mode highlight-thing rainbow-delimiters highlight-symbol markdown-mode lua-mode ac-octave dark-souls col-highlight better-shell delight diminish osx-browse osx-dictionary zenburn-theme yascroll yafolding xkcd xcscope tabbar-ruler swiper sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 origami on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme ido-vertical-mode icicles hlinum helm ghci-completion ghc fold-this fold-dwim flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
+    (dracula-theme bison-mode rainbow-mode highlight-thing rainbow-delimiters highlight-symbol markdown-mode lua-mode ac-octave dark-souls col-highlight better-shell delight diminish osx-browse osx-dictionary zenburn-theme yascroll yafolding xkcd xcscope tabbar-ruler swiper sublimity sublime-themes sr-speedbar solarized-theme smooth-scrolling smooth-scroll py-autopep8 pos-tip phi-rectangle p4 origami on-screen nyan-prompt nyan-mode neotree mouse3 monokai-theme moe-theme minimap minesweeper material-theme ido-vertical-mode icicles hlinum helm ghci-completion ghc fold-this fold-dwim flycheck-irony flycheck-haskell flycheck-ghcmod fill-column-indicator elpy ecb dtrace-script-mode drag-stuff dockerfile-mode direx dired-single dired-rainbow dired-k dired-details+ dired+ cygwin-mount cmake-font-lock clang-format bm auto-virtualenv auto-complete alect-themes 2048-game)))
  '(semantic-idle-scheduler-idle-time 0.5)
  '(send-mail-function (quote sendmail-send-it))
  '(tabbar-separator (quote (0.2))))
