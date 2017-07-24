@@ -1454,11 +1454,10 @@
     (set-face-attribute
      'tabbar-default nil
      :inherit 'default
-     ;;:foreground (face-attribute 'font-lock-builtin-face :foreground)
-     :background (face-attribute 'hl-line :background)
+     :foreground (face-attribute 'mode-line :foreground)
+     :background (face-attribute 'mode-line :background)
      :underline nil
      :box '(:line-width 1 :style released-button))
-
 
     (set-face-attribute
      'tabbar-unselected nil
