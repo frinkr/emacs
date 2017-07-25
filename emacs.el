@@ -329,7 +329,9 @@
 ;;;;           bookmark
 ;;;;
 (when t
-  (defun line-at-click ()
+  (require 'bm)
+  
+  (defun bm-get-line-at-click ()
     (save-excursion
       (let ((click-y (cdr (cdr (mouse-position))))
             (line-move-visual-store line-move-visual))
@@ -342,12 +344,31 @@
 
   (defun bookmark-line-at-click ()
     (interactive)
-    (goto-line (line-at-click))
+    (goto-line (bm-get-line-at-click))
     (bm-toggle)
     )
   
   (global-set-key (kbd "<left-margin> <mouse-1>") 'bookmark-line-at-click)
-  (require 'bm)
+  
+  (setq bm-highlight-style 'bm-highlight-line-and-fringe)
+
+  ;; save and restore
+  (when t
+    (setq bm-repository-file "~/.emacs.d/bm-repository")
+    (setq-default bm-buffer-persistence t)
+    (add-hook' after-init-hook 'bm-repository-load)
+    (add-hook 'find-file-hooks 'bm-buffer-restore)
+    (add-hook 'kill-buffer-hook #'bm-buffer-save)
+
+    (add-hook 'kill-emacs-hook #'(lambda nil
+                                   (bm-buffer-save-all)
+                                   (bm-repository-save)))
+    
+    (add-hook 'after-save-hook #'bm-buffer-save)
+
+    (add-hook 'find-file-hooks   #'bm-buffer-restore)
+    (add-hook 'after-revert-hook #'bm-buffer-restore)
+    )
   )
 
 
