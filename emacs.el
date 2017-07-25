@@ -113,7 +113,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (when is-windows
   (add-to-list 'load-path "C:/emacs-23.3/lisp/emacs-lisp")
-)
+  )
 
 ;; some package (gud.el) managed manually
 (add-to-list 'load-path user-lisp-root)
@@ -189,11 +189,11 @@
 ;;;;           format title bar to show full path of current file
 ;;;;
 (setq-default frame-title-format
-   (list '((buffer-file-name " %f"
-             (dired-directory
-              dired-directory
-              (revert-buffer-function " %b"
-              ("%b - Dir:  " default-directory)))))))
+              (list '((buffer-file-name " %f"
+                                        (dired-directory
+                                         dired-directory
+                                         (revert-buffer-function " %b"
+                                                                 ("%b - Dir:  " default-directory)))))))
 
 
 ;;;;
@@ -202,20 +202,20 @@
 (defun set-frame-size-according-to-resolution ()
   (interactive)
   (if is-windows
-  (progn
-    ;; use 120 char wide window for largeish displays
-    ;; and smaller 80 column windows for smaller displays
-    ;; pick whatever numbers make sense for you
-    (if (> (x-display-pixel-width) 1280)
-           (add-to-list 'default-frame-alist (cons 'width 120))
-           (add-to-list 'default-frame-alist (cons 'width 80)))
-    ;; for the height, subtract a couple hundred pixels
-    ;; from the screen height (for panels, menubars and
-    ;; whatnot), then divide by the height of a char to
-    ;; get the height we want
-    (add-to-list 'default-frame-alist 
-         (cons 'height (/ (- (x-display-pixel-height) 200)
-                             (frame-char-height)))))))
+      (progn
+        ;; use 120 char wide window for largeish displays
+        ;; and smaller 80 column windows for smaller displays
+        ;; pick whatever numbers make sense for you
+        (if (> (x-display-pixel-width) 1280)
+            (add-to-list 'default-frame-alist (cons 'width 120))
+          (add-to-list 'default-frame-alist (cons 'width 80)))
+        ;; for the height, subtract a couple hundred pixels
+        ;; from the screen height (for panels, menubars and
+        ;; whatnot), then divide by the height of a char to
+        ;; get the height we want
+        (add-to-list 'default-frame-alist 
+                     (cons 'height (/ (- (x-display-pixel-height) 200)
+                                      (frame-char-height)))))))
 
 (when (display-graphic-p)
   (set-frame-size-according-to-resolution))
@@ -270,8 +270,8 @@
     (switch-to-buffer (loop for num from 0
                             for name = (format "*scratch-%03i*" num)
                             while (get-buffer name)
-                          finally return name)))
-)
+                            finally return name)))
+  )
 
 ;;;;
 ;;;;          ido
@@ -299,10 +299,10 @@
 ;;;;
 (when t
   (require 'on-screen)
-  (on-screen-global-mode +1)
+  (on-screen-global-mode nil)
 
-;;  (require 'smooth-scroll)
-;;  (smooth-scroll-mode t)
+  ;;  (require 'smooth-scroll)
+  ;;  (smooth-scroll-mode t)
 
   (require 'smooth-scrolling)
   (when t
@@ -315,7 +315,7 @@
 
   
   ;; yascroll
-  (when nil
+  (when t
     (require 'yascroll)
     (global-yascroll-bar-mode 1)
     (setq yascroll:delay-to-hide nil)
@@ -329,7 +329,24 @@
 ;;;;           bookmark
 ;;;;
 (when t
-  (global-set-key (kbd "<left-margin> <mouse-1>") 'bm-toggle)
+  (defun line-at-click ()
+    (save-excursion
+      (let ((click-y (cdr (cdr (mouse-position))))
+            (line-move-visual-store line-move-visual))
+        (setq line-move-visual t)
+        (goto-char (window-start))
+        (next-line (1- click-y))
+        (setq line-move-visual line-move-visual-store)
+        (line-number-at-pos))))
+  
+
+  (defun bookmark-line-at-click ()
+    (interactive)
+    (goto-line (line-at-click))
+    (bm-toggle)
+    )
+  
+  (global-set-key (kbd "<left-margin> <mouse-1>") 'bookmark-line-at-click)
   (require 'bm)
   )
 
@@ -363,14 +380,14 @@
 ;;;;           kill all other buffers but current one
 ;;;;
 (defun kill-other-buffers ()
-    "Kill all other buffers, but eshell and shell."
-    (interactive)
-    (mapc 'kill-buffer 
-          (delq (current-buffer)
-                ;; keep eshell and shell
-                (cl-remove-if '(lambda (x) (member (buffer-local-value 'major-mode x)
-                                                   '(eshell-mode shell-mode)))
-                               (buffer-list)))))
+  "Kill all other buffers, but eshell and shell."
+  (interactive)
+  (mapc 'kill-buffer 
+        (delq (current-buffer)
+              ;; keep eshell and shell
+              (cl-remove-if '(lambda (x) (member (buffer-local-value 'major-mode x)
+                                                 '(eshell-mode shell-mode)))
+                            (buffer-list)))))
 
 (global-set-key (kbd "C-x j") 'kill-other-buffers)
 
@@ -390,7 +407,7 @@
 
 (if is-windows
     (define-key global-map "\M-`" (lambda() (interactive) (toggle-shell-buffer "*shell*")))
-    (define-key global-map "\M-`" (lambda() (interactive) (toggle-shell-buffer "*eshell*"))))
+  (define-key global-map "\M-`" (lambda() (interactive) (toggle-shell-buffer "*eshell*"))))
 
 
 ;;;;
@@ -448,7 +465,7 @@
 (when t
   (require 'reveal-in-osx-finder)
   (defalias 'open-in-finder 'reveal-in-osx-finder)
- )
+  )
 
 
 ;;;;
@@ -473,8 +490,8 @@
     (erase-buffer)
     (eshell-send-input)))
 (add-hook 'eshell-mode-hook
-      '(lambda()
-         (local-set-key (kbd "C-l") 'eshell-clear-buffer)))
+          '(lambda()
+             (local-set-key (kbd "C-l") 'eshell-clear-buffer)))
 
 ;;;;
 ;;;;           kill *Completions* buffer automatically
@@ -529,8 +546,8 @@
 ;;;;
 (defun set-exec-path-from-shell-PATH ()
   (let ((path-from-shell 
-      (replace-regexp-in-string "[[:space:]\n]*$" "" 
-        (shell-command-to-string "$SHELL -l -c 'echo $PATH'"))))
+         (replace-regexp-in-string "[[:space:]\n]*$" "" 
+                                   (shell-command-to-string "$SHELL -l -c 'echo $PATH'"))))
     (setenv "PATH" path-from-shell)
     (setq exec-path (split-string path-from-shell path-separator))))
 (when is-macos
@@ -588,7 +605,7 @@
 (when t
   (require 'highlight-symbol)
   (global-set-key [double-mouse-1] 'highlight-symbol)
-;;  (global-set-key [mouse-1] 'highlight-symbol-remove-all)
+  ;;  (global-set-key [mouse-1] 'highlight-symbol-remove-all)
 
   (setq highlight-symbol-color-pairs
         '(
@@ -637,8 +654,8 @@
         )))
 
   ;;  (require 'highlight-thing)
-;;  (global-highlight-thing-mode)
-;;  (setq highlight-thing-delay-seconds 0.2)
+  ;;  (global-highlight-thing-mode)
+  ;;  (setq highlight-thing-delay-seconds 0.2)
   )
 
 ;;;;
@@ -737,7 +754,7 @@
               (font-lock-mode 1)))
 
   (require 'ac-octave)
-;;  (ac-octave-init)
+  ;;  (ac-octave-init)
   (defun ac-octave-mode-setup ()
     (setq ac-sources '(ac-source-octave)))
   (add-hook 'octave-mode-hook
@@ -897,8 +914,8 @@
 
       (define-key global-map [(meta m)] 'set-mark-command)
       (global-set-key (kbd "<mouse-2>") (lambda () (interactive) (kill-buffer (current-buffer))))
-;;      (global-set-key (kbd "<mouse-3>") 'tabbar-forward)
-;;      (global-set-key (kbd "<mouse-5>") 'tabbar-backward)
+      ;;      (global-set-key (kbd "<mouse-3>") 'tabbar-forward)
+      ;;      (global-set-key (kbd "<mouse-5>") 'tabbar-backward)
 
       map)
     "fast-nav-mode keymap.")
@@ -1061,7 +1078,7 @@
   (custom-set-variables
    '(haskell-interactive-mode-hide-multi-line-errors nil)
    '(haskell-process-log t)
-    '(haskell-process-type (quote cabal-repl)))
+   '(haskell-process-type (quote cabal-repl)))
   )
 
 
@@ -1153,7 +1170,7 @@
         (kill-buffer "*Completions*")))                                                                          
     output)
   (add-hook 'comint-preoutput-filter-functions 'delete-completion-window-buffer))
-  
+
 ;;;;
 ;;;;           cygwin in emacs
 ;;;;
@@ -1418,8 +1435,8 @@
           )
       (progn
         (menu-bar-mode -1)
-;;        (set-face-background 'hl-line "color-235")
-;;        (set-face-attribute 'region nil :background "color-19")        
+        ;;        (set-face-background 'hl-line "color-235")
+        ;;        (set-face-attribute 'region nil :background "color-19")        
         )
       )
     )
@@ -1487,7 +1504,7 @@
      :weight 'bold
      :height 110
      :box '(:style pressed-button))
-        
+    
     (set-face-attribute
      'tabbar-highlight nil
      :inherit 'highlight
@@ -1522,7 +1539,7 @@
   (add-to-list 'semantic-default-submodes 'global-semantic-idle-scheduler-mode)
   (add-to-list 'semantic-default-submodes 'global-semantic-idle-summary-mode)
   ;;(add-to-list 'semantic-default-submodes 'global-semantic-idle-completions-mode) ;; fronzen?
-               
+  
   ;; Activate semantic
   (semantic-mode 1)
   
@@ -1642,7 +1659,7 @@
         (c-tab-always-indent            . t)
         (c-toggle-hungry-state          . t)
         (c-hanging-braces-alist         . ((substatement-open after)
-                                          (brace-list-open)))
+                                           (brace-list-open)))
         (c-offsets-alist                . ((arglist-close . c-lineup-arglist)
                                            (case-label . 4)
                                            (substatement-open . 0)
@@ -1666,7 +1683,7 @@
         (c-tab-always-indent            . t)
         (c-toggle-hungry-state          . t)
         (c-hanging-braces-alist         . ((substatement-open after)
-                                          (brace-list-open)))
+                                           (brace-list-open)))
         (c-offsets-alist                . ((arglist-close . c-lineup-arglist)
                                            (case-label . 4)
                                            (substatement-open . 0)
@@ -1680,7 +1697,7 @@
         (c-cleanup-list                 . (scope-operator
                                            empty-defun-braces
                                            defun-close-semi))))
-        
+
 
 (defun vlad-cc-style()
   ;;(c-set-style "linux")
@@ -1693,7 +1710,7 @@
   ;;(setq c-basic-offset 4)
   ;;(setq tab-width 4)
   ;;(setq indent-tabs-mode nil)
-)
+  )
 
 (add-hook 'c++-mode-hook 'vlad-cc-style)
 
@@ -1738,7 +1755,7 @@
 
 (setq custom-file "~/.emacs.d/package-selected-packages.el")
 (when (file-exists-p custom-file)
-      (load custom-file))
+  (load custom-file))
 
 ;; Add final message so using C-h l I can see if .emacs failed
 (message ".emacs loaded successfully.")
