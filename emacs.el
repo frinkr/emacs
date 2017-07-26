@@ -836,7 +836,7 @@
     (facep face)
     )
 
-  (defun tabbar-install-faces2 (&optional frame)
+  (defun tabbar-install-faces (&optional frame)
     ;; do nothing
     )
 
