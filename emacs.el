@@ -88,6 +88,7 @@
                        xcscope
                        yascroll
                        yaml-mode
+                       
                        ;; top themes
                        zenburn-theme
                        solarized-theme
@@ -96,6 +97,7 @@
                        moe-theme
                        material-theme
                        dracula-theme
+                       afternoon-theme
                        )
         )
 
@@ -1485,45 +1487,54 @@
     )  
 
 
-
-  ;;(load-theme 'solarized-light t)
-
-  (defun frinkr/load-tabbar-theme()
+  (defun frinkr/setup-tabbar-theme()
+    ;; setup the the tabbar-theme, which is not included in most theme
     (set-face-attribute
      'tabbar-default nil
      :inherit 'default
      :foreground (face-attribute 'mode-line :foreground)
      :background (face-attribute 'mode-line :background)
+     :family (face-attribute 'mode-line :family)
+     :height (face-attribute 'mode-line :height)
+     :weight (face-attribute 'mode-line :weight)
      :underline nil
-     :box '(:line-width 1 :style released-button))
+     :box nil
+     )
 
     (set-face-attribute
      'tabbar-unselected nil
      :inherit 'tabbar-default
+     :foreground (face-attribute 'tabbar-default :foreground)
+     :background (face-attribute 'tabbar-default :background)
+     :box '(:style released-button)
      )
 
     (set-face-attribute
      'tabbar-modified nil
      :inherit 'tabbar-default
      :weight 'bold
-     :slant 'italic)
+     :slant 'italic
+     :background (face-attribute 'tabbar-default :background)
+     :box '(:style released-button)
+     )
 
     (set-face-attribute
      'tabbar-selected nil
      :inherit 'tabbar-default
-     :foreground (face-attribute 'font-lock-keyword-face :foreground)
-     :background (face-attribute 'font-lock-keyword-face :background)
+     :foreground (face-attribute 'mode-line-buffer-id :foreground)
+     :background (face-attribute 'mode-line-buffer-id :background)
      :weight 'bold
-     :height 110
+     :height (face-attribute 'tabbar-default :height)
      :slant 'italic
-     :box '(:style pressed-button))
+     :box '(:style pressed-button)
+     )
     
     (set-face-attribute
      'tabbar-selected-modified nil
      :inherit 'tabbar-default
      :slant 'italic
      :weight 'bold
-     :height 110
+     :height (face-attribute 'tabbar-default :height)
      :box '(:style pressed-button))
     
     (set-face-attribute
@@ -1534,11 +1545,20 @@
 
     (set-face-attribute
      'tabbar-button nil
-     :inherit 'tabbar-default)
+     :inherit 'tabbar-default
+     :foreground (face-attribute 'tabbar-default :foreground)
+     :background (face-attribute 'tabbar-default :background)
+     :box '(:line-width 1 :style released-button)
+     )
     
     (set-face-attribute
      'tabbar-separator nil
-     :inherit 'default)
+;;     :inherit 'default
+     :inherit 'tabbar-default
+     :foreground (face-attribute 'tabbar-default :foreground)
+     :background (face-attribute 'tabbar-default :background)
+     :box nil
+     )
     )
 
 
@@ -1548,9 +1568,13 @@
     "Run `after-load-theme-hook'."
     (run-hooks 'after-load-theme-hook))
 
-  (add-hook 'after-load-theme-hook 'frinkr/load-tabbar-theme)
+  (add-hook 'after-load-theme-hook 'frinkr/setup-tabbar-theme)
 
-  (load-theme 'dracula t)
+  ;;(load-theme 'dracula t)
+  ;;(load-theme 'solarized-light t)
+  ;;(load-theme 'monokai t)
+  (load-theme 'gotham t)
+  ;;(load-theme 'afternoon t)
   )
 
 
