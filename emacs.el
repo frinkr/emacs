@@ -186,6 +186,8 @@
 
 ;; Auto close bracket insertion
 (electric-pair-mode 1)
+;; Show matching pairs of parenthess
+(show-paren-mode 1)
 
 ;;;;
 ;;;;           format title bar to show full path of current file
@@ -800,6 +802,17 @@
 (setq enable-tabbar t)
 
 (when enable-tabbar
+
+  (setq tabbar-ruler-global-tabbar t)
+  (setq tabbar-ruler-use-mode-icons nil)  ;; don't use the ungly icons
+  (setq tabbar-ruler-swap-faces t)
+  (require 'tabbar-ruler)
+
+  ;; use my faces
+  (defun tabbar-diff-face-p (face)
+    (facep face)
+    )
+
   (require 'tabbar)
   (tabbar-mode 1)
   
@@ -1491,6 +1504,7 @@
 
   (defun frinkr/setup-tabbar-theme()
     "setup the the tabbar-theme, which is not included in most theme"
+
     (set-face-attribute
      'tabbar-default nil
      :inherit 'default
@@ -1555,14 +1569,22 @@
     
     (set-face-attribute
      'tabbar-separator nil
-;;     :inherit 'default
+     ;;     :inherit 'default
      :inherit 'tabbar-default
      :foreground (face-attribute 'tabbar-default :foreground)
      :background (face-attribute 'tabbar-default :background)
      :box nil
      )
-    )
 
+    (tabbar-install-faces)
+
+    (set-face-attribute
+     'tabbar-selected nil
+     :weight 'bold
+     :box '(:style pressed-button)
+     )
+    
+    )
 
   (defvar after-load-theme-hook nil
     "Hook run after a color theme is loaded using `load-theme'.")
@@ -1571,12 +1593,13 @@
     (run-hooks 'after-load-theme-hook))
 
   (add-hook 'after-load-theme-hook 'frinkr/setup-tabbar-theme)
-
+  
   (load-theme 'dracula t)
   ;;(load-theme 'solarized-light t)
   ;;(load-theme 'monokai t)
   ;;(load-theme 'gotham t)
   ;;(load-theme 'afternoon t)
+  
   )
 
 
