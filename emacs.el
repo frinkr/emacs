@@ -285,7 +285,7 @@
   (setq ido-everywhere t)
   
   (ido-mode t)
-  (ido-vertical-mode 1)
+  (ido-vertical-mode t)
   )
 
 ;;;;
@@ -699,10 +699,12 @@
   (require 'fill-column-indicator)
   (setq fci-rule-width 1)
   (setq fci-rule-column 90)
-  (if (display-graphic-p)
-      (setq fci-rule-color "darkblue")
-    (setq fci-rule-color "green"))
-
+  (when nil
+    (if (display-graphic-p)
+        (setq fci-rule-color "darkblue")
+      (setq fci-rule-color "green"))
+    )
+  
   (add-hook 'after-change-major-mode-hook 'fci-mode)
 
   ;; will disrupt the auto-complte menu, hide the indicator
@@ -829,7 +831,7 @@
     (setq ad-return-value
           (if (and (buffer-modified-p (tabbar-tab-value tab))
                    (buffer-file-name (tabbar-tab-value tab)))
-              (concat " > " (concat ad-return-value " "))
+              (concat " * " (concat ad-return-value " "))
             (concat " " (concat ad-return-value " ")))))
   ;; Called each time the modification state of the buffer changed.
   (defun ztl-modification-state-change ()
@@ -1488,7 +1490,7 @@
 
 
   (defun frinkr/setup-tabbar-theme()
-    ;; setup the the tabbar-theme, which is not included in most theme
+    "setup the the tabbar-theme, which is not included in most theme"
     (set-face-attribute
      'tabbar-default nil
      :inherit 'default
@@ -1570,10 +1572,10 @@
 
   (add-hook 'after-load-theme-hook 'frinkr/setup-tabbar-theme)
 
-  ;;(load-theme 'dracula t)
+  (load-theme 'dracula t)
   ;;(load-theme 'solarized-light t)
   ;;(load-theme 'monokai t)
-  (load-theme 'gotham t)
+  ;;(load-theme 'gotham t)
   ;;(load-theme 'afternoon t)
   )
 
