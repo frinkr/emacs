@@ -33,6 +33,7 @@
                        ac-octave
                        auto-complete
                        auto-virtualenv
+                       beacon
                        bm
                        bison-mode
                        cygwin-mount
@@ -65,6 +66,8 @@
                        hlinum
                        highlight-thing
                        highlight-symbol
+                       highlight-numbers
+                       highlight-tail
                        lua-mode
                        mouse3
                        magit
@@ -184,10 +187,29 @@
 (setq indent-line-function 'insert-tab)
 (setq tab-stop-list (quote (4 8 12 16 20 24 28 32 36 40 44 48 52 56 60 64 68 72 76 80 84 88 92 96 100 104 108 112 116 120)))
 
-;; Auto close bracket insertion
-(electric-pair-mode 1)
-;; Show matching pairs of parenthess
-(show-paren-mode 1)
+;;;;
+;;;;           a few visual tweaks
+;;;;
+(when t
+  ;; Auto close bracket insertion
+  (electric-pair-mode 1)
+  
+  ;; Show matching pairs of parenthess
+  (show-paren-mode 1)
+
+  (beacon-mode t)
+  (setq beacon-blink-when-focused t)
+  (setq beacon-blink-when-window-changes t)
+  (setq beacon-blink-when-window-scrolls t)
+  (setq beacon-blink-when-point-moves-horizontally t)
+  (setq beacon-blink-when-point-moves-vertically t)
+
+  (require 'highlight-parentheses)
+  (global-highlight-parentheses-mode t)
+
+  (require 'highlight-numbers)
+  (add-hook 'prog-mode-hook 'highlight-numbers-mode)
+  )
 
 ;;;;
 ;;;;           format title bar to show full path of current file
@@ -811,6 +833,10 @@
   ;; use my faces
   (defun tabbar-diff-face-p (face)
     (facep face)
+    )
+
+  (defun tabbar-install-faces2 (&optional frame)
+    ;; do nothing
     )
 
   (require 'tabbar)
