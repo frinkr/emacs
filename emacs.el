@@ -1485,10 +1485,10 @@
     )  
 
 
-  (load-theme 'dracula t)
+
   ;;(load-theme 'solarized-light t)
 
-  (when t
+  (defun frinkr/load-tabbar-theme()
     (set-face-attribute
      'tabbar-default nil
      :inherit 'default
@@ -1540,6 +1540,17 @@
      'tabbar-separator nil
      :inherit 'default)
     )
+
+
+  (defvar after-load-theme-hook nil
+    "Hook run after a color theme is loaded using `load-theme'.")
+  (defadvice load-theme (after run-after-load-theme-hook activate)
+    "Run `after-load-theme-hook'."
+    (run-hooks 'after-load-theme-hook))
+
+  (add-hook 'after-load-theme-hook 'frinkr/load-tabbar-theme)
+
+  (load-theme 'dracula t)
   )
 
 
