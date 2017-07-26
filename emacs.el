@@ -1575,11 +1575,11 @@
     (set-face-attribute
      'tabbar-selected nil
      :inherit 'tabbar-default
-     :foreground (face-attribute 'mode-line-buffer-id :foreground)
-     :background (face-attribute 'mode-line-buffer-id :background)
+     :foreground (face-attribute 'font-lock-function-name-face :foreground)
+     :background (face-attribute 'tabbar-default :background)
      :weight 'bold
      :height (face-attribute 'tabbar-default :height)
-     :slant 'italic
+     :slant 'normal
      :box '(:style pressed-button)
      )
     
@@ -1607,7 +1607,6 @@
     
     (set-face-attribute
      'tabbar-separator nil
-     ;;     :inherit 'default
      :inherit 'tabbar-default
      :foreground (face-attribute 'tabbar-default :foreground)
      :background (face-attribute 'tabbar-default :background)
