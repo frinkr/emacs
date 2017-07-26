@@ -1560,7 +1560,18 @@
      :background (face-attribute 'tabbar-default :background)
      :box '(:style released-button)
      )
+    
+    (set-face-attribute
+     'tabbar-unselected-modified nil
+     :inherit 'tabbar-default
+     :weight 'normal
+     :slant 'italic
+     :background (face-attribute 'tabbar-default :background)
+     :foreground (face-attribute 'tabbar-default :foreground)
+     :box '(:style released-button)
+     )
 
+    
     (set-face-attribute
      'tabbar-selected nil
      :inherit 'tabbar-default
