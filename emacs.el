@@ -64,6 +64,7 @@
                        haskell-mode
                        helm
                        hlinum
+                       highlight-parentheses
                        highlight-thing
                        highlight-symbol
                        highlight-numbers
