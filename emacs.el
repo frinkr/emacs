@@ -40,6 +40,7 @@
                        cmake-font-lock
                        cmake-mode
                        clang-format
+                       counsel
                        dash
                        dired+
                        dired-details
@@ -82,6 +83,7 @@
                        pos-tip
                        icicles
                        ido-vertical-mode
+                       ivy
                        on-screen
                        osx-dictionary
                        reveal-in-osx-finder
@@ -154,6 +156,7 @@
 ;; Disable backup and autosave
 (setq backup-inhibited t)
 (setq auto-save-default nil)
+(save-place-mode t)   ;; save cursor position
 
 ;; recent files
 (require 'recentf)
@@ -196,8 +199,11 @@
   (electric-pair-mode 1)
   
   ;; Show matching pairs of parenthess
-  (show-paren-mode 1)
-
+  (show-paren-mode nil)
+  (setq show-paren-when-point-in-periphery t)
+  (setq show-paren-when-point-inside-paren t)
+  (setq show-paren-style 'parenthesis)
+  
   (beacon-mode t)
   (setq beacon-blink-when-focused t)
   (setq beacon-blink-when-window-changes t)
@@ -303,7 +309,7 @@
 ;;;;
 ;;;;          ido
 ;;;;
-(when t
+(when nil
   (require 'ido)
   (require 'ido-vertical-mode)
 
@@ -312,6 +318,42 @@
   (ido-mode t)
   (ido-vertical-mode t)
   )
+
+(when t
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t)
+  (setq enable-recursive-minibuffers t)
+  (global-set-key "\C-s" 'swiper)
+  (global-set-key (kbd "C-c C-r") 'ivy-resume)
+  (global-set-key (kbd "<f6>") 'ivy-resume)
+  (global-set-key (kbd "M-x") 'counsel-M-x)
+  (global-set-key (kbd "C-x C-f") 'counsel-find-file)
+  (global-set-key (kbd "<f1> f") 'counsel-describe-function)
+  (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
+  (global-set-key (kbd "<f1> l") 'counsel-find-library)
+  (global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
+  (global-set-key (kbd "<f2> u") 'counsel-unicode-char)
+  (global-set-key (kbd "C-c g") 'counsel-git)
+  (global-set-key (kbd "C-c j") 'counsel-git-grep)
+  (global-set-key (kbd "C-c k") 'counsel-ag)
+  (global-set-key (kbd "C-x l") 'counsel-locate)
+  (global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
+  (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
+  )
+
+
+;;;;
+;;;;      kill minibuffer
+;;;;
+(when t
+  (defun stop-using-minibuffer ()
+    "kill the minibuffer"
+    (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
+      (abort-recursive-edit)))
+
+  (add-hook 'mouse-leave-buffer-hook 'stop-using-minibuffer)
+  )
+
 
 ;;;;
 ;;;;          ibuffer
@@ -334,10 +376,10 @@
   (require 'smooth-scrolling)
   (when t
     (setq mouse-wheel-progressive-speed nil) ;; make the scrolling slower
-    (setq mouse-wheel-scroll-amount '(3 ((shift) . 3))) ;; 3 lines at a time
+    (setq mouse-wheel-scroll-amount '(5 ((shift) . 5))) ;; 3 lines at a time
     (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
     (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
-    (setq scroll-step 3) ;; keyboard scroll 3 lines at a time
+    (setq scroll-step 5) ;; keyboard scroll 3 lines at a time
     )
 
   
