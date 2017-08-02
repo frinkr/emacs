@@ -199,10 +199,12 @@
   (electric-pair-mode 1)
   
   ;; Show matching pairs of parenthess
-  (show-paren-mode nil)
-  (setq show-paren-when-point-in-periphery t)
-  (setq show-paren-when-point-inside-paren t)
-  (setq show-paren-style 'parenthesis)
+  (when nil
+    (show-paren-mode nil)
+    (setq show-paren-when-point-in-periphery t)
+    (setq show-paren-when-point-inside-paren t)
+    (setq show-paren-style 'parenthesis)
+    )
   
   (beacon-mode t)
   (setq beacon-blink-when-focused t)
@@ -309,7 +311,7 @@
 ;;;;
 ;;;;          ido
 ;;;;
-(when nil
+(when t
   (require 'ido)
   (require 'ido-vertical-mode)
 
@@ -319,7 +321,7 @@
   (ido-vertical-mode t)
   )
 
-(when t
+(when nil
   (ivy-mode 1)
   (setq ivy-use-virtual-buffers t)
   (setq enable-recursive-minibuffers t)
@@ -483,21 +485,75 @@
 
 
 ;;;;
-;;;;           toggle shell buffer
+;;;;           eshell
 ;;;;
-(defun toggle-shell-buffer (name)
-  "Toggle *shell*/*eshell* (`NAME')buffer."
-  (interactive)
-  (if (string-equal name (buffer-name))
-      (previous-buffer)
-    (if (get-buffer name)
-        (switch-to-buffer name)
-      (message (format "buffer %s not exists!" name))
-      )))
 
-(if is-windows
-    (define-key global-map "\M-`" (lambda() (interactive) (toggle-shell-buffer "*shell*")))
-  (define-key global-map "\M-`" (lambda() (interactive) (toggle-shell-buffer "*eshell*"))))
+(when t
+
+  ;; max lines
+  (setq eshell-buffer-maximum-lines 10000)
+  
+  ;;           toggle shell buffer
+  ;;
+  (defun toggle-shell-buffer (name)
+    "Toggle *shell*/*eshell* (`NAME')buffer."
+    (interactive)
+    (if (string-equal name (buffer-name))
+        (previous-buffer)
+      (if (get-buffer name)
+          (switch-to-buffer name)
+        (message (format "buffer %s not exists!" name))
+        )))
+
+  (if is-windows
+      (define-key global-map "\M-`" (lambda() (interactive) (toggle-shell-buffer "*shell*")))
+    (define-key global-map "\M-`" (lambda() (interactive) (toggle-shell-buffer "*eshell*"))))
+
+
+
+  ;;           emacs prompt for eshell
+  ;;
+  (setq eshell-prompt-function
+        (lambda ()
+          (concat (getenv "USER") "@"
+                  (file-name-nondirectory (eshell/pwd))
+                  (if (= (user-uid) 0) " # " " $ "))))
+
+  ;; clear the buffer in eshell
+  (defun eshell/clear ()
+    "clear the eshell buffer."
+    (interactive)
+    (let ((inhibit-read-only t))
+      (erase-buffer)))
+
+
+  
+  ;;           clear *shell* buffer
+  ;;
+  (defun clear-shell ()
+    "Clear eshell."
+    (interactive)
+    (let ((comint-buffer-maximum-size 0))
+      (comint-truncate-buffer)))
+
+  (defun clear-shell-hook ()
+    "Hook of shell mode."
+    (local-set-key "\C-l" 'clear-shell))
+
+  ;;(add-hook 'shell-mode-hook 'clear-shell-hook)
+
+  (defun eshell-clear-buffer ()
+    "Clear terminal."
+    (interactive)
+    (let ((inhibit-read-only t))
+      (erase-buffer)
+      (eshell-send-input)))
+  
+  (add-hook 'eshell-mode-hook
+            '(lambda()
+               (local-set-key (kbd "C-l") 'eshell-clear-buffer)))
+
+  )
 
 
 ;;;;
@@ -559,31 +615,6 @@
 
 
 ;;;;
-;;;;           clear *shell* buffer
-;;;;
-(defun clear-shell ()
-  "Clear eshell."
-  (interactive)
-  (let ((comint-buffer-maximum-size 0))
-    (comint-truncate-buffer)))
-
-(defun clear-shell-hook ()
-  "Hook of shell mode."
-  (local-set-key "\C-l" 'clear-shell))
-
-;;(add-hook 'shell-mode-hook 'clear-shell-hook)
-
-(defun eshell-clear-buffer ()
-  "Clear terminal."
-  (interactive)
-  (let ((inhibit-read-only t))
-    (erase-buffer)
-    (eshell-send-input)))
-(add-hook 'eshell-mode-hook
-          '(lambda()
-             (local-set-key (kbd "C-l") 'eshell-clear-buffer)))
-
-;;;;
 ;;;;           kill *Completions* buffer automatically
 ;;;;
 (defun delete-completion-window-buffer (&optional output)
@@ -642,23 +673,6 @@
     (setq exec-path (split-string path-from-shell path-separator))))
 (when is-macos
   (set-exec-path-from-shell-PATH))
-
-
-;;;;
-;;;;           emacs prompt for eshell
-;;;;
-(setq eshell-prompt-function
-      (lambda ()
-        (concat (getenv "USER") "@"
-                (file-name-nondirectory (eshell/pwd))
-                (if (= (user-uid) 0) " # " " $ "))))
-
-;; clear the buffer in eshell
-(defun eshell/clear ()
-  "clear the eshell buffer."
-  (interactive)
-  (let ((inhibit-read-only t))
-    (erase-buffer)))
 
 
 ;;;; 
