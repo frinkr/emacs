@@ -1304,11 +1304,14 @@
               'comint-watch-for-password-prompt nil t)
     )
 
+  (setq cygwin-root "C:/cygwin/")
+  
   ;; NTEmacs
-  (when is-windows
-    (setenv "PATH" (concat "C:/cygwin/bin;" (getenv "PATH")))
-    (setq exec-path (cons "C:/cygwin/bin/" exec-path))
-
+  (when (and is-windows (file-exists-p cygwin-root))
+    (setq cygwin-mount-cygwin-bin-directory (concat cygwin-root "bin"))
+    (setenv "PATH" (concat (concat cygwin-root "bin;") (getenv "PATH")))
+    (setq exec-path (cons (concat cygwin-root "bin;") exec-path))
+    
     (require 'cygwin-mount)
     (cygwin-mount-activate)
 
@@ -1319,7 +1322,7 @@
               'comint-watch-for-password-prompt nil t)
 
     (when nil
-      (setq explicit-shell-file-name "C:/cygwin/Cygwin_x86_64 vc12.bat")
+      (setq explicit-shell-file-name (concat cygwin-root "Cygwin_x86_64 vc12.bat"))
       ;; For subprocesses invoked via the shell
       ;; (e.g., "shell -c command")
       (setq shell-file-name explicit-shell-file-name)

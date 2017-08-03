@@ -27,7 +27,7 @@ $^9::
     return
 
 $F1::    ; F1
-    ToggleWindow("ahk_class Xming X")
+    ToggleWindow("ahk_class Emacs")
     return
 
 $F2::    ; F2
