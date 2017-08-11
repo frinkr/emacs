@@ -216,6 +216,11 @@
   (require 'highlight-parentheses)
   (global-highlight-parentheses-mode t)
 
+  (set-face-attribute
+   'hl-paren-face nil
+   :slant 'italic
+   )
+  
   (require 'highlight-numbers)
   (add-hook 'prog-mode-hook 'highlight-numbers-mode)
   )
@@ -553,6 +558,13 @@
             '(lambda()
                (local-set-key (kbd "C-l") 'eshell-clear-buffer)))
 
+  )
+
+;;;;
+;;;;          diff
+;;;;
+(when t
+  (setq-default ediff-forward-word-function 'forward-char)
   )
 
 
@@ -1138,6 +1150,8 @@
   (global-flycheck-mode)
   (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++11")))
   (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++11")))
+  (add-hook 'c++-mode-hook (lambda () (flyspell-prog-mode)))
+  
   (add-hook 'flycheck-mode-hook #'flycheck-haskell-setup)
 
   ;;(add-hook 'text-mode-hook 'flyspell-mode)
