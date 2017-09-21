@@ -33,12 +33,14 @@
                        ac-octave
                        auto-complete
                        auto-virtualenv
+                       back-button
                        beacon
                        bm
                        bison-mode
                        cygwin-mount
                        cmake-font-lock
                        cmake-mode
+                       cmake-ide
                        clang-format
                        counsel
                        dash
@@ -55,6 +57,7 @@
                        dtrace-script-mode
                        ecb
                        elpy
+                       engine-mode
                        fill-column-indicator
                        flycheck
                        flycheck-haskell
@@ -87,6 +90,7 @@
                        on-screen
                        osx-dictionary
                        reveal-in-osx-finder
+                       rtags
                        smooth-scroll
                        smooth-scrolling
                        tabbar
@@ -567,6 +571,22 @@
   (setq-default ediff-forward-word-function 'forward-char)
   )
 
+
+;;;;
+;;;;           google
+;;;;
+(when t
+  (require 'engine-mode)
+  (engine-mode t)
+  (defengine google
+    "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s"
+    :keybinding "g")
+
+  (defun google (search)
+    (interactive (list (engine/get-query (symbol-name 'google))))
+    (engine/search-google search)
+    )
+  )
 
 ;;;;
 ;;;;           lua
@@ -1091,6 +1111,23 @@
   (require 'phi-rectangle)
   )
 
+
+;;;;
+;;;;           cmake-ide
+;;;;
+(when nil
+  (require 'rtags)
+  (cmake-ide-setup)
+  (define-key c++-mode-map [C-down-mouse-1] 'rtags-find-symbol-at-point)
+  )
+
+;;;;
+;;;;           back-bottom
+;;;;
+(when t
+  (require 'back-button)
+  (back-button-mode 1)
+  )
 
 ;;;;
 ;;;;           cmake
