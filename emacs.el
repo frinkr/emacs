@@ -98,6 +98,7 @@
                        xcscope
                        yascroll
                        yaml-mode
+                       undo-tree
                        
                        ;; top themes
                        zenburn-theme
@@ -319,6 +320,24 @@
   (global-set-key (kbd "C-t") 'new-scratch)
   (global-set-key (kbd "<header-line> <double-mouse-1>") 'new-scratch)
   )
+
+
+
+;;;;
+;;;;          undo-tree-mode
+;;;;
+(when t
+  
+  (require 'undo-tree)
+  ;; override the function so undo-tree-mode can be
+  ;; force enabled
+  (defun undo-tree-overridden-undo-bindings-p ())
+  (global-undo-tree-mode)
+  
+  (global-set-key (kbd "C-z") 'undo-tree-undo)
+  (global-set-key (kbd "C-S-z") 'undo-tree-redo)
+  )
+
 
 ;;;;
 ;;;;          ido
