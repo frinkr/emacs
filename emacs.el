@@ -315,6 +315,9 @@
                             for name = (format "*scratch-%03i*" num)
                             while (get-buffer name)
                             finally return name)))
+
+  (global-set-key (kbd "C-t") 'new-scratch)
+  (global-set-key (kbd "<header-line> <double-mouse-1>") 'new-scratch)
   )
 
 ;;;;
@@ -936,7 +939,6 @@
     (global-set-key (kbd "M-.") 'tabbar-forward))
   (global-set-key (kbd "C-{") 'tabbar-backward)
   (global-set-key (kbd "C-}") 'tabbar-forward)
-  (global-set-key (kbd "C-t") 'new-scratch)
 
   (setq tabbar-buffer-groups-function
         (lambda ()
