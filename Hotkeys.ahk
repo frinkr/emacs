@@ -31,7 +31,7 @@ $F1::    ; F1
     return
 
 $F2::    ; F2
-    ToggleWindow("ahk_class mintty")
+    ToggleWindow("ahk_class FaTTY")
     return
 
 $F3::    ; F3
