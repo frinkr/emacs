@@ -87,6 +87,7 @@
                        icicles
                        ido-vertical-mode
                        ivy
+                       imenu-anywhere
                        on-screen
                        osx-dictionary
                        reveal-in-osx-finder
@@ -825,6 +826,10 @@
 
   (global-set-key (kbd "C-x m") 'helm-M-x)
   (global-set-key (kbd "C-x C-f") 'helm-find-files)
+  )
+
+(when t
+  (global-set-key (kbd "C-S-l") 'helm-semantic-or-imenu)
   )
 
 ;;;;
