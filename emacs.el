@@ -323,6 +323,18 @@
   )
 
 
+;;;;
+;;;;          todo
+;;;;
+(when t
+  (defun default-todo-list()
+    "open the default todo list"
+    (interactive)
+    (find-file "~/.emacs.d/todo.org")
+    )
+    (global-set-key (kbd "C-S-t") 'default-todo-list)
+  )
+
 
 ;;;;
 ;;;;          undo-tree-mode
