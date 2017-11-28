@@ -1665,24 +1665,29 @@
     )
 
   (when t
+
+    (defun what-face (pos)
+      (interactive "d")
+      (let ((face (or (get-char-property (point) 'read-face-name)
+                      (get-char-property (point) 'face))))
+        (if face (message "Face: %s" face) (message "No face at %d" pos))))
     
     ;; Font stuff for emacs versions that support it
     ;;  (this stuff seems to be the least portable, comment this stuff out if it
     ;;   prevents the config file from loading)
     (when is-macos
       ;;(set-face-attribute 'default nil :font "Menlo 12")
-      (set-face-attribute 'default nil :font "Anonymous Pro-14")
-      (add-to-list 'default-frame-alist '(font . "Anonymous Pro-14"))
+      ;;(set-face-attribute 'default nil :font "Anonymous Pro-14")
+      (set-face-attribute 'default nil :family "Source Code Pro" :weight 'light :height 130)
+      
       ;; fix gap at top when maximized
       (setq frame-resize-pixelwise t)
       )
 
     (when is-windows
-      (add-to-list 'default-frame-alist '(font . "Consolas 11"))
       (set-face-attribute 'default nil :font "Consolas 11"))
 
     (when is-wsl
-      (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-14"))
       (set-face-attribute 'default nil :font "DejaVu Sans Mono-14"))
     )  
 
@@ -1997,6 +2002,18 @@
   )
 (add-hook 'c-mode-common-hook 'lconfig-c-mode)
 
+(defadvice c-lineup-arglist (around my activate)
+  "Improve indentation of continued C++11 lambda function opened as argument."
+  (setq ad-return-value
+        (if (and (equal major-mode 'c++-mode)
+                 (ignore-errors
+                   (save-excursion
+                     (goto-char (c-langelem-pos langelem))
+                     ;; Detect "[...](" or "[...]{". preceded by "," or "(",
+                     ;;   and with unclosed brace.
+                     (looking-at ".*[(,][ \t]*\\[[^]]*\\][ \t]*[({][^}]*$"))))
+            0                           ; no additional indent
+          ad-do-it)))                   ; default behavior
 
 ;; Setup font-lock syntax coloring package
 (autoload 'font-lock-fontify-buffer "font-lock" "Fontify Buffer" t)
