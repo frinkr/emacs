@@ -912,6 +912,11 @@
   
   (global-set-key (kbd "C-x g") 'magit-status)
   (defalias 'magit 'magit-status)
+
+  (define-key magit-mode-map 
+    (kbd "q") 
+    (lambda() (interactive) (magit-mode-bury-buffer t)))
+  
   )
 
 
