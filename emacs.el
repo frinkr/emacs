@@ -123,12 +123,6 @@
 
   )
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(when is-windows
-  (add-to-list 'load-path "C:/emacs-23.3/lisp/emacs-lisp")
-  )
-
 ;; some package (gud.el) managed manually
 (add-to-list 'load-path user-lisp-root)
 
@@ -324,7 +318,7 @@
 
 
 ;;;;
-;;;;          todo
+;;;;          TODO
 ;;;;
 (when t
   (defun default-todo-list()
@@ -332,7 +326,7 @@
     (interactive)
     (find-file "~/.emacs.d/todo.org")
     )
-    (global-set-key (kbd "C-S-t") 'default-todo-list)
+  (global-set-key (kbd "C-S-t") 'default-todo-list)
   )
 
 
@@ -408,6 +402,7 @@
   (global-set-key (kbd "C-x C-b") 'ibuffer)
   (autoload 'ibuffer "ibuffer" "List buffers." t)
   )
+
 
 ;;;;
 ;;;;          scrolling
@@ -599,6 +594,103 @@
 
   )
 
+
+;;;;
+;;;;           cygwin in emacs
+;;;;
+(when t
+  ;; Cgywin Emacs
+  (when (eq system-type 'cygwin)
+    (add-hook 'comint-output-filter-functions
+              'shell-strip-ctrl-m nil t)
+    (add-hook 'comint-output-filter-functions
+              'comint-watch-for-password-prompt nil t)
+    )
+
+  (setq cygwin-root "C:/cygwin/")
+  
+  ;; NTEmacs
+  (when (and is-windows (file-exists-p cygwin-root))
+    (setq cygwin-mount-cygwin-bin-directory (concat cygwin-root "bin"))
+    (setenv "PATH" (concat (concat cygwin-root "bin;") (getenv "PATH")))
+    (setq exec-path (cons (concat cygwin-root "bin;") exec-path))
+    
+    (require 'cygwin-mount)
+    (cygwin-mount-activate)
+
+    ;; Remove the unsightly chars
+    (add-hook 'comint-output-filter-functions
+              'shell-strip-ctrl-m nil t)
+    (add-hook 'comint-output-filter-functions
+              'comint-watch-for-password-prompt nil t)
+
+    (when nil
+      (setq explicit-shell-file-name (concat cygwin-root "Cygwin_x86_64 vc12.bat"))
+      ;; For subprocesses invoked via the shell
+      ;; (e.g., "shell -c command")
+      (setq shell-file-name explicit-shell-file-name)
+      )
+    
+    (when t
+      ;; NT-emacs assumes a Windows shell. Change to bash.
+      (setq shell-file-name "bash")
+      (setenv "SHELL" shell-file-name) 
+      (setq explicit-shell-file-name shell-file-name)
+      )
+
+    (when t
+      ;; Prevent issues with the Windows null device (NUL)
+      ;; when using cygwin find with rgrep.
+      (defadvice grep-compute-defaults (around grep-compute-defaults-advice-null-device)
+        "Use cygwin's /dev/null as the null-device."
+        (let ((null-device "/dev/null"))
+          ad-do-it))
+      (ad-activate 'grep-compute-defaults)
+      )
+    ;;   add more path for emacs (eshell)
+    ;;
+    ;;(when (string-equal system-type "windows-nt")
+    (if nil
+        (setq exec-path 
+              (append exec-path 
+                      '(
+                        "C:/Windows/system32/"
+                        "C:/Windows/"
+                        )
+                      )))
+    ;;           emacs prompt for eshell
+    ;;
+    (setq eshell-prompt-function
+          (lambda ()
+            (concat (getenv "USERNAME") "@"
+                    (file-name-nondirectory (eshell/pwd))
+                    (if (= (user-uid) 0) " # " " $ "))))
+
+    ;; shell-prompt not work for Windows. 
+    ;; We need fix .bashrc for windows (NOT .bash_profile, which is not read
+    ;; by cygwin version of emacs)
+    ;; export PS1="daji% "
+    ;;
+    ;; STARTFGCOLOR='\e[0;35m';
+    ;; STARTBGCOLOR="\e[40m"
+    ;; ENDCOLOR="\e[0m"
+    ;; 
+    ;; if [ "$PS" == "" ] ; then
+    ;;     export PS1="daji\$ "
+    ;;     if [ "$TERM" == "xterm" ] ; then
+    ;;         export PS1="\[$STARTFGCOLOR$STARTBGCOLOR\]daji:\W\$ \[$ENDCOLOR\]"
+    ;;     elif [ "$TERM" == "cygwin" ] ; then
+    ;;         export PS1="\[$STARTFGCOLOR$STARTBGCOLOR\]daji:\W\$ \[$ENDCOLOR\]"
+    ;;     fi
+    ;; fi
+    ;; 
+    ;; if [ "$TERM" == "xterm" ] ; then
+    ;;     PROMPT_COMMAND='echo -ne "\e]0;${HOSTNAME} - ${PWD}\007"'
+    ;; fi
+
+    ))
+
+
 ;;;;
 ;;;;          diff
 ;;;;
@@ -621,39 +713,6 @@
     (interactive (list (engine/get-query (symbol-name 'google))))
     (engine/search-google search)
     )
-  )
-
-;;;;
-;;;;           lua
-;;;;
-(when t
-  (autoload 'lua-mode "lua-mode" "Lua editing mode." t)
-  (add-to-list 'auto-mode-alist '("\\.lua$" . lua-mode))
-  (add-to-list 'interpreter-mode-alist '("lua" . lua-mode))
-  )
-
-;;;;
-;;;;           yaml mode
-;;;;
-(when t
-  (require 'yaml-mode)
-  (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
-  )
-
-
-;;;;
-;;;;
-;;;;
-(when t
-  (require 'markdown-mode)
-  (autoload 'markdown-mode "markdown-mode"
-    "Major mode for editing Markdown files" t)
-  (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
-  (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
-
-  (autoload 'gfm-mode "markdown-mode"
-    "Major mode for editing GitHub Flavored Markdown files" t)
-  (add-to-list 'auto-mode-alist '("README\\.md\\'" . gfm-mode))
   )
 
 ;;;;
@@ -749,9 +808,6 @@
   (when (display-graphic-p)
     (require 'mouse3)))
 
-
-
-
 ;;;;
 ;;;;           neotree
 ;;;;
@@ -830,21 +886,6 @@
   )
 
 ;;;;
-;;;;           helm
-;;;;
-(when nil
-  (require 'helm-config)
-  (global-set-key (kbd "C-x b") 'helm-buffers-list)
-
-  (global-set-key (kbd "C-x m") 'helm-M-x)
-  (global-set-key (kbd "C-x C-f") 'helm-find-files)
-  )
-
-(when t
-  (global-set-key (kbd "C-S-l") 'helm-semantic-or-imenu)
-  )
-
-;;;;
 ;;;;           fill column indicator
 ;;;;
 (when t
@@ -912,40 +953,8 @@
   
   (global-set-key (kbd "C-x g") 'magit-status)
   (defalias 'magit 'magit-status)
-  
   )
 
-
-;;;;
-;;;;           octave
-;;;;
-(when t
-  (setq auto-mode-alist
-        (cons '("\\.m$" . octave-mode) auto-mode-alist))
-
-  (setq inferior-octave-prompt ">> ")
-  
-  (add-hook 'octave-mode-hook
-            (lambda ()
-              (abbrev-mode 1)
-              (auto-fill-mode 1)
-              (font-lock-mode 1)))
-
-  (require 'ac-octave)
-  ;;  (ac-octave-init)
-  (defun ac-octave-mode-setup ()
-    (setq ac-sources '(ac-source-octave)))
-  (add-hook 'octave-mode-hook
-            '(lambda () (ac-octave-mode-setup)))
-
-  (add-hook 'inferior-octave-mode-hook
-            (lambda ()
-              (turn-on-font-lock)
-              (define-key inferior-octave-mode-map [up]
-                'comint-previous-input)
-              (define-key inferior-octave-mode-map [down]
-                'comint-next-input)))
-  )
 
 ;;;;
 ;;;;           tabbar
@@ -1150,16 +1159,6 @@
   (require 'phi-rectangle)
   )
 
-
-;;;;
-;;;;           cmake-ide
-;;;;
-(when nil
-  (require 'rtags)
-  (cmake-ide-setup)
-  (define-key c++-mode-map [C-down-mouse-1] 'rtags-find-symbol-at-point)
-  )
-
 ;;;;
 ;;;;           back-bottom
 ;;;;
@@ -1169,476 +1168,11 @@
   )
 
 ;;;;
-;;;;           cmake
-;;;;
-;; Add cmake listfile names to the mode list.
-(when t
-  (setq auto-mode-alist
-        (append
-         '(("CMakeLists\\.txt\\'" . cmake-mode))
-         '(("\\.cmake\\'" . cmake-mode))
-         '(("CMakeCache\\.txt\\'" . cmake-mode))
-         auto-mode-alist))
-  
-  (autoload 'cmake-mode "cmake-mode" nil t)
-  (autoload 'cmake-font-lock-activate "cmake-font-lock" nil t)
-  (add-hook 'cmake-mode-hook 'cmake-font-lock-activate)
-  )
-
-
-;;;;
-;;;;           yacc and lex
-;;;;
-(when t
-  (require 'bison-mode)
-  (add-to-list 'auto-mode-alist '("\\.lm\\'" . bison-mode))
-  (add-to-list 'auto-mode-alist '("\\.ym\\'" . bison-mode))
-  )
-
-;;;;
 ;;;;           ansi color
 ;;;;
 (when t
   (autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
   (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-  )
-
-
-;;;;
-;;;;           elscreen
-;;;;
-(when nil
-  (when (display-graphic-p) 
-    (add-to-list 'load-path (concat user-lisp-root "elscreen-1.4.6"))
-    (add-to-list 'load-path (concat user-lisp-root "apel-10.8"))
-    ;;(load "elscreen" "ElScreen" t)
-    (global-set-key (kbd "C-. C-c") 'elscreen-create)
-    (global-set-key (kbd "C-. C-k") 'elscreen-kill-screen-and-buffers)
-    (global-set-key (kbd "C-. C-p") 'elscreen-previous)
-    (global-set-key (kbd "C-. C-n") 'elscreen-next))
-  )
-
-
-;;;;
-;;;;           Flycheck
-;;;;
-(when t
-  (global-flycheck-mode)
-  (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++11")))
-  (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++11")))
-  (add-hook 'c++-mode-hook (lambda () (flyspell-prog-mode)))
-  
-  (add-hook 'flycheck-mode-hook #'flycheck-haskell-setup)
-
-  ;;(add-hook 'text-mode-hook 'flyspell-mode)
-  ;;(add-hook 'prog-mode-hook 'flyspell-prog-mode)
-
-  (eval-after-load 'flycheck '(require 'flycheck-ghcmod))
-  )
-
-
-;;;;
-;;;;           D mode
-;;;;
-(when t
-  (autoload 'd-mode "d-mode" "Major mode for editing D code." t)
-  (add-to-list 'auto-mode-alist '("\\.d[i]?\\'" . d-mode)))
-
-
-;;;;
-;;;;           DTrace
-;;;;
-(when t
-  (autoload 'dtrace-script-mode "dtrace-script-mode" () t)
-  (add-to-list 'auto-mode-alist '("\\.d\\'" . dtrace-script-mode))
-  (add-hook 'dtrace-script-mode-hook 'imenu-add-menubar-index)
-  (add-hook 'dtrace-script-mode-hook 'font-lock-mode))
-
-
-;;;;
-;;;;           Haskell mode
-;;;;
-(when t
-  (setq exec-path (append exec-path '("/Users/frinkr/.cabal/bin")))
-  
-  ;; `cabal install ghc-mod` first
-  (require 'haskell-mode)
-  (add-to-list 'Info-default-directory-list (concat user-lisp-root "haskell-mode"))
-  (autoload 'ghc-init "ghc" nil t)
-  (autoload 'ghc-debug "ghc" nil t)
-  (add-hook 'haskell-mode-hook (lambda () (ghc-init)))
-  (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
-  (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
-  (add-hook 'haskell-mode-hook 'turn-on-font-lock)
-  (add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
-  (add-hook 'haskell-mode-hook 'turn-on-haskell-ghci)
-
-  (eval-after-load 'haskell-mode '(progn
-                                    (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-or-reload)
-                                    (define-key haskell-mode-map (kbd "C-`") 'haskell-interactive-bring)
-                                    (define-key haskell-mode-map (kbd "C-c C-n C-t") 'haskell-process-do-type)
-                                    (define-key haskell-mode-map (kbd "C-c C-n C-i") 'haskell-process-do-info)
-                                    (define-key haskell-mode-map (kbd "C-c C-n C-c") 'haskell-process-cabal-build)
-                                    (define-key haskell-mode-map (kbd "C-c C-n c") 'haskell-process-cabal)))
-  (eval-after-load 'haskell-cabal '(progn
-                                     (define-key haskell-cabal-mode-map (kbd "C-`") 'haskell-interactive-bring)
-                                     (define-key haskell-cabal-mode-map (kbd "C-c C-k") 'haskell-interactive-ode-clear)
-                                     (define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
-                                     (define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)))
-
-  (custom-set-variables
-   '(haskell-interactive-mode-hide-multi-line-errors nil)
-   '(haskell-process-log t)
-   '(haskell-process-type (quote cabal-repl)))
-  )
-
-
-;;;;
-;;;;                        python
-;;;;
-(when nil
-  ;; auto env
-  (when nil
-    (require 'auto-virtualenv)
-    (add-hook 'python-mode-hook 'auto-virtualenv-set-virtualenv)
-    )
-  
-  ;; python shell
-  (setq gud-pdb-command-name "python -m pdb ")
-  (defalias 'python 'run-python)
-
-  (elpy-enable)
-
-  (when (require 'flycheck nil t)
-    (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-    (add-hook 'elpy-mode-hook 'flycheck-mode))
-
-  (require 'py-autopep8)
-  (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
-  )
-
-
-;;;;
-;;;;                        yasnippets
-;;;;
-(when nil
-  (require 'yasnippet)
-  (yas-global-mode t)
-
-  ;; Remove Yasnippet's default tab key binding
-  (define-key yas-minor-mode-map (kbd "<tab>") nil)
-  (define-key yas-minor-mode-map (kbd "TAB") nil)
-  ;; Set Yasnippet's key binding to shift+tab
-  (define-key yas-minor-mode-map (kbd "<backtab>") 'yas-expand)
-  ;; Alternatively use Control-c + tab
-  (define-key yas-minor-mode-map (kbd "\C-c TAB") 'yas-expand)
-  )
-
-;;;;
-;;;;                        pseudocode mode
-;;;;
-(when t
-  (require 'generic-x) 
-
-  (defface pseudocode-paragraph-face
-    '((t (:foreground "green"
-                      :background "gray20"
-                      :slant italic
-                      :height 1.1
-                      ))
-      )
-    "pseudocode paragraph face")
-
-  (defvar pseudocode-mode-font-lock-keywords
-    '(("\\<m\\>\\|\\<n\\>\\|\\<p\\>\\|\\<k\\>\\|\\<i\\>\\|\\<j\\>\\|\\<nil\\>" . font-lock-variable-name-face)
-      ("\\<node\\>\\|\\<value\\>\\|\\<prev\\>\\|\\<next\\>\\|\\<head\\>" . font-lock-variable-name-face)
-      ("\\<from\\>\\|\\<to\\>" . font-lock-keyword-face)
-      ("\\<done\\>\\|\\<end\\>\\|\\<fi\\>" . font-lock-keyword-face)
-      ("\\<is\\>\\|\\<fi\\>" . font-lock-keyword-face)
-      ("^[0-9]+\..*" . 'pseudocode-paragraph-face)
-      ("\:" . font-lock-keyword-face)
-      )
-    )
-
-  (define-derived-mode pseudocode-mode c++-mode
-    (font-lock-add-keywords nil pseudocode-mode-font-lock-keywords)
-    (setq c-syntactic-indentation nil)
-    (setq mode-name "pseudocode mode")
-    )
-
-  (add-to-list 'auto-mode-alist '("\\.answer$" . pseudocode-mode))
-  )
-
-;;;;
-;;;;           delete the 'complete' buffer
-;;;;
-(when t
-  (defun delete-completion-window-buffer (&optional output)                                                                
-    (interactive)                                                                                                
-    (dolist (win (window-list))                                                                                  
-      (when (string= (buffer-name (window-buffer win)) "*Completions*")                                          
-        (delete-window win)                                                                                      
-        (kill-buffer "*Completions*")))                                                                          
-    output)
-  (add-hook 'comint-preoutput-filter-functions 'delete-completion-window-buffer))
-
-;;;;
-;;;;           cygwin in emacs
-;;;;
-(when t
-  ;; Cgywin Emacs
-  (when (eq system-type 'cygwin)
-    (add-hook 'comint-output-filter-functions
-              'shell-strip-ctrl-m nil t)
-    (add-hook 'comint-output-filter-functions
-              'comint-watch-for-password-prompt nil t)
-    )
-
-  (setq cygwin-root "C:/cygwin/")
-  
-  ;; NTEmacs
-  (when (and is-windows (file-exists-p cygwin-root))
-    (setq cygwin-mount-cygwin-bin-directory (concat cygwin-root "bin"))
-    (setenv "PATH" (concat (concat cygwin-root "bin;") (getenv "PATH")))
-    (setq exec-path (cons (concat cygwin-root "bin;") exec-path))
-    
-    (require 'cygwin-mount)
-    (cygwin-mount-activate)
-
-    ;; Remove the unsightly chars
-    (add-hook 'comint-output-filter-functions
-              'shell-strip-ctrl-m nil t)
-    (add-hook 'comint-output-filter-functions
-              'comint-watch-for-password-prompt nil t)
-
-    (when nil
-      (setq explicit-shell-file-name (concat cygwin-root "Cygwin_x86_64 vc12.bat"))
-      ;; For subprocesses invoked via the shell
-      ;; (e.g., "shell -c command")
-      (setq shell-file-name explicit-shell-file-name)
-      )
-    
-    (when t
-      ;; NT-emacs assumes a Windows shell. Change to bash.
-      (setq shell-file-name "bash")
-      (setenv "SHELL" shell-file-name) 
-      (setq explicit-shell-file-name shell-file-name)
-      )
-
-    (when t
-      ;; Prevent issues with the Windows null device (NUL)
-      ;; when using cygwin find with rgrep.
-      (defadvice grep-compute-defaults (around grep-compute-defaults-advice-null-device)
-        "Use cygwin's /dev/null as the null-device."
-        (let ((null-device "/dev/null"))
-          ad-do-it))
-      (ad-activate 'grep-compute-defaults)
-      )
-    ;;   add more path for emacs (eshell)
-    ;;
-    ;;(when (string-equal system-type "windows-nt")
-    (if nil
-        (setq exec-path 
-              (append exec-path 
-                      '(
-                        "C:/Windows/system32/"
-                        "C:/Windows/"
-                        )
-                      )))
-    ;;           emacs prompt for eshell
-    ;;
-    (setq eshell-prompt-function
-          (lambda ()
-            (concat (getenv "USERNAME") "@"
-                    (file-name-nondirectory (eshell/pwd))
-                    (if (= (user-uid) 0) " # " " $ "))))
-
-    ;; shell-prompt not work for Windows. 
-    ;; We need fix .bashrc for windows (NOT .bash_profile, which is not read
-    ;; by cygwin version of emacs)
-    ;; export PS1="daji% "
-    ;;
-    ;; STARTFGCOLOR='\e[0;35m';
-    ;; STARTBGCOLOR="\e[40m"
-    ;; ENDCOLOR="\e[0m"
-    ;; 
-    ;; if [ "$PS" == "" ] ; then
-    ;;     export PS1="daji\$ "
-    ;;     if [ "$TERM" == "xterm" ] ; then
-    ;;         export PS1="\[$STARTFGCOLOR$STARTBGCOLOR\]daji:\W\$ \[$ENDCOLOR\]"
-    ;;     elif [ "$TERM" == "cygwin" ] ; then
-    ;;         export PS1="\[$STARTFGCOLOR$STARTBGCOLOR\]daji:\W\$ \[$ENDCOLOR\]"
-    ;;     fi
-    ;; fi
-    ;; 
-    ;; if [ "$TERM" == "xterm" ] ; then
-    ;;     PROMPT_COMMAND='echo -ne "\e]0;${HOSTNAME} - ${PWD}\007"'
-    ;; fi
-
-    ))
-
-
-;;;;
-;;;;           DOS mode for batch
-;;;;
-(when t
-  (require 'bat-mode)
-  (add-to-list 'auto-mode-alist '("\\.bat$" . bat-mode)))
-
-;;;;
-;;;;           Dockerfile mode
-;;;;
-(when t
-  (require 'dockerfile-mode)
-  (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode)))
-
-
-;;;;
-;;;;           Speed Bar
-;;;;
-(when nil
-  (when (display-graphic-p)
-    (load-file (concat user-lisp-root "sr-speedbar.el"))
-    (require 'sr-speedbar)
-
-    ;; Setup speedbar, an additional frame for viewing source files
-    (autoload 'speedbar-frame-mode "speedbar" "Popup a speedbar frame" t)
-    (autoload 'speedbar-get-focus "speedbar" "Jump to speedbar frame" t)
-    (autoload 'speedbar-toggle-etags "speedbar" "Add argument to etags command" t)
-    (setq speedbar-frame-plist '(minibuffer nil
-                                            border-width 0
-                                            internal-border-width 0
-                                            menu-bar-lines 0
-                                            modeline t
-                                            name "SpeedBar"
-                                            width 24
-                                            unsplittable t))
-    (condition-case err
-        (progn (speedbar-toggle-etags "-C"))
-      (error (message "Unable to load Speedbar package.")))
-
-    (global-set-key [(meta f4)] 'speedbar-get-focus)))
-
-
-;;;;
-;;;;           C++11
-;;;;
-(when nil ;; depricated in emacs 25
-  (require 'font-lock)
-
-  (defun --copy-face (new-face face)
-    "Define NEW-FACE from existing FACE."
-    (copy-face face new-face)
-    (eval `(defvar ,new-face nil))
-    (set new-face new-face))
-
-  (--copy-face 'font-lock-label-face  ; labels, case, public, private, proteced, namespace-tags
-               'font-lock-keyword-face)
-  (--copy-face 'font-lock-doc-markup-face ; comment markups such as Javadoc-tags
-               'font-lock-doc-face)
-  (--copy-face 'font-lock-doc-string-face ; comment markups
-               'font-lock-comment-face)
-
-  (global-font-lock-mode t)
-  (setq font-lock-maximum-decoration t)
-
-
-  (add-hook 'c++-mode-hook
-            '(lambda()
-               (font-lock-add-keywords
-                nil '(;; complete some fundamental keywords
-                      ("\\<\\(void\\|unsigned\\|signed\\|char\\|short\\|bool\\|int\\|long\\|float\\|double\\)\\>" . font-lock-keyword-face)
-                      ;; add the new C++11 keywords
-                      ("\\<\\(alignof\\|alignas\\|constexpr\\|decltype\\|noexcept\\|nullptr\\|static_assert\\|thread_local\\|override\\|final\\)\\>" . font-lock-keyword-face)
-                      ("\\<\\(char[0-9]+_t\\)\\>" . font-lock-keyword-face)
-                      ;; PREPROCESSOR_CONSTANT
-                      ("\\<[A-Z]+[A-Z_]+\\>" . font-lock-constant-face)
-                      ;; hexadecimal numbers
-                      ("\\<0[xX][0-9A-Fa-f]+\\>" . font-lock-constant-face)
-                      ;; integer/float/scientific numbers
-                      ("\\<[\\-+]*[0-9]*\\.?[0-9]+\\([ulUL]+\\|[eE][\\-+]?[0-9]+\\)?\\>" . font-lock-constant-face)
-                      ;; user-types (customize!)
-                      ("\\<[A-Za-z_]+[A-Za-z_0-9]*_\\(t\\|type\\|ptr\\)\\>" . font-lock-type-face)
-                      ("\\<\\(xstring\\|xchar\\)\\>" . font-lock-type-face)
-                      ))
-               ) t)
-  )
-
-
-;;;;
-;;;;           Auto Complete
-;;;;
-(when t
-  (require 'auto-complete-config)
-  (require 'pos-tip)  ;; for a nice completion menu and help
-  
-  (add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
-  
-  (ac-config-default)
-  (setq ac-auto-start t)
-
-  ;; tooltip
-  (setq ac-use-quick-help t)
-  
-  ;; menu font
-  ;;(set-face-font 'ac-candidate-face "Courier New 13")
-  ;;(set-face-font 'ac-selection-face "Courier New 13")
-
-  ;; scroll bar font
-  (set-face-background 'popup-scroll-bar-foreground-face "red3")
-  (if (display-graphic-p)
-      (global-set-key [(control ?/)] 'auto-complete)
-    (ac-set-trigger-key "TAB"))
-
-  ;; matching
-  (setq ac-use-fuzzy t)
-  (setq ac-ignore-case t)
-
-  ;;(setq popup-use-optimized-column-computation nil)
-  (ac-linum-workaround)
-  )
-
-
-;;;;
-;;;;           ecb
-;;;;
-(when is-macos
-  ;; error when byte-compiling from melpa, nerver mind. It can just run
-
-  (require 'ecb)
-  (custom-set-variables '(ecb-options-version "2.40"))
-
-  ;; activate at start up  
-  (when (display-graphic-p)
-    (setq ecb-auto-activate t))
-
-  (setq ecb-auto-activate nil)
-  
-  ;; no tip-of-day
-  (setq ecb-tip-of-the-day nil)
-
-  ;; layout
-  (setq ecb-layout-name "left15")  
-  (setq ecb-layout-window-sizes nil)
-  (setq ecb-fix-window-size (quote width)) ;; fixed witdh
-
-  ;; directories
-  (setq ecb-source-path (quote (("/usr/include" "c")
-                                ("/usr/include/c++/4.2.1" "std c++")
-                                ("/Data/P4/" "P4")
-                                ("/Users/frinkr/Desktop/Dropbox/Tech/" "Tech"))))
-  
-  (setq ecb-primary-secondary-mouse-buttons (quote mouse-1--C-mouse-1))
-  (setq ecb-use-speedbar-instead-native-tree-buffer nil)
-
-  (defun ecb-toggle-windows ()
-    "toggle ecb-activaty"
-    (interactive)
-    (ecb-toggle-ecb-windows)
-    )
-  
-  (global-set-key (kbd "M-SPC") 'ecb-toggle-windows)
-  
   )
 
 
@@ -1805,9 +1339,423 @@
 
 
 
+
+;;;;---------------------------------------------------------------------------
+;;;;                     Modes Settings
+;;;;---------------------------------------------------------------------------
+
+;;;;
+;;;;           lua
+;;;;
+(when t
+  (autoload 'lua-mode "lua-mode" "Lua editing mode." t)
+  (add-to-list 'auto-mode-alist '("\\.lua$" . lua-mode))
+  (add-to-list 'interpreter-mode-alist '("lua" . lua-mode))
+  )
+
+;;;;
+;;;;           yaml mode
+;;;;
+(when t
+  (require 'yaml-mode)
+  (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
+  )
+
+
+;;;;
+;;;;           octave
+;;;;
+(when t
+  (setq auto-mode-alist
+        (cons '("\\.m$" . octave-mode) auto-mode-alist))
+
+  (setq inferior-octave-prompt ">> ")
+  
+  (add-hook 'octave-mode-hook
+            (lambda ()
+              (abbrev-mode 1)
+              (auto-fill-mode 1)
+              (font-lock-mode 1)))
+
+  (require 'ac-octave)
+  ;;  (ac-octave-init)
+  (defun ac-octave-mode-setup ()
+    (setq ac-sources '(ac-source-octave)))
+  (add-hook 'octave-mode-hook
+            '(lambda () (ac-octave-mode-setup)))
+
+  (add-hook 'inferior-octave-mode-hook
+            (lambda ()
+              (turn-on-font-lock)
+              (define-key inferior-octave-mode-map [up]
+                'comint-previous-input)
+              (define-key inferior-octave-mode-map [down]
+                'comint-next-input)))
+  )
+
+
+;;;;
+;;;;           Haskell mode
+;;;;
+(when t
+  (setq exec-path (append exec-path '("/Users/frinkr/.cabal/bin")))
+  
+  ;; `cabal install ghc-mod` first
+  (require 'haskell-mode)
+  (add-to-list 'Info-default-directory-list (concat user-lisp-root "haskell-mode"))
+  (autoload 'ghc-init "ghc" nil t)
+  (autoload 'ghc-debug "ghc" nil t)
+  (add-hook 'haskell-mode-hook (lambda () (ghc-init)))
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+  (add-hook 'haskell-mode-hook 'turn-on-font-lock)
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-ghci)
+
+  (eval-after-load 'haskell-mode '(progn
+                                    (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-or-reload)
+                                    (define-key haskell-mode-map (kbd "C-`") 'haskell-interactive-bring)
+                                    (define-key haskell-mode-map (kbd "C-c C-n C-t") 'haskell-process-do-type)
+                                    (define-key haskell-mode-map (kbd "C-c C-n C-i") 'haskell-process-do-info)
+                                    (define-key haskell-mode-map (kbd "C-c C-n C-c") 'haskell-process-cabal-build)
+                                    (define-key haskell-mode-map (kbd "C-c C-n c") 'haskell-process-cabal)))
+  (eval-after-load 'haskell-cabal '(progn
+                                     (define-key haskell-cabal-mode-map (kbd "C-`") 'haskell-interactive-bring)
+                                     (define-key haskell-cabal-mode-map (kbd "C-c C-k") 'haskell-interactive-ode-clear)
+                                     (define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
+                                     (define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)))
+
+  (custom-set-variables
+   '(haskell-interactive-mode-hide-multi-line-errors nil)
+   '(haskell-process-log t)
+   '(haskell-process-type (quote cabal-repl)))
+  )
+
+
+;;;;
+;;;;           cmake
+;;;;
+;; Add cmake listfile names to the mode list.
+(when t
+  (setq auto-mode-alist
+        (append
+         '(("CMakeLists\\.txt\\'" . cmake-mode))
+         '(("\\.cmake\\'" . cmake-mode))
+         '(("CMakeCache\\.txt\\'" . cmake-mode))
+         auto-mode-alist))
+  
+  (autoload 'cmake-mode "cmake-mode" nil t)
+  (autoload 'cmake-font-lock-activate "cmake-font-lock" nil t)
+  (add-hook 'cmake-mode-hook 'cmake-font-lock-activate)
+  )
+
+
+;;;;
+;;;;           yacc and lex
+;;;;
+(when t
+  (require 'bison-mode)
+  (add-to-list 'auto-mode-alist '("\\.lm\\'" . bison-mode))
+  (add-to-list 'auto-mode-alist '("\\.ym\\'" . bison-mode))
+  )
+
+;;;;
+;;;;           D mode
+;;;;
+(when t
+  (autoload 'd-mode "d-mode" "Major mode for editing D code." t)
+  (add-to-list 'auto-mode-alist '("\\.d[i]?\\'" . d-mode)))
+
+
+;;;;
+;;;;           DTrace
+;;;;
+(when t
+  (autoload 'dtrace-script-mode "dtrace-script-mode" () t)
+  (add-to-list 'auto-mode-alist '("\\.d\\'" . dtrace-script-mode))
+  (add-hook 'dtrace-script-mode-hook 'imenu-add-menubar-index)
+  (add-hook 'dtrace-script-mode-hook 'font-lock-mode))
+
+
+;;;;
+;;;;                        pseudocode mode
+;;;;
+(when t
+  (require 'generic-x) 
+
+  (defface pseudocode-paragraph-face
+    '((t (:foreground "green"
+                      :background "gray20"
+                      :slant italic
+                      :height 1.1
+                      ))
+      )
+    "pseudocode paragraph face")
+
+  (defvar pseudocode-mode-font-lock-keywords
+    '(("\\<m\\>\\|\\<n\\>\\|\\<p\\>\\|\\<k\\>\\|\\<i\\>\\|\\<j\\>\\|\\<nil\\>" . font-lock-variable-name-face)
+      ("\\<node\\>\\|\\<value\\>\\|\\<prev\\>\\|\\<next\\>\\|\\<head\\>" . font-lock-variable-name-face)
+      ("\\<from\\>\\|\\<to\\>" . font-lock-keyword-face)
+      ("\\<done\\>\\|\\<end\\>\\|\\<fi\\>" . font-lock-keyword-face)
+      ("\\<is\\>\\|\\<fi\\>" . font-lock-keyword-face)
+      ("^[0-9]+\..*" . 'pseudocode-paragraph-face)
+      ("\:" . font-lock-keyword-face)
+      )
+    )
+
+  (define-derived-mode pseudocode-mode c++-mode
+    (font-lock-add-keywords nil pseudocode-mode-font-lock-keywords)
+    (setq c-syntactic-indentation nil)
+    (setq mode-name "pseudocode mode")
+    )
+
+  (add-to-list 'auto-mode-alist '("\\.answer$" . pseudocode-mode))
+  )
+
+
+;;;;
+;;;;        Markdown mode
+;;;;
+(when t
+  (require 'markdown-mode)
+  (autoload 'markdown-mode "markdown-mode"
+    "Major mode for editing Markdown files" t)
+  (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
+  (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+
+  (autoload 'gfm-mode "markdown-mode"
+    "Major mode for editing GitHub Flavored Markdown files" t)
+  (add-to-list 'auto-mode-alist '("README\\.md\\'" . gfm-mode))
+  )
+
+
+;;;;
+;;;;           DOS mode for batch
+;;;;
+(when t
+  (require 'bat-mode)
+  (add-to-list 'auto-mode-alist '("\\.bat$" . bat-mode)))
+
+
+;;;;
+;;;;           Dockerfile mode
+;;;;
+(when t
+  (require 'dockerfile-mode)
+  (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode)))
+
+
+
 ;;;;---------------------------------------------------------------------------
 ;;;;                     Programming Settings
 ;;;;---------------------------------------------------------------------------
+
+;;;;
+;;;;           C++11
+;;;;
+(when nil ;; depricated in emacs 25
+  (require 'font-lock)
+
+  (defun --copy-face (new-face face)
+    "Define NEW-FACE from existing FACE."
+    (copy-face face new-face)
+    (eval `(defvar ,new-face nil))
+    (set new-face new-face))
+
+  (--copy-face 'font-lock-label-face  ; labels, case, public, private, proteced, namespace-tags
+               'font-lock-keyword-face)
+  (--copy-face 'font-lock-doc-markup-face ; comment markups such as Javadoc-tags
+               'font-lock-doc-face)
+  (--copy-face 'font-lock-doc-string-face ; comment markups
+               'font-lock-comment-face)
+
+  (global-font-lock-mode t)
+  (setq font-lock-maximum-decoration t)
+
+
+  (add-hook 'c++-mode-hook
+            '(lambda()
+               (font-lock-add-keywords
+                nil '(;; complete some fundamental keywords
+                      ("\\<\\(void\\|unsigned\\|signed\\|char\\|short\\|bool\\|int\\|long\\|float\\|double\\)\\>" . font-lock-keyword-face)
+                      ;; add the new C++11 keywords
+                      ("\\<\\(alignof\\|alignas\\|constexpr\\|decltype\\|noexcept\\|nullptr\\|static_assert\\|thread_local\\|override\\|final\\)\\>" . font-lock-keyword-face)
+                      ("\\<\\(char[0-9]+_t\\)\\>" . font-lock-keyword-face)
+                      ;; PREPROCESSOR_CONSTANT
+                      ("\\<[A-Z]+[A-Z_]+\\>" . font-lock-constant-face)
+                      ;; hexadecimal numbers
+                      ("\\<0[xX][0-9A-Fa-f]+\\>" . font-lock-constant-face)
+                      ;; integer/float/scientific numbers
+                      ("\\<[\\-+]*[0-9]*\\.?[0-9]+\\([ulUL]+\\|[eE][\\-+]?[0-9]+\\)?\\>" . font-lock-constant-face)
+                      ;; user-types (customize!)
+                      ("\\<[A-Za-z_]+[A-Za-z_0-9]*_\\(t\\|type\\|ptr\\)\\>" . font-lock-type-face)
+                      ("\\<\\(xstring\\|xchar\\)\\>" . font-lock-type-face)
+                      ))
+               ) t)
+  )
+
+
+;;;;
+;;;;           Auto Complete
+;;;;
+(when t
+  (require 'auto-complete-config)
+  (require 'pos-tip)  ;; for a nice completion menu and help
+  
+  (add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
+  
+  (ac-config-default)
+  (setq ac-auto-start t)
+
+  ;; tooltip
+  (setq ac-use-quick-help t)
+  
+  ;; menu font
+  ;;(set-face-font 'ac-candidate-face "Courier New 13")
+  ;;(set-face-font 'ac-selection-face "Courier New 13")
+
+  ;; scroll bar font
+  (set-face-background 'popup-scroll-bar-foreground-face "red3")
+  (if (display-graphic-p)
+      (global-set-key [(control ?/)] 'auto-complete)
+    (ac-set-trigger-key "TAB"))
+
+  ;; matching
+  (setq ac-use-fuzzy t)
+  (setq ac-ignore-case t)
+
+  ;;(setq popup-use-optimized-column-computation nil)
+  (ac-linum-workaround)
+  )
+
+
+;;;;
+;;;;           ecb
+;;;;
+(when is-macos
+  ;; error when byte-compiling from melpa, nerver mind. It can just run
+
+  (require 'ecb)
+  (custom-set-variables '(ecb-options-version "2.40"))
+
+  ;; activate at start up  
+  (when (display-graphic-p)
+    (setq ecb-auto-activate t))
+
+  (setq ecb-auto-activate nil)
+  
+  ;; no tip-of-day
+  (setq ecb-tip-of-the-day nil)
+
+  ;; layout
+  (setq ecb-layout-name "left15")  
+  (setq ecb-layout-window-sizes nil)
+  (setq ecb-fix-window-size (quote width)) ;; fixed witdh
+
+  ;; directories
+  (setq ecb-source-path (quote (("/usr/include" "c")
+                                ("/usr/include/c++/4.2.1" "std c++")
+                                ("/Data/P4/" "P4")
+                                ("/Users/frinkr/Desktop/Dropbox/Tech/" "Tech"))))
+  
+  (setq ecb-primary-secondary-mouse-buttons (quote mouse-1--C-mouse-1))
+  (setq ecb-use-speedbar-instead-native-tree-buffer nil)
+
+  (defun ecb-toggle-windows ()
+    "toggle ecb-activaty"
+    (interactive)
+    (ecb-toggle-ecb-windows)
+    )
+  
+  (global-set-key (kbd "M-SPC") 'ecb-toggle-windows)
+  
+  )
+
+;;;;
+;;;;                        python
+;;;;
+(when nil
+  ;; auto env
+  (when nil
+    (require 'auto-virtualenv)
+    (add-hook 'python-mode-hook 'auto-virtualenv-set-virtualenv)
+    )
+  
+  ;; python shell
+  (setq gud-pdb-command-name "python -m pdb ")
+  (defalias 'python 'run-python)
+
+  (elpy-enable)
+
+  (when (require 'flycheck nil t)
+    (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+    (add-hook 'elpy-mode-hook 'flycheck-mode))
+
+  (require 'py-autopep8)
+  (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
+  )
+
+
+;;;;
+;;;;                        yasnippets
+;;;;
+(when nil
+  (require 'yasnippet)
+  (yas-global-mode t)
+
+  ;; Remove Yasnippet's default tab key binding
+  (define-key yas-minor-mode-map (kbd "<tab>") nil)
+  (define-key yas-minor-mode-map (kbd "TAB") nil)
+  ;; Set Yasnippet's key binding to shift+tab
+  (define-key yas-minor-mode-map (kbd "<backtab>") 'yas-expand)
+  ;; Alternatively use Control-c + tab
+  (define-key yas-minor-mode-map (kbd "\C-c TAB") 'yas-expand)
+  )
+
+;;;;
+;;;;           helm
+;;;;
+(when nil
+  (require 'helm-config)
+  (global-set-key (kbd "C-x b") 'helm-buffers-list)
+
+  (global-set-key (kbd "C-x m") 'helm-M-x)
+  (global-set-key (kbd "C-x C-f") 'helm-find-files)
+  )
+
+(when t
+  (global-set-key (kbd "C-S-l") 'helm-semantic-or-imenu)
+  )
+
+
+
+;;;;
+;;;;           Flycheck
+;;;;
+(when t
+  (global-flycheck-mode)
+  (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++11")))
+  (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++11")))
+  (add-hook 'c++-mode-hook (lambda () (flyspell-prog-mode)))
+  
+  (add-hook 'flycheck-mode-hook #'flycheck-haskell-setup)
+
+  ;;(add-hook 'text-mode-hook 'flyspell-mode)
+  ;;(add-hook 'prog-mode-hook 'flyspell-prog-mode)
+
+  (eval-after-load 'flycheck '(require 'flycheck-ghcmod))
+  )
+
+
+;;;;
+;;;;           cmake-ide
+;;;;
+(when nil
+  (require 'rtags)
+  (cmake-ide-setup)
+  (define-key c++-mode-map [C-down-mouse-1] 'rtags-find-symbol-at-point)
+  )
+
 
 ;;;;
 ;;;;               Cedet
@@ -1918,129 +1866,134 @@
   (error (message "Unable to load Common Lisp package.")))
 
 
-;; Setup C mode
-(autoload 'c++-mode  "cc-mode" "C++ Editing Mode" t)
-(autoload 'c-mode    "cc-mode" "C Editing Mode" t)
-(autoload 'c-mode-common-hook "cc-mode" "C Mode Hooks" t)
-(autoload 'c-add-style "cc-mode" "Add coding style" t)
+;;;;
+;;;;        C++
+;;;;
+(when t
+  ;; Setup C mode
+  (autoload 'c++-mode  "cc-mode" "C++ Editing Mode" t)
+  (autoload 'c-mode    "cc-mode" "C Editing Mode" t)
+  (autoload 'c-mode-common-hook "cc-mode" "C Mode Hooks" t)
+  (autoload 'c-add-style "cc-mode" "Add coding style" t)
 
 
-;; Associate extensions with modes
-(add-to-list 'auto-mode-alist '("\\.h$" . c++-mode))
-(add-to-list 'auto-mode-alist '("\\.mm\\'" . objc-mode))
-;;(add-to-list 'auto-mode-alist '("\\.m\\'" . objc-mode))
+  ;; Associate extensions with modes
+  (add-to-list 'auto-mode-alist '("\\.h$" . c++-mode))
+  (add-to-list 'auto-mode-alist '("\\.mm\\'" . objc-mode))
+  ;;(add-to-list 'auto-mode-alist '("\\.m\\'" . objc-mode))
 
-;; Create my own coding style
-;; No space before { and function sig indents 4 if argument overflow
-(setq frinkr/c4-style
-      '((c-auto-newline                 . nil)
-        (c-basic-offset                 . 4)
-        (c-comment-only-line-offset     . 0)
-        (c-echo-syntactic-information-p . nil)
-        (c-hungry-delete-key            . t)
-        (c-tab-always-indent            . t)
-        (c-toggle-hungry-state          . t)
-        (c-hanging-braces-alist         . ((substatement-open after)
-                                           (brace-list-open)))
-        (c-offsets-alist                . ((arglist-close . c-lineup-arglist)
-                                           (case-label . 4)
-                                           (substatement-open . 0)
-                                           (block-open . 0) ; no space before {
-                                           (knr-argdecl-intro . -)))
-        (c-hanging-colons-alist         . ((member-init-intro before)
-                                           (inher-intro)
-                                           (case-label after)
-                                           (label after)
-                                           (access-label after)))
-        (c-cleanup-list                 . (scope-operator
-                                           empty-defun-braces
-                                           defun-close-semi))))
+  ;; Create my own coding style
+  ;; No space before { and function sig indents 4 if argument overflow
+  (setq frinkr/c4-style
+        '((c-auto-newline                 . nil)
+          (c-basic-offset                 . 4)
+          (c-comment-only-line-offset     . 0)
+          (c-echo-syntactic-information-p . nil)
+          (c-hungry-delete-key            . t)
+          (c-tab-always-indent            . t)
+          (c-toggle-hungry-state          . t)
+          (c-hanging-braces-alist         . ((substatement-open after)
+                                             (brace-list-open)))
+          (c-offsets-alist                . ((arglist-close . c-lineup-arglist)
+                                             (case-label . 4)
+                                             (substatement-open . 0)
+                                             (block-open . 0) ; no space before {
+                                             (knr-argdecl-intro . -)))
+          (c-hanging-colons-alist         . ((member-init-intro before)
+                                             (inher-intro)
+                                             (case-label after)
+                                             (label after)
+                                             (access-label after)))
+          (c-cleanup-list                 . (scope-operator
+                                             empty-defun-braces
+                                             defun-close-semi))))
 
-(setq frinkr/c2-style
-      '((c-auto-newline                 . nil)
-        (c-basic-offset                 . 2)
-        (c-comment-only-line-offset     . 0)
-        (c-echo-syntactic-information-p . nil)
-        (c-hungry-delete-key            . t)
-        (c-tab-always-indent            . t)
-        (c-toggle-hungry-state          . t)
-        (c-hanging-braces-alist         . ((substatement-open after)
-                                           (brace-list-open)))
-        (c-offsets-alist                . ((arglist-close . c-lineup-arglist)
-                                           (case-label . 4)
-                                           (substatement-open . 0)
-                                           (block-open . 0) ; no space before {
-                                           (knr-argdecl-intro . -)))
-        (c-hanging-colons-alist         . ((member-init-intro before)
-                                           (inher-intro)
-                                           (case-label after)
-                                           (label after)
-                                           (access-label after)))
-        (c-cleanup-list                 . (scope-operator
-                                           empty-defun-braces
-                                           defun-close-semi))))
+  (setq frinkr/c2-style
+        '((c-auto-newline                 . nil)
+          (c-basic-offset                 . 2)
+          (c-comment-only-line-offset     . 0)
+          (c-echo-syntactic-information-p . nil)
+          (c-hungry-delete-key            . t)
+          (c-tab-always-indent            . t)
+          (c-toggle-hungry-state          . t)
+          (c-hanging-braces-alist         . ((substatement-open after)
+                                             (brace-list-open)))
+          (c-offsets-alist                . ((arglist-close . c-lineup-arglist)
+                                             (case-label . 4)
+                                             (substatement-open . 0)
+                                             (block-open . 0) ; no space before {
+                                             (knr-argdecl-intro . -)))
+          (c-hanging-colons-alist         . ((member-init-intro before)
+                                             (inher-intro)
+                                             (case-label after)
+                                             (label after)
+                                             (access-label after)))
+          (c-cleanup-list                 . (scope-operator
+                                             empty-defun-braces
+                                             defun-close-semi))))
 
 
-(defun vlad-cc-style()
-  ;;(c-set-style "linux")
-  ;;(c-set-offset 'innamespace '0)
-  ;;(c-set-offset 'inextern-lang '0)
-  (c-set-offset 'inline-open '0)
-  ;;(c-set-offset 'label '*)
-  ;;(c-set-offset 'case-label '*)
-  ;;(c-set-offset 'access-label '/)
-  ;;(setq c-basic-offset 4)
-  ;;(setq tab-width 4)
-  ;;(setq indent-tabs-mode nil)
+  (defun vlad-cc-style()
+    ;;(c-set-style "linux")
+    ;;(c-set-offset 'innamespace '0)
+    ;;(c-set-offset 'inextern-lang '0)
+    (c-set-offset 'inline-open '0)
+    ;;(c-set-offset 'label '*)
+    ;;(c-set-offset 'case-label '*)
+    ;;(c-set-offset 'access-label '/)
+    ;;(setq c-basic-offset 4)
+    ;;(setq tab-width 4)
+    ;;(setq indent-tabs-mode nil)
+    )
+
+  (add-hook 'c++-mode-hook 'vlad-cc-style)
+
+  ;; Construct a hook to be called when entering C mode
+  (defun lconfig-c-mode ()
+    (progn (define-key c-mode-base-map "\C-l" 'newline-and-indent)
+           (c-add-style "frinkr4" frinkr/c4-style t))
+    )
+  (add-hook 'c-mode-common-hook 'lconfig-c-mode)
+
+  (defadvice c-lineup-arglist (around my activate)
+    "Improve indentation of continued C++11 lambda function opened as argument."
+    (setq ad-return-value
+          (if (and (equal major-mode 'c++-mode)
+                   (ignore-errors
+                     (save-excursion
+                       (goto-char (c-langelem-pos langelem))
+                       ;; Detect "[...](" or "[...]{". preceded by "," or "(",
+                       ;;   and with unclosed brace.
+                       (looking-at ".*[(,][ \t]*\\[[^]]*\\][ \t]*[({][^}]*$"))))
+              0                           ; no additional indent
+            ad-do-it)))                   ; default behavior
+
+  ;; Setup font-lock syntax coloring package
+  (autoload 'font-lock-fontify-buffer "font-lock" "Fontify Buffer" t)
+  (condition-case err
+      (progn (add-hook 'c-mode-common-hook 'font-lock-fontify-buffer)
+             (add-hook 'emacs-lisp-mode-hook 'font-lock-fontify-buffer)
+             (global-font-lock t))
+    (error (progn
+             (message "Could not customize colors, disabling colored fonts.")
+             (setq-default font-lock-auto-fontify t))))
+
+
+  ;; Setup CPerl mode
+  (setq cperl-brace-offset -4)
+  (setq cperl-indent-level 4)
+
+
+  ;; Setup Assembler mode
+  (defun lconfig-asm-mode-hook ()
+    (progn (setq comment-column 36)
+           (setq tab-stop-list '(4 8 12 16 20 24 28 36 40 44 48))))
+  (add-hook 'asm-mode-hook 'lconfig-asm-mode-hook)
+  (add-to-list 'auto-mode-alist '("\\.s$" . asm-mode))
+  (add-to-list 'auto-mode-alist '("\\.asm$" . asm-mode))
+
+  (autoload 'cpp-font-lock "cpp-mode" "CPP Font Lock mode" t)
   )
-
-(add-hook 'c++-mode-hook 'vlad-cc-style)
-
-;; Construct a hook to be called when entering C mode
-(defun lconfig-c-mode ()
-  (progn (define-key c-mode-base-map "\C-l" 'newline-and-indent)
-         (c-add-style "frinkr4" frinkr/c4-style t))
-  )
-(add-hook 'c-mode-common-hook 'lconfig-c-mode)
-
-(defadvice c-lineup-arglist (around my activate)
-  "Improve indentation of continued C++11 lambda function opened as argument."
-  (setq ad-return-value
-        (if (and (equal major-mode 'c++-mode)
-                 (ignore-errors
-                   (save-excursion
-                     (goto-char (c-langelem-pos langelem))
-                     ;; Detect "[...](" or "[...]{". preceded by "," or "(",
-                     ;;   and with unclosed brace.
-                     (looking-at ".*[(,][ \t]*\\[[^]]*\\][ \t]*[({][^}]*$"))))
-            0                           ; no additional indent
-          ad-do-it)))                   ; default behavior
-
-;; Setup font-lock syntax coloring package
-(autoload 'font-lock-fontify-buffer "font-lock" "Fontify Buffer" t)
-(condition-case err
-    (progn (add-hook 'c-mode-common-hook 'font-lock-fontify-buffer)
-           (add-hook 'emacs-lisp-mode-hook 'font-lock-fontify-buffer)
-           (global-font-lock t))
-  (error (progn
-           (message "Could not customize colors, disabling colored fonts.")
-           (setq-default font-lock-auto-fontify t))))
-
-
-;; Setup CPerl mode
-(setq cperl-brace-offset -4)
-(setq cperl-indent-level 4)
-
-
-;; Setup Assembler mode
-(defun lconfig-asm-mode-hook ()
-  (progn (setq comment-column 36)
-         (setq tab-stop-list '(4 8 12 16 20 24 28 36 40 44 48))))
-(add-hook 'asm-mode-hook 'lconfig-asm-mode-hook)
-(add-to-list 'auto-mode-alist '("\\.s$" . asm-mode))
-(add-to-list 'auto-mode-alist '("\\.asm$" . asm-mode))
-
-(autoload 'cpp-font-lock "cpp-mode" "CPP Font Lock mode" t)
 
 
 ;;;;---------------------------------------------------------------------------
