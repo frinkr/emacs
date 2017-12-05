@@ -28,7 +28,7 @@
   (package-initialize) ;; You might already have this line
   )
 
-(when t  ;; install the required packages automatically
+(defun fx/install-required-packages()  ;; install the required packages automatically
   (setq package-list '(
                        ac-octave
                        auto-complete
@@ -123,6 +123,8 @@
 
   )
 
+(fx/install-required-packages)
+
 ;; some package (gud.el) managed manually
 (add-to-list 'load-path user-lisp-root)
 
@@ -136,60 +138,63 @@
 ;;;;
 ;;;;        Behavior Settings
 ;;;;
+(defun fx/general-behavior()
+  (global-hl-line-mode 1)
+  (desktop-save-mode 1)  ;; save session
 
-(global-hl-line-mode 1)
-(desktop-save-mode 1)  ;; save session
+  ;; transparent
+  (set-frame-parameter (selected-frame) 'alpha '(95 90))
+  (add-to-list 'default-frame-alist '(alpha 95 90))
 
-;; transparent
-(set-frame-parameter (selected-frame) 'alpha '(95 90))
-(add-to-list 'default-frame-alist '(alpha 95 90))
+  ;; line & column number
+  (line-number-mode t)
+  (column-number-mode t)
 
-;; line & column number
-(line-number-mode t)
-(column-number-mode t)
+  ;; mouse in terminal
+  (xterm-mouse-mode t)
+  (tool-bar-mode nil)
 
-;; mouse in terminal
-(xterm-mouse-mode t)
-(tool-bar-mode nil)
+  ;; Setup save options (auto and backup) -- still buggy need new Replace func
+  ;; Disable backup and autosave
+  (setq backup-inhibited t)
+  (setq auto-save-default nil)
+  (save-place-mode t)   ;; save cursor position
 
-;; Setup save options (auto and backup) -- still buggy need new Replace func
-;; Disable backup and autosave
-(setq backup-inhibited t)
-(setq auto-save-default nil)
-(save-place-mode t)   ;; save cursor position
+  ;; recent files
+  (require 'recentf)
+  (recentf-mode 1)
+  (setq recentf-max-menu-items 2500)
+  (global-set-key "\C-x\ \C-r" 'recentf-open-files)
 
-;; recent files
-(require 'recentf)
-(recentf-mode 1)
-(setq recentf-max-menu-items 2500)
-(global-set-key "\C-x\ \C-r" 'recentf-open-files)
+  (setq inhibit-splash-screen t)
+  (setq transient-mark-mode t)
+  (setq delete-key-deletes-forward t)
+  (setq mouse-yank-at-point nil)
+  (setq bookmark-save-flag 1)  ;; autosave bookmarks
+  (setq-default indent-tabs-mode nil)
 
-(setq inhibit-splash-screen t)
-(setq transient-mark-mode t)
-(setq delete-key-deletes-forward t)
-(setq mouse-yank-at-point nil)
-(setq bookmark-save-flag 1)  ;; autosave bookmarks
-(setq-default indent-tabs-mode nil)
+  ;; upcase region is anoying
+  (put 'upcase-region 'disabled nil)
+  (put 'narrow-to-region 'disabled nil)
 
-;; upcase region is anoying
-(put 'upcase-region 'disabled nil)
-(put 'narrow-to-region 'disabled nil)
+  ;; Setup time mode
+  (setq display-time-day-and-date t)
+  (setq display-time-format "%I:%M %p %m/%d")
+  (setq display-time-default-load-average nil)
+  (display-time-mode t)
 
-;; Setup time mode
-(setq display-time-day-and-date t)
-(setq display-time-format "%I:%M %p %m/%d")
-(setq display-time-default-load-average nil)
-(display-time-mode t)
+  ;; Setup text mode
+  (add-hook 'text-mode-hook '(lambda() (auto-fill-mode 1)))
+  (add-hook 'text-mode-hook '(lambda() (setq fill-column 70)))
 
-;; Setup text mode
-(add-hook 'text-mode-hook '(lambda() (auto-fill-mode 1)))
-(add-hook 'text-mode-hook '(lambda() (setq fill-column 70)))
+  ;; Tab stop
+  (setq-default indent-tabs-mode nil)
+  (setq-default tab-width 4)
+  (setq indent-line-function 'insert-tab)
+  (setq tab-stop-list (quote (4 8 12 16 20 24 28 32 36 40 44 48 52 56 60 64 68 72 76 80 84 88 92 96 100 104 108 112 116 120)))
+  )
 
-;; Tab stop
-(setq-default indent-tabs-mode nil)
-(setq-default tab-width 4)
-(setq indent-line-function 'insert-tab)
-(setq tab-stop-list (quote (4 8 12 16 20 24 28 32 36 40 44 48 52 56 60 64 68 72 76 80 84 88 92 96 100 104 108 112 116 120)))
+(fx/general-behavior)
 
 ;;;;
 ;;;;           a few visual tweaks
@@ -239,7 +244,7 @@
 ;;;;
 ;;;;           Set the emacs window size
 ;;;;
-(defun set-frame-size-according-to-resolution ()
+(defun fx/set-frame-size-according-to-resolution ()
   (interactive)
   (if is-windows
       (progn
@@ -258,45 +263,47 @@
                                       (frame-char-height)))))))
 
 (when (display-graphic-p)
-  (set-frame-size-according-to-resolution))
+  (fx/set-frame-size-according-to-resolution))
 
 
 ;;;;
-;;;;           Set control & meta key
+;;;;      Global key bindings
 ;;;;
-(setq mac-option-key-is-meta nil)
-(setq mac-command-key-is-meta nil)
-(setq mac-command-modifier 'control)
-(setq mac-option-modifier 'meta)
+(defun fx/setup-key-bindings()
+  ;; Set control & meta key
+  (setq mac-option-key-is-meta nil)
+  (setq mac-command-key-is-meta nil)
+  (setq mac-command-modifier 'control)
+  (setq mac-option-modifier 'meta)
 
+  ;; set of glocal shortcut
+  (define-key global-map "\C-xw" 'what-line)
+  (define-key global-map "\C-z" 'undo)
+  (define-key global-map "\M-g" 'goto-line)
+  (define-key global-map "\C-o" 'ff-find-other-file)
+  (define-key global-map "\C-q" 'save-buffers-kill-terminal)
+  (define-key global-map [(meta m)] 'set-mark-command)
+  (define-key global-map [delete] 'delete-char)
+  (define-key global-map [backspace] 'delete-backward-char)
+  (define-key isearch-mode-map [backspace] 'isearch-delete-char)
 
-;;;;
-;;;;           set of glocal shortcut
-;;;;
-(define-key global-map "\C-xw" 'what-line)
-(define-key global-map "\C-z" 'undo)
-(define-key global-map "\M-g" 'goto-line)
-(define-key global-map "\C-o" 'ff-find-other-file)
-(define-key global-map "\C-q" 'save-buffers-kill-terminal)
-(define-key global-map [(meta m)] 'set-mark-command)
-(define-key global-map [delete] 'delete-char)
-(define-key global-map [backspace] 'delete-backward-char)
-(define-key isearch-mode-map [backspace] 'isearch-delete-char)
+  (global-set-key (kbd "M-SPC") 'set-mark-command)
+  (global-set-key (kbd "M-n") (lambda () (interactive) (next-line 5)))
+  (global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
+  (global-set-key (kbd "C-4") 'p4-edit)
 
-(global-set-key (kbd "M-SPC") 'set-mark-command)
-(global-set-key (kbd "M-n") (lambda () (interactive) (next-line 5)))
-(global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
-(global-set-key (kbd "C-4") 'p4-edit)
-
-(when is-windows
-  (define-key global-map [f1] 'help-command)
-  (define-key global-map [f2] 'undo)
-  (define-key global-map [f3] 'isearch-forward)
-  (define-key global-map [f4] 'other-window)
-  (define-key global-map [f12] 'revert-buffer)
-  (define-key global-map [button4] 'previous-line)
-  (define-key global-map [button5] 'next-line)
+  (when is-windows
+    (define-key global-map [f1] 'help-command)
+    (define-key global-map [f2] 'undo)
+    (define-key global-map [f3] 'isearch-forward)
+    (define-key global-map [f4] 'other-window)
+    (define-key global-map [f12] 'revert-buffer)
+    (define-key global-map [button4] 'previous-line)
+    (define-key global-map [button5] 'next-line)
+    )
   )
+
+(fx/setup-key-bindings)
 
 
 ;;;;
@@ -304,7 +311,7 @@
 ;;;;
 
 (when t
-  (defun new-scratch ()
+  (defun fx/new-scratch ()
     "open up a guaranteed new scratch buffer"
     (interactive)
     (switch-to-buffer (loop for num from 0
@@ -313,7 +320,7 @@
                             finally return name)))
 
   (global-set-key (kbd "C-t") 'new-scratch)
-  (global-set-key (kbd "<header-line> <double-mouse-1>") 'new-scratch)
+  (global-set-key (kbd "<header-line> <double-mouse-1>") 'fx/new-scratch)
   )
 
 
@@ -321,20 +328,19 @@
 ;;;;          TODO
 ;;;;
 (when t
-  (defun default-todo-list()
+  (defun fx/default-todo-list()
     "open the default todo list"
     (interactive)
     (find-file "~/.emacs.d/todo.org")
     )
-  (global-set-key (kbd "C-S-t") 'default-todo-list)
+  (global-set-key (kbd "C-S-t") 'fx/default-todo-list)
   )
 
 
 ;;;;
 ;;;;          undo-tree-mode
 ;;;;
-(when t
-  
+(defun fx/undo-tree-mode()
   (require 'undo-tree)
   ;; override the function so undo-tree-mode can be
   ;; force enabled
@@ -344,12 +350,12 @@
   (global-set-key (kbd "C-z") 'undo-tree-undo)
   (global-set-key (kbd "C-S-z") 'undo-tree-redo)
   )
-
+(fx/undo-tree-mode)
 
 ;;;;
 ;;;;          ido
 ;;;;
-(when t
+(defun fx/ido-mode()
   (require 'ido)
   (require 'ido-vertical-mode)
 
@@ -358,40 +364,18 @@
   (ido-mode t)
   (ido-vertical-mode t)
   )
-
-(when nil
-  (ivy-mode 1)
-  (setq ivy-use-virtual-buffers t)
-  (setq enable-recursive-minibuffers t)
-  (global-set-key "\C-s" 'swiper)
-  (global-set-key (kbd "C-c C-r") 'ivy-resume)
-  (global-set-key (kbd "<f6>") 'ivy-resume)
-  (global-set-key (kbd "M-x") 'counsel-M-x)
-  (global-set-key (kbd "C-x C-f") 'counsel-find-file)
-  (global-set-key (kbd "<f1> f") 'counsel-describe-function)
-  (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
-  (global-set-key (kbd "<f1> l") 'counsel-find-library)
-  (global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
-  (global-set-key (kbd "<f2> u") 'counsel-unicode-char)
-  (global-set-key (kbd "C-c g") 'counsel-git)
-  (global-set-key (kbd "C-c j") 'counsel-git-grep)
-  (global-set-key (kbd "C-c k") 'counsel-ag)
-  (global-set-key (kbd "C-x l") 'counsel-locate)
-  (global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
-  (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
-  )
-
+(fx/ido-mode)
 
 ;;;;
 ;;;;      kill minibuffer
 ;;;;
 (when t
-  (defun stop-using-minibuffer ()
+  (defun fx/kill-minibuffer ()
     "kill the minibuffer"
     (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
       (abort-recursive-edit)))
 
-  (add-hook 'mouse-leave-buffer-hook 'stop-using-minibuffer)
+  (add-hook 'mouse-leave-buffer-hook 'fx/kill-minibuffer)
   )
 
 
@@ -441,7 +425,7 @@
 (when t
   (require 'bm)
   
-  (defun bm-get-line-at-click ()
+  (defun fx/bm-get-line-at-click ()
     (save-excursion
       (let ((click-y (cdr (cdr (mouse-position))))
             (line-move-visual-store line-move-visual))
@@ -452,13 +436,13 @@
         (line-number-at-pos))))
   
 
-  (defun bookmark-line-at-click ()
+  (defun fx/bm-line-at-click ()
     (interactive)
-    (goto-line (bm-get-line-at-click))
+    (goto-line (fx/bm-get-line-at-click))
     (bm-toggle)
     )
   
-  (global-set-key (kbd "<left-margin> <mouse-1>") 'bookmark-line-at-click)
+  (global-set-key (kbd "<left-margin> <mouse-1>") 'fx/bm-line-at-click)
   
   (setq bm-highlight-style 'bm-highlight-line-and-fringe)
 
@@ -722,8 +706,8 @@
 (global-set-key [ns-drag-file] 'ns-find-file)
 (setq ns-pop-up-frames nil)
 (when nil
-  (define-key global-map [ns-drag-file] 'my-ns-open-files)
-  (defun my-ns-open-files ()
+  (define-key global-map [ns-drag-file] 'fx/ns-open-files)
+  (defun fx/ns-open-files ()
     "Open files in the list `ns-input-file'."
     (interactive)
     (mapc 'find-file ns-input-file)
@@ -743,7 +727,7 @@
 ;;;;
 ;;;;           kill *Completions* buffer automatically
 ;;;;
-(defun delete-completion-window-buffer (&optional output)
+(defun fx/delete-completion-window-buffer (&optional output)
   (interactive)
   (dolist (win (window-list))
     (when (string= (buffer-name (window-buffer win)) "*Completions*")
@@ -751,7 +735,7 @@
       (kill-buffer "*Completions*")))
   output)
 
-(add-hook 'comint-preoutput-filter-functions 'delete-completion-window-buffer)
+(add-hook 'comint-preoutput-filter-functions 'fx/delete-completion-window-buffer)
 
 
 ;;;;
@@ -791,14 +775,14 @@
 ;;;;             
 ;;;;           set emacs PATH
 ;;;;
-(defun set-exec-path-from-shell-PATH ()
+(defun fx/set-exec-path-from-shell-PATH ()
   (let ((path-from-shell 
          (replace-regexp-in-string "[[:space:]\n]*$" "" 
                                    (shell-command-to-string "$SHELL -l -c 'echo $PATH'"))))
     (setenv "PATH" path-from-shell)
     (setq exec-path (split-string path-from-shell path-separator))))
 (when is-macos
-  (set-exec-path-from-shell-PATH))
+  (fx/set-exec-path-from-shell-PATH))
 
 
 ;;;; 
@@ -925,10 +909,10 @@
 
   ;; better appearance for terminal
   (when (not (display-graphic-p))
-    (defun linum-format-func (line)
+    (defun fx/linum-format-func (line)
       (let ((w (length (number-to-string (count-lines (point-min) (point-max))))))
         (propertize (format (format "%%%dd| " w) line) 'face 'linum)))
-    (setq linum-format 'linum-format-func)
+    (setq linum-format 'fx/linum-format-func)
     )
 
   (global-linum-mode 1)
@@ -1010,17 +994,17 @@
               (concat " * " (concat ad-return-value " "))
             (concat " " (concat ad-return-value " ")))))
   ;; Called each time the modification state of the buffer changed.
-  (defun ztl-modification-state-change ()
+  (defun fx/modification-state-change ()
     (tabbar-set-template tabbar-current-tabset nil)
     (tabbar-display-update))
   ;; First-change-hook is called BEFORE the change is made.
-  (defun ztl-on-buffer-modification ()
+  (defun fx/on-buffer-modification ()
     (set-buffer-modified-p t)
-    (ztl-modification-state-change))
-  (add-hook 'after-save-hook 'ztl-modification-state-change)
+    (fx/modification-state-change))
+  (add-hook 'after-save-hook 'fx/modification-state-change)
   ;; This doesn't work for revert, I don't know.
-  ;;(add-hook 'after-revert-hook 'ztl-modification-state-change)
-  (add-hook 'first-change-hook 'ztl-on-buffer-modification)
+  ;;(add-hook 'after-revert-hook 'fx/modification-state-change)
+  (add-hook 'first-change-hook 'fx/on-buffer-modification)
 
   (setq tabbar-use-images nil)
   (setq tabbar-separator (quote (0.2)))
@@ -1062,8 +1046,8 @@
                                         ; was dired-up-directory
               ))
 
-  (add-hook 'dired-mode-hook 'frinkr/dired-mode-hook)
-  (defun frinkr/dired-mode-hook ()
+  (add-hook 'dired-mode-hook 'fx/dired-mode-hook)
+  (defun fx/dired-mode-hook ()
     (local-set-key (kbd "<mouse-2>") 'diredp-mouse-find-file-reuse-dir-buffer))
   
   )
@@ -1075,7 +1059,7 @@
 (when (not (display-graphic-p))
 
   ;; Mousewheel
-  (defun sd-mousewheel-scroll-up (event)
+  (defun fx/mousewheel-scroll-up (event)
     "Scroll window under mouse up by five lines."
     (interactive "e")
     (let ((current-window (selected-window)))
@@ -1085,7 +1069,7 @@
             (scroll-up 5))
         (select-window current-window))))
 
-  (defun sd-mousewheel-scroll-down (event)
+  (defun fx/mousewheel-scroll-down (event)
     "Scroll window under mouse down by five lines."
     (interactive "e")
     (let ((current-window (selected-window)))
@@ -1095,15 +1079,15 @@
             (scroll-down 5))
         (select-window current-window))))
 
-  (global-set-key (kbd "<mouse-5>") 'sd-mousewheel-scroll-up)
-  (global-set-key (kbd "<mouse-4>") 'sd-mousewheel-scroll-down)
+  (global-set-key (kbd "<mouse-5>") 'fx/mousewheel-scroll-up)
+  (global-set-key (kbd "<mouse-4>") 'fx/mousewheel-scroll-down)
   )
 
 
 ;;;;
 ;;;;           fast-nav mode
 (when t
-  (defvar fast-nav-mode-map
+  (defvar fx/fast-nav-mode-map
     (let ((map (make-sparse-keymap)))
       (define-key map (kbd "M-n") (lambda () (interactive) (next-line 5)))
       (define-key map (kbd "M-p") (lambda () (interactive) (previous-line 5)))
@@ -1119,19 +1103,19 @@
       ;;      (global-set-key (kbd "<mouse-5>") 'tabbar-backward)
 
       map)
-    "fast-nav-mode keymap.")
+    "fx/fast-nav-mode keymap.")
 
-  (define-minor-mode fast-nav-mode
+  (define-minor-mode fx/fast-nav-mode
     "A minor mode so that my key settings override annoying major modes."
     :init-value t
     :lighter " fast-nav"
-    :keymap fast-nav-mode-map)
+    :keymap fx/fast-nav-mode-map)
 
-  (defun fast-nav/minibuffer-setup-hook ()
-    (fast-nav-mode 0))
-  (add-hook 'minibuffer-setup-hook 'fast-nav/minibuffer-setup-hook)
+  (defun fx/fast-nav/minibuffer-setup-hook ()
+    (fx/fast-nav-mode 0))
+  (add-hook 'minibuffer-setup-hook 'fx/fast-nav/minibuffer-setup-hook)
   
-  (fast-nav-mode 1)
+  (fx/fast-nav-mode 1)
   
   )
 
@@ -1147,7 +1131,7 @@
   (eval-after-load "p4" '(diminish 'p4-mode nil))
   (eval-after-load "abbrev" '(diminish 'abbrev-mode nil))
   
-  (diminish 'fast-nav-mode nil)
+  (diminish 'fx/fast-nav-mode nil)
   )
 
 
@@ -1227,7 +1211,7 @@
     )  
 
 
-  (defun frinkr/setup-tabbar-theme()
+  (defun fx/setup-tabbar-theme()
     "setup the the tabbar-theme, which is not included in most theme"
 
     (set-face-attribute
@@ -1327,7 +1311,7 @@
     "Run `after-load-theme-hook'."
     (run-hooks 'after-load-theme-hook))
 
-  (add-hook 'after-load-theme-hook 'frinkr/setup-tabbar-theme)
+  (add-hook 'after-load-theme-hook 'fx/setup-tabbar-theme)
   
   (load-theme 'dracula t)
   ;;(load-theme 'solarized-light t)
@@ -1379,10 +1363,10 @@
 
   (require 'ac-octave)
   ;;  (ac-octave-init)
-  (defun ac-octave-mode-setup ()
+  (defun fx/ac-octave-mode-setup ()
     (setq ac-sources '(ac-source-octave)))
   (add-hook 'octave-mode-hook
-            '(lambda () (ac-octave-mode-setup)))
+            '(lambda () (fx/ac-octave-mode-setup)))
 
   (add-hook 'inferior-octave-mode-hook
             (lambda ()
@@ -1791,13 +1775,13 @@
   (global-semantic-highlight-edits-mode 1)
   
   ;; ac source
-  (defun frinkr/ac-cedet-hook ()
+  (defun fx/ac-cedet-hook ()
     (add-to-list 'ac-sources 'ac-source-gtags)
     (add-to-list 'ac-sources 'ac-source-semantic))
-  (add-hook 'c-mode-common-hook 'frinkr/ac-cedet-hook)
+  (add-hook 'c-mode-common-hook 'fx/ac-cedet-hook)
 
   ;; Keybinding
-  (defun frinkr/cedet-hook ()
+  (defun fx/cedet-hook ()
     (local-set-key [(control return)] 'semantic-ia-complete-symbol-menu)
     (local-set-key "\C-c?" 'semantic-ia-complete-symbol)
     (local-set-key [(control ?/)] 'semantic-ia-complete-symbol-menu)
@@ -1808,11 +1792,11 @@
     (local-set-key "\C-cs" 'semantic-ia-show-summary)
     (local-set-key "\C-cp" 'semantic-analyze-proto-impl-toggle)
     )
-  (add-hook 'c-mode-common-hook 'frinkr/cedet-hook)
-  (add-hook 'lisp-mode-hook 'frinkr/cedet-hook)
-  (add-hook 'scheme-mode-hook 'frinkr/cedet-hook)
-  (add-hook 'emacs-lisp-mode-hook 'frinkr/cedet-hook)
-  (add-hook 'erlang-mode-hook 'frinkr/cedet-hook)
+  (add-hook 'c-mode-common-hook 'fx/cedet-hook)
+  (add-hook 'lisp-mode-hook 'fx/cedet-hook)
+  (add-hook 'scheme-mode-hook 'fx/cedet-hook)
+  (add-hook 'emacs-lisp-mode-hook 'fx/cedet-hook)
+  (add-hook 'erlang-mode-hook 'fx/cedet-hook)
 
   ;; Appearance
   (if (display-graphic-p)
@@ -1884,7 +1868,7 @@
 
   ;; Create my own coding style
   ;; No space before { and function sig indents 4 if argument overflow
-  (setq frinkr/c4-style
+  (setq fx/c4-style
         '((c-auto-newline                 . nil)
           (c-basic-offset                 . 4)
           (c-comment-only-line-offset     . 0)
@@ -1908,7 +1892,7 @@
                                              empty-defun-braces
                                              defun-close-semi))))
 
-  (setq frinkr/c2-style
+  (setq fx/c2-style
         '((c-auto-newline                 . nil)
           (c-basic-offset                 . 2)
           (c-comment-only-line-offset     . 0)
@@ -1949,11 +1933,11 @@
   (add-hook 'c++-mode-hook 'vlad-cc-style)
 
   ;; Construct a hook to be called when entering C mode
-  (defun lconfig-c-mode ()
+  (defun fx/c-mode ()
     (progn (define-key c-mode-base-map "\C-l" 'newline-and-indent)
-           (c-add-style "frinkr4" frinkr/c4-style t))
+           (c-add-style "fx4" fx/c4-style t))
     )
-  (add-hook 'c-mode-common-hook 'lconfig-c-mode)
+  (add-hook 'c-mode-common-hook 'fx/c-mode)
 
   (defadvice c-lineup-arglist (around my activate)
     "Improve indentation of continued C++11 lambda function opened as argument."
@@ -1985,10 +1969,10 @@
 
 
   ;; Setup Assembler mode
-  (defun lconfig-asm-mode-hook ()
+  (defun fx/asm-mode-hook ()
     (progn (setq comment-column 36)
            (setq tab-stop-list '(4 8 12 16 20 24 28 36 40 44 48))))
-  (add-hook 'asm-mode-hook 'lconfig-asm-mode-hook)
+  (add-hook 'asm-mode-hook 'fx/asm-mode-hook)
   (add-to-list 'auto-mode-alist '("\\.s$" . asm-mode))
   (add-to-list 'auto-mode-alist '("\\.asm$" . asm-mode))
 
