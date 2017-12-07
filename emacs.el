@@ -139,7 +139,7 @@
 ;;;;        Behavior Settings
 ;;;;
 (defun fx/general-behavior()
-  (global-hl-line-mode 1)
+  (global-hl-line-mode t)
   (desktop-save-mode 1)  ;; save session
 
   ;; transparent
@@ -311,7 +311,7 @@
 ;;;;
 
 (when t
-  (defun fx/new-scratch ()
+  (defun new-scratch ()
     "open up a guaranteed new scratch buffer"
     (interactive)
     (switch-to-buffer (loop for num from 0
@@ -320,7 +320,7 @@
                             finally return name)))
 
   (global-set-key (kbd "C-t") 'new-scratch)
-  (global-set-key (kbd "<header-line> <double-mouse-1>") 'fx/new-scratch)
+  (global-set-key (kbd "<header-line> <double-mouse-1>") 'new-scratch)
   )
 
 
@@ -328,19 +328,19 @@
 ;;;;          TODO
 ;;;;
 (when t
-  (defun fx/default-todo-list()
+  (defun default-todo-list()
     "open the default todo list"
     (interactive)
     (find-file "~/.emacs.d/todo.org")
     )
-  (global-set-key (kbd "C-S-t") 'fx/default-todo-list)
+  (global-set-key (kbd "C-S-t") 'default-todo-list)
   )
 
 
 ;;;;
 ;;;;          undo-tree-mode
 ;;;;
-(defun fx/undo-tree-mode()
+(defun fx/setup-undo()
   (require 'undo-tree)
   ;; override the function so undo-tree-mode can be
   ;; force enabled
@@ -350,12 +350,12 @@
   (global-set-key (kbd "C-z") 'undo-tree-undo)
   (global-set-key (kbd "C-S-z") 'undo-tree-redo)
   )
-(fx/undo-tree-mode)
+(fx/setup-undo)
 
 ;;;;
 ;;;;          ido
 ;;;;
-(defun fx/ido-mode()
+(defun fx/setup-ido()
   (require 'ido)
   (require 'ido-vertical-mode)
 
@@ -364,12 +364,12 @@
   (ido-mode t)
   (ido-vertical-mode t)
   )
-(fx/ido-mode)
+(fx/setup-ido)
 
 ;;;;
 ;;;;      kill minibuffer
 ;;;;
-(when t
+(defun fx/setup-minibuffer()
   (defun fx/kill-minibuffer ()
     "kill the minibuffer"
     (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
@@ -377,21 +377,22 @@
 
   (add-hook 'mouse-leave-buffer-hook 'fx/kill-minibuffer)
   )
-
+(fx/setup-minibuffer)
 
 ;;;;
 ;;;;          ibuffer
 ;;;;
-(when t
+(defun fx/setup-ibuffer()
   (global-set-key (kbd "C-x C-b") 'ibuffer)
   (autoload 'ibuffer "ibuffer" "List buffers." t)
   )
+(fx/setup-ibuffer)
 
 
 ;;;;
 ;;;;          scrolling
 ;;;;
-(when t
+(defun fx/setup-scrolling()
   (require 'on-screen)
   (on-screen-global-mode nil)
 
@@ -417,14 +418,13 @@
     (scroll-bar-mode -1)
     )
   )
-
+(fx/setup-scrolling)
 
 ;;;;
 ;;;;           bookmark
 ;;;;
-(when t
+(defun fx/setup-bookmark()
   (require 'bm)
-  
   (defun fx/bm-get-line-at-click ()
     (save-excursion
       (let ((click-y (cdr (cdr (mouse-position))))
@@ -464,7 +464,7 @@
     (add-hook 'after-revert-hook #'bm-buffer-restore)
     )
   )
-
+(fx/setup-bookmark)
 
 ;;;;
 ;;;;           nyan
@@ -511,7 +511,7 @@
 ;;;;           eshell
 ;;;;
 
-(when t
+(defun fx/setup-eshell()
 
   ;; max lines
   (setq eshell-buffer-maximum-lines 10000)
@@ -578,11 +578,12 @@
 
   )
 
+(fx/setup-eshell)
 
 ;;;;
 ;;;;           cygwin in emacs
 ;;;;
-(when t
+(defun fx/setup-cygwin()
   ;; Cgywin Emacs
   (when (eq system-type 'cygwin)
     (add-hook 'comint-output-filter-functions
@@ -674,6 +675,7 @@
 
     ))
 
+(fx/setup-cygwin)
 
 ;;;;
 ;;;;          diff
@@ -700,34 +702,25 @@
   )
 
 ;;;;
-;;;;           drag on Mac OSX
+;;;;       macOS setup
 ;;;;
+(defun fx/setup-macos()
+  ;; drag on Mac OSX
+  (global-set-key [ns-drag-file] 'ns-find-file)
+  (setq ns-pop-up-frames nil)
 
-(global-set-key [ns-drag-file] 'ns-find-file)
-(setq ns-pop-up-frames nil)
-(when nil
-  (define-key global-map [ns-drag-file] 'fx/ns-open-files)
-  (defun fx/ns-open-files ()
-    "Open files in the list `ns-input-file'."
-    (interactive)
-    (mapc 'find-file ns-input-file)
-    (setq ns-input-file nil))
-  )
-
-
-;;;;
-;;;;          reveal in Finder  
-;;;;
-(when t
+  ;; reveal in Finder  
   (require 'reveal-in-osx-finder)
   (defalias 'open-in-finder 'reveal-in-osx-finder)
+
   )
+(fx/setup-macos)
 
 
 ;;;;
 ;;;;           kill *Completions* buffer automatically
 ;;;;
-(defun fx/delete-completion-window-buffer (&optional output)
+(defun fx/kill-completion-buffer (&optional output)
   (interactive)
   (dolist (win (window-list))
     (when (string= (buffer-name (window-buffer win)) "*Completions*")
@@ -735,16 +728,16 @@
       (kill-buffer "*Completions*")))
   output)
 
-(add-hook 'comint-preoutput-filter-functions 'fx/delete-completion-window-buffer)
+(add-hook 'comint-preoutput-filter-functions 'fx/kill-completion-buffer)
 
 
 ;;;;
 ;;;;           reload the buffer
 ;;;;
 (defun reload ()
-  "Reload the buffer."
+  "Reload the buffer w/o prompt."
   (interactive)
-  (revert-buffer))
+  (revert-buffer nil t))
 
 (global-set-key (kbd "C-x r") 'reload)
 
@@ -761,7 +754,7 @@
 ;;;;
 ;;;;           open file with sudo
 ;;;;
-(defun find-alternative-file-with-sudo ()
+(defun find-file-sudo ()
   "Open current buffer as root!"
   (interactive)
   (when buffer-file-name
@@ -769,20 +762,20 @@
      (concat "/sudo::"
              buffer-file-name))))
 
-(global-set-key (kbd "C-x C-k") 'find-alternative-file-with-sudo)
+(global-set-key (kbd "C-x C-k") 'find-file-sudo)
 
 
 ;;;;             
 ;;;;           set emacs PATH
 ;;;;
-(defun fx/set-exec-path-from-shell-PATH ()
+(defun fx/set-exec-path ()
   (let ((path-from-shell 
          (replace-regexp-in-string "[[:space:]\n]*$" "" 
                                    (shell-command-to-string "$SHELL -l -c 'echo $PATH'"))))
     (setenv "PATH" path-from-shell)
     (setq exec-path (split-string path-from-shell path-separator))))
 (when is-macos
-  (fx/set-exec-path-from-shell-PATH))
+  (fx/set-exec-path))
 
 
 ;;;; 
@@ -813,7 +806,7 @@
 ;;;;
 ;;;;           highlight-thing
 ;;;;
-(when t
+(defun fx/setup-highlight-thing()
   (require 'highlight-symbol)
   (global-set-key [double-mouse-1] 'highlight-symbol)
   ;;  (global-set-key [mouse-1] 'highlight-symbol-remove-all)
@@ -868,11 +861,12 @@
   ;;  (global-highlight-thing-mode)
   ;;  (setq highlight-thing-delay-seconds 0.2)
   )
+(fx/setup-highlight-thing)
 
 ;;;;
 ;;;;           fill column indicator
 ;;;;
-(when t
+(defun fx/setup-column-indicator()
   (require 'fill-column-indicator)
   (setq fci-rule-width 1)
   (setq fci-rule-column 90)
@@ -898,12 +892,12 @@
       (setq sanityinc/fci-mode-suppressed nil)
       (turn-on-fci-mode)))
   )
-
+(fx/setup-column-indicator)
 
 ;;;;
 ;;;;           line number
 ;;;;
-(when t
+(defun fx/setup-line-number()
   (require 'linum)
   (add-hook 'find-file-hook (lambda () (linum-mode 1)))
 
@@ -918,6 +912,7 @@
   (global-linum-mode 1)
   (linum-mode t)
   )
+(fx/setup-line-number)
 
 ;;;;
 ;;;;           P4
@@ -930,7 +925,8 @@
 ;;;;
 ;;;;           magit
 ;;;;
-(when t
+
+(defun fx/setup-git()
   (require 'magit)
 
   (setq magit-auto-revert-mode nil)
@@ -938,15 +934,12 @@
   (global-set-key (kbd "C-x g") 'magit-status)
   (defalias 'magit 'magit-status)
   )
-
+(fx/setup-git)
 
 ;;;;
 ;;;;           tabbar
 ;;;;
-(setq enable-tabbar t)
-
-(when enable-tabbar
-
+(defun fx/setup-tabbar()
   (setq tabbar-ruler-global-tabbar t)
   (setq tabbar-ruler-use-mode-icons nil)  ;; don't use the ungly icons
   (setq tabbar-ruler-swap-faces t)
@@ -1010,11 +1003,12 @@
   (setq tabbar-separator (quote (0.2)))
   )
 
+(fx/setup-tabbar)
 
 ;;;;
 ;;;;           Dired
 ;;;;
-(when t
+(defun fx/setup-dired()
   ;; show details by default
   (setq diredp-hide-details-initially-flag nil)
   (require 'dired+)
@@ -1051,7 +1045,7 @@
     (local-set-key (kbd "<mouse-2>") 'diredp-mouse-find-file-reuse-dir-buffer))
   
   )
-
+(fx/setup-dired)
 
 ;;;;
 ;;;;            Mouse Scroll in terminal
@@ -1163,7 +1157,7 @@
 ;;;;
 ;;;;                     theme
 ;;;;
-(when t
+(defun fx/setup-theme()
   (when t ;; basic
     (if (display-graphic-p)
         (progn
@@ -1321,6 +1315,7 @@
   
   )
 
+(fx/setup-theme)
 
 
 
@@ -1328,6 +1323,7 @@
 ;;;;                     Modes Settings
 ;;;;---------------------------------------------------------------------------
 
+(defun fx/setup-modes()
 ;;;;
 ;;;;           lua
 ;;;;
@@ -1529,6 +1525,9 @@
   (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode)))
 
 
+)
+
+(fx/setup-modes)
 
 ;;;;---------------------------------------------------------------------------
 ;;;;                     Programming Settings
@@ -1537,7 +1536,7 @@
 ;;;;
 ;;;;           C++11
 ;;;;
-(when nil ;; depricated in emacs 25
+(defun fx/setup-c++11() ;; depricated in emacs 25
   (require 'font-lock)
 
   (defun --copy-face (new-face face)
@@ -1582,7 +1581,7 @@
 ;;;;
 ;;;;           Auto Complete
 ;;;;
-(when t
+(defun fx/setup-auto-complete()
   (require 'auto-complete-config)
   (require 'pos-tip)  ;; for a nice completion menu and help
   
@@ -1611,54 +1610,57 @@
   ;;(setq popup-use-optimized-column-computation nil)
   (ac-linum-workaround)
   )
-
+(fx/setup-auto-complete)
 
 ;;;;
 ;;;;           ecb
 ;;;;
-(when is-macos
-  ;; error when byte-compiling from melpa, nerver mind. It can just run
+(defun fx/setup-ecb()
+     (when is-macos
+       ;; error when byte-compiling from melpa, nerver mind. It can just run
 
-  (require 'ecb)
-  (custom-set-variables '(ecb-options-version "2.40"))
+       (require 'ecb)
+       (custom-set-variables '(ecb-options-version "2.40"))
 
-  ;; activate at start up  
-  (when (display-graphic-p)
-    (setq ecb-auto-activate t))
+       ;; activate at start up  
+       (when (display-graphic-p)
+         (setq ecb-auto-activate t))
 
-  (setq ecb-auto-activate nil)
-  
-  ;; no tip-of-day
-  (setq ecb-tip-of-the-day nil)
+       (setq ecb-auto-activate nil)
+       
+       ;; no tip-of-day
+       (setq ecb-tip-of-the-day nil)
 
-  ;; layout
-  (setq ecb-layout-name "left15")  
-  (setq ecb-layout-window-sizes nil)
-  (setq ecb-fix-window-size (quote width)) ;; fixed witdh
+       ;; layout
+       (setq ecb-layout-name "left15")  
+       (setq ecb-layout-window-sizes nil)
+       (setq ecb-fix-window-size (quote width)) ;; fixed witdh
 
-  ;; directories
-  (setq ecb-source-path (quote (("/usr/include" "c")
-                                ("/usr/include/c++/4.2.1" "std c++")
-                                ("/Data/P4/" "P4")
-                                ("/Users/frinkr/Desktop/Dropbox/Tech/" "Tech"))))
-  
-  (setq ecb-primary-secondary-mouse-buttons (quote mouse-1--C-mouse-1))
-  (setq ecb-use-speedbar-instead-native-tree-buffer nil)
+       ;; directories
+       (setq ecb-source-path (quote (("/usr/include" "c")
+                                     ("/usr/include/c++/4.2.1" "std c++")
+                                     ("/Data/P4/" "P4")
+                                     ("/Users/frinkr/Desktop/Dropbox/Tech/" "Tech"))))
+       
+       (setq ecb-primary-secondary-mouse-buttons (quote mouse-1--C-mouse-1))
+       (setq ecb-use-speedbar-instead-native-tree-buffer nil)
 
-  (defun ecb-toggle-windows ()
-    "toggle ecb-activaty"
-    (interactive)
-    (ecb-toggle-ecb-windows)
-    )
-  
-  (global-set-key (kbd "M-SPC") 'ecb-toggle-windows)
-  
-  )
+       (defun ecb-toggle-windows ()
+         "toggle ecb-activaty"
+         (interactive)
+         (ecb-toggle-ecb-windows)
+         )
+       
+       (global-set-key (kbd "M-SPC") 'ecb-toggle-windows)
+       
+       )
+     )
+(fx/setup-ecb)
 
 ;;;;
 ;;;;                        python
 ;;;;
-(when nil
+(defun fx/setup-python()
   ;; auto env
   (when nil
     (require 'auto-virtualenv)
@@ -1683,7 +1685,7 @@
 ;;;;
 ;;;;                        yasnippets
 ;;;;
-(when nil
+(defun fx/setup-yasnippets()
   (require 'yasnippet)
   (yas-global-mode t)
 
@@ -1699,7 +1701,7 @@
 ;;;;
 ;;;;           helm
 ;;;;
-(when nil
+(defun fx/setup-helm()
   (require 'helm-config)
   (global-set-key (kbd "C-x b") 'helm-buffers-list)
 
@@ -1716,7 +1718,7 @@
 ;;;;
 ;;;;           Flycheck
 ;;;;
-(when t
+(defun fx/setup-flycheck()
   (global-flycheck-mode)
   (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++11")))
   (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++11")))
@@ -1730,6 +1732,7 @@
   (eval-after-load 'flycheck '(require 'flycheck-ghcmod))
   )
 
+(fx/setup-flycheck)
 
 ;;;;
 ;;;;           cmake-ide
@@ -1744,12 +1747,12 @@
 ;;;;
 ;;;;               Cedet
 ;;;;
-(when t
+(defun fx/setup-cedet()
   ;; select which submodes we want to activate
   (add-to-list 'semantic-default-submodes 'global-semanticdb-minor-mode)
   (add-to-list 'semantic-default-submodes 'global-semantic-mru-bookmark-mode)
   ;;(add-to-list 'semantic-default-submodes 'global-semantic-stickyfunc-mode)
-  (add-to-list 'semantic-default-submodes 'global-semantic-highlight-func-mode)
+  ;;(add-to-list 'semantic-default-submodes 'global-semantic-highlight-func-mode)
   (add-to-list 'semantic-default-submodes 'global-semantic-idle-scheduler-mode)
   (add-to-list 'semantic-default-submodes 'global-semantic-idle-summary-mode)
   ;;(add-to-list 'semantic-default-submodes 'global-semantic-idle-completions-mode) ;; fronzen?
@@ -1808,6 +1811,7 @@
       ))
   )
 
+(fx/setup-cedet)
 
 ;;;;
 ;;;;           gdb many window
@@ -1819,9 +1823,9 @@
 ;;;;
 ;;;;           cscope
 ;;;;
-(when t
+(defun fx/setup-cscope()
   (require 'xcscope)
-  (setq cscope-do-not-update-database t)
+  (setq cscope-do-not-update-database nil)
   ;; hotkey for cscope
   (when t
     (define-key global-map [(meta f2)]  'cscope-find-this-symbol)
@@ -1837,12 +1841,17 @@
     )
   (global-set-key (kbd "M-s d") 'cscope-find-global-definition)
   (global-set-key (kbd "M-s s") 'cscope-find-this-symbol)
+  (global-set-key (kbd "M-s M-s") 'cscope-find-this-symbol)
+  (global-set-key (kbd "C-S-s") 'cscope-find-this-symbol)
+  (global-set-key (kbd "C-S-j") 'cscope-find-global-definition)
   (global-set-key (kbd "M-s f") 'cscope-find-this-file)
   (global-set-key (kbd "M-s t") 'cscope-find-this-text-string)
   (global-set-key (kbd "M-s u") 'sr-speedbar-select-window)
   (global-set-key (kbd "M-s k") 'sr-speedbar-toggle)
   (global-set-key (kbd "<M-down-mouse-1>") 'cscope-find-this-symbol)
   )
+
+(fx/setup-cscope)
 
 ;; Setup Common Lisp mode
 (condition-case err
@@ -1853,7 +1862,7 @@
 ;;;;
 ;;;;        C++
 ;;;;
-(when t
+(defun fx/setup-c++()
   ;; Setup C mode
   (autoload 'c++-mode  "cc-mode" "C++ Editing Mode" t)
   (autoload 'c-mode    "cc-mode" "C Editing Mode" t)
@@ -1979,6 +1988,7 @@
   (autoload 'cpp-font-lock "cpp-mode" "CPP Font Lock mode" t)
   )
 
+(fx/setup-c++)
 
 ;;;;---------------------------------------------------------------------------
 ;;;;                     More variable settings
