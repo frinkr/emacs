@@ -9,7 +9,7 @@
 ;;;;
 ;;;;           proxy
 ;;;;
-(when t
+(when nil
   (setq url-proxy-services
         '(("no_proxy" . "^\\(localhost\\|10.*\\)")
           ("http" . "eglbeprx001:8080")
@@ -23,7 +23,7 @@
   (require 'package)
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
   ;;(add-to-list 'package-archives '("milkbox" . "http://melpa.milkbox.net/packages/") t)
-  ;;(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
+  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
   ;;(add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
   (package-initialize) ;; You might already have this line
   )
@@ -37,16 +37,16 @@
                        beacon
                        bm
                        bison-mode
-                       cygwin-mount
+                       ;;cygwin-mount
                        cmake-font-lock
                        cmake-mode
                        cmake-ide
                        clang-format
                        counsel
                        dash
-                       dired+
-                       dired-details
-                       dired-details+
+                       ;;dired+
+                       ;;dired-details
+                       ;;dired-details+
                        dired-hacks-utils
                        dired-k
                        dired-rainbow
@@ -72,9 +72,9 @@
                        highlight-thing
                        highlight-symbol
                        highlight-numbers
-                       highlight-tail
+                       ;;highlight-tail
                        lua-mode
-                       mouse3
+                       ;;mouse3
                        magit
                        markdown-mode
                        nyan-mode
@@ -84,7 +84,7 @@
                        py-autopep8
                        popup
                        pos-tip
-                       icicles
+                       ;;icicles
                        ido-vertical-mode
                        ivy
                        imenu-anywhere
@@ -781,7 +781,7 @@
 ;;;; 
 ;;;;           mouse3
 ;;;;
-(when t
+(when nil
   (when (display-graphic-p)
     (require 'mouse3)))
 
@@ -1010,8 +1010,8 @@
 ;;;;
 (defun fx/setup-dired()
   ;; show details by default
-  (setq diredp-hide-details-initially-flag nil)
-  (require 'dired+)
+  ;;(setq diredp-hide-details-initially-flag nil)
+  ;;(require 'dired+)
   ;;(require 'dired-details+)
 
   ;; show link
@@ -1045,7 +1045,7 @@
     (local-set-key (kbd "<mouse-2>") 'diredp-mouse-find-file-reuse-dir-buffer))
   
   )
-(fx/setup-dired)
+;;(fx/setup-dired)
 
 ;;;;
 ;;;;            Mouse Scroll in terminal
