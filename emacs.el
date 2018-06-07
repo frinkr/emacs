@@ -139,7 +139,7 @@
 ;;;;        Behavior Settings
 ;;;;
 (defun fx/general-behavior()
-  (global-hl-line-mode t)
+  (global-hl-line-mode nil)
   (desktop-save-mode 1)  ;; save session
 
   ;; transparent
@@ -334,6 +334,11 @@
     (find-file "~/.emacs.d/todo.org")
     )
   (global-set-key (kbd "C-S-t") 'default-todo-list)
+  
+  (add-hook 'org-agenda-mode-hook
+            (lambda ()
+              (add-hook 'auto-save-hook 'org-save-all-org-buffers nil t)
+              (auto-save-mode)))
   )
 
 
@@ -418,7 +423,7 @@
     (scroll-bar-mode -1)
     )
   )
-(fx/setup-scrolling)
+;;;; (fx/setup-scrolling)
 
 ;;;;
 ;;;;           bookmark
@@ -811,6 +816,8 @@
   (global-set-key [double-mouse-1] 'highlight-symbol)
   ;;  (global-set-key [mouse-1] 'highlight-symbol-remove-all)
 
+  (overlay-lists)
+
   (setq highlight-symbol-color-pairs
         '(
           ("white" . "SpringGreen3")
@@ -826,6 +833,33 @@
           ("white" . "RoyalBlue4")
           ))
 
+  (defvar-local highlight-symbol-line-overlay nil "Over used by ")
+  
+  (defun highlight-symbol-add-overlay(symbol begin end face)
+    
+    (setq highlight-symbol-line-overlay (make-overlay begin end))
+    ;;                                             (line-beginning-position)
+    ;;                                             (line-end-position)))
+
+    (overlay-put highlight-symbol-line-overlay 'priority -10)
+    (overlay-put highlight-symbol-line-overlay 'face face)
+    
+    )
+
+  (defun highlight-symbol-post-command-hook ()
+    (if highlight-symbol-line-overlay
+        (delete-overlay highlight-symbol-line-overlay))
+    (let ((begin (line-beginning-position))
+          (end (line-end-position))
+
+          )
+
+      ;; find symbols on current line
+      ;;(print begin)
+      )
+    )
+  ;;(add-hook 'post-command-hook 'highlight-symbol-post-command-hook nil t)
+  
   (defun highlight-symbol-next-color-pair ()
     "Step to and return next color from the color ring."
     (let ((color (nth highlight-symbol-color-index
@@ -836,6 +870,19 @@
               color (car highlight-symbol-color-pairs)))
       color))
 
+  (defun highlight-symbol-add-overlay-at-point (face)
+    "Add overlay at current symbol of current line"
+    (let (symbol bounds begin end)
+      (setq symbol (thing-at-point 'symbol))
+      (setq bounds (bounds-of-thing-at-point 'symbol))
+      (setq begin (car bounds))
+      (setq end (cdr bounds))
+
+      (highlight-symbol-add-overlay symbol begin end color)
+      (print (format "%d, %d" begin end))
+      )
+    )
+  
   (defun highlight-symbol-add-symbol (symbol &optional color)
     "Override this function for support convenience set foreground and background"
     (unless (highlight-symbol-symbol-highlighted-p symbol)
@@ -855,6 +902,9 @@
         ;; highlight
         (highlight-symbol-add-symbol-with-face symbol color)
         ;;(push symbol highlight-symbol-list)
+
+        ;;(highlight-symbol-add-overlay-at-point color)
+        
         )))
 
   ;;  (require 'highlight-thing)
@@ -1429,6 +1479,12 @@
   (add-hook 'cmake-mode-hook 'cmake-font-lock-activate)
   )
 
+;;;;
+;;;;           Makefile
+;;;;
+(when t
+  (add-to-list 'auto-mode-alist '("\\.mk\\'" . makefile-mode))
+  )
 
 ;;;;
 ;;;;           yacc and lex
@@ -1586,7 +1642,7 @@
   (require 'pos-tip)  ;; for a nice completion menu and help
   
   (add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
-  
+
   (ac-config-default)
   (setq ac-auto-start t)
 
@@ -1811,7 +1867,7 @@
       ))
   )
 
-(fx/setup-cedet)
+;;;; (fx/setup-cedet)
 
 ;;;;
 ;;;;           gdb many window
@@ -1941,9 +1997,48 @@
 
   (add-hook 'c++-mode-hook 'vlad-cc-style)
 
+  ;; syntax-highlighting for Qt
+  ;; (based on work by Arndt Gulbrandsen, Troll Tech)
+  (defun jk/c-mode-common-hook ()
+    "Set up c-mode and related modes.
+ 
+ Includes support for Qt code (signal, slots and alikes)."
+    
+    ;; base-style
+    (c-set-style "stroustrup")
+    ;; set auto cr mode
+    ;;(c-toggle-auto-hungry-state 0)
+    
+    ;; qt keywords and stuff ...
+    ;; set up indenting correctly for new qt kewords
+    (setq c-protection-key (concat "\\<\\(public\\|public slot\\|protected"
+                                   "\\|protected slot\\|private\\|private slot"
+                                   "\\)\\>")
+          c-C++-access-key (concat "\\<\\(signals\\|public\\|protected\\|private"
+                                   "\\|public slots\\|protected slots\\|private slots"
+                                   "\\)\\>[ \t]*:"))
+    (progn
+      ;; modify the colour of slots to match public, private, etc ...
+      (font-lock-add-keywords 'c++-mode
+                              '(("\\<\\(slots\\|signals\\)\\>" . font-lock-type-face)))
+      ;; make new font for rest of qt keywords
+      (make-face 'qt-keywords-face)
+      (set-face-foreground 'qt-keywords-face "BlueViolet")
+      ;; qt keywords
+      (font-lock-add-keywords 'c++-mode
+                              '(("\\<Q_OBJECT\\>" . 'qt-keywords-face)))
+      (font-lock-add-keywords 'c++-mode
+                              '(("\\<SIGNAL\\|SLOT\\>" . 'qt-keywords-face)))
+      (font-lock-add-keywords 'c++-mode
+                              '(("\\<Q[A-Z][A-Za-z]*" . 'qt-keywords-face)))
+      ))
+  (add-hook 'c-mode-common-hook 'jk/c-mode-common-hook)
+
+  
   ;; Construct a hook to be called when entering C mode
   (defun fx/c-mode ()
     (progn (define-key c-mode-base-map "\C-l" 'newline-and-indent)
+           (c-add-style "fx2" fx/c2-style t)
            (c-add-style "fx4" fx/c4-style t))
     )
   (add-hook 'c-mode-common-hook 'fx/c-mode)
