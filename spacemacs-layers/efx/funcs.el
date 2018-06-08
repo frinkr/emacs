@@ -306,20 +306,6 @@
   (add-to-list 'auto-mode-alist '("\\.mm\\'" . objc-mode))
   (add-to-list 'auto-mode-alist '("\\.m\\'" . objc-mode))
 
-
-  (defadvice c-lineup-arglist (around my activate)
-    "Improve indentation of continued C++11 lambda function opened as argument."
-    (setq ad-return-value
-          (if (and (equal major-mode 'c++-mode)
-                   (ignore-errors
-                     (save-excursion
-                       (goto-char (c-langelem-pos langelem))
-                       ;; Detect "[...](" or "[...]{". preceded by "," or "(",
-                       ;;   and with unclosed brace.
-                       (looking-at ".*[(,][ \t]*\\[[^]]*\\][ \t]*[({][^}]*$"))))
-              0                           ; no additional indent
-            ad-do-it)))                   ; default behavior
-
   ;; Create my own coding style
   ;; No space before { and function sig indents 4 if argument overflow
   (setq efx/cc-base-style
@@ -331,10 +317,10 @@
           (c-toggle-hungry-state          . t)
           (c-hanging-braces-alist         . ((substatement-open after)
                                              (brace-list-open)))
-          (c-offsets-alist                . ((arglist-close . c-lineup-arglist)
-                                             (case-label . 0)
+          (c-offsets-alist                . ((case-label . 0)
                                              (inline-open . 0)
                                              (substatement-open . 0)
+                                             (inlambda . 0) ; no extra indent for lambda
                                              (block-open . 0) ; no space before {
                                              (knr-argdecl-intro . -)))
           (c-hanging-colons-alist         . ((member-init-intro before)
