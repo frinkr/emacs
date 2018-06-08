@@ -1,4 +1,4 @@
-;;;;               
+;;;;
 ;;;;                Global configs
 ;;;;
 (setq is-macos (eq system-type 'darwin))
@@ -100,7 +100,7 @@
                        yascroll
                        yaml-mode
                        undo-tree
-                       
+
                        ;; top themes
                        zenburn-theme
                        solarized-theme
@@ -142,9 +142,19 @@
   (global-hl-line-mode nil)
   (desktop-save-mode 1)  ;; save session
 
-  ;; transparent
-  (set-frame-parameter (selected-frame) 'alpha '(95 90))
-  (add-to-list 'default-frame-alist '(alpha 95 90))
+  (if is-macos
+      (progn
+        (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+        (add-to-list 'default-frame-alist '(ns-appearance . dark)) ;; assuming you are using a dark theme
+        (setq ns-use-proxy-icon nil)
+        (setq frame-title-format nil)
+        )
+    (progn
+      ;; transparent
+      (set-frame-parameter (selected-frame) 'alpha '(95 90))
+      (add-to-list 'default-frame-alist '(alpha 95 90))
+      )
+    )
 
   ;; line & column number
   (line-number-mode t)
@@ -202,7 +212,7 @@
 (when t
   ;; Auto close bracket insertion
   (electric-pair-mode 1)
-  
+
   ;; Show matching pairs of parenthess
   (when nil
     (show-paren-mode nil)
@@ -210,7 +220,7 @@
     (setq show-paren-when-point-inside-paren t)
     (setq show-paren-style 'parenthesis)
     )
-  
+
   (beacon-mode t)
   (setq beacon-blink-when-focused t)
   (setq beacon-blink-when-window-changes t)
@@ -225,7 +235,7 @@
    'hl-paren-face nil
    :slant 'italic
    )
-  
+
   (require 'highlight-numbers)
   (add-hook 'prog-mode-hook 'highlight-numbers-mode)
   )
@@ -258,7 +268,7 @@
         ;; from the screen height (for panels, menubars and
         ;; whatnot), then divide by the height of a char to
         ;; get the height we want
-        (add-to-list 'default-frame-alist 
+        (add-to-list 'default-frame-alist
                      (cons 'height (/ (- (x-display-pixel-height) 200)
                                       (frame-char-height)))))))
 
@@ -334,7 +344,7 @@
     (find-file "~/.emacs.d/todo.org")
     )
   (global-set-key (kbd "C-S-t") 'default-todo-list)
-  
+
   (add-hook 'org-agenda-mode-hook
             (lambda ()
               (add-hook 'auto-save-hook 'org-save-all-org-buffers nil t)
@@ -351,7 +361,7 @@
   ;; force enabled
   (defun undo-tree-overridden-undo-bindings-p ())
   (global-undo-tree-mode)
-  
+
   (global-set-key (kbd "C-z") 'undo-tree-undo)
   (global-set-key (kbd "C-S-z") 'undo-tree-redo)
   )
@@ -365,7 +375,7 @@
   (require 'ido-vertical-mode)
 
   (setq ido-everywhere t)
-  
+
   (ido-mode t)
   (ido-vertical-mode t)
   )
@@ -413,13 +423,13 @@
     (setq scroll-step 5) ;; keyboard scroll 3 lines at a time
     )
 
-  
+
   ;; yascroll
   (when t
     (require 'yascroll)
     (global-yascroll-bar-mode 1)
     (setq yascroll:delay-to-hide nil)
-    
+
     (scroll-bar-mode -1)
     )
   )
@@ -439,16 +449,16 @@
         (next-line (1- click-y))
         (setq line-move-visual line-move-visual-store)
         (line-number-at-pos))))
-  
+
 
   (defun fx/bm-line-at-click ()
     (interactive)
     (goto-line (fx/bm-get-line-at-click))
     (bm-toggle)
     )
-  
+
   (global-set-key (kbd "<left-margin> <mouse-1>") 'fx/bm-line-at-click)
-  
+
   (setq bm-highlight-style 'bm-highlight-line-and-fringe)
 
   ;; save and restore
@@ -462,7 +472,7 @@
     (add-hook 'kill-emacs-hook #'(lambda nil
                                    (bm-buffer-save-all)
                                    (bm-repository-save)))
-    
+
     (add-hook 'after-save-hook #'bm-buffer-save)
 
     (add-hook 'find-file-hooks   #'bm-buffer-restore)
@@ -502,7 +512,7 @@
 (defun kill-other-buffers ()
   "Kill all other buffers, but eshell and shell."
   (interactive)
-  (mapc 'kill-buffer 
+  (mapc 'kill-buffer
         (delq (current-buffer)
               ;; keep eshell and shell
               (cl-remove-if '(lambda (x) (member (buffer-local-value 'major-mode x)
@@ -520,7 +530,7 @@
 
   ;; max lines
   (setq eshell-buffer-maximum-lines 10000)
-  
+
   ;;           toggle shell buffer
   ;;
   (defun toggle-shell-buffer (name)
@@ -555,7 +565,7 @@
       (erase-buffer)))
 
 
-  
+
   ;;           clear *shell* buffer
   ;;
   (defun clear-shell ()
@@ -576,7 +586,7 @@
     (let ((inhibit-read-only t))
       (erase-buffer)
       (eshell-send-input)))
-  
+
   (add-hook 'eshell-mode-hook
             '(lambda()
                (local-set-key (kbd "C-l") 'eshell-clear-buffer)))
@@ -598,13 +608,13 @@
     )
 
   (setq cygwin-root "C:/cygwin/")
-  
+
   ;; NTEmacs
   (when (and is-windows (file-exists-p cygwin-root))
     (setq cygwin-mount-cygwin-bin-directory (concat cygwin-root "bin"))
     (setenv "PATH" (concat (concat cygwin-root "bin;") (getenv "PATH")))
     (setq exec-path (cons (concat cygwin-root "bin;") exec-path))
-    
+
     (require 'cygwin-mount)
     (cygwin-mount-activate)
 
@@ -620,11 +630,11 @@
       ;; (e.g., "shell -c command")
       (setq shell-file-name explicit-shell-file-name)
       )
-    
+
     (when t
       ;; NT-emacs assumes a Windows shell. Change to bash.
       (setq shell-file-name "bash")
-      (setenv "SHELL" shell-file-name) 
+      (setenv "SHELL" shell-file-name)
       (setq explicit-shell-file-name shell-file-name)
       )
 
@@ -641,8 +651,8 @@
     ;;
     ;;(when (string-equal system-type "windows-nt")
     (if nil
-        (setq exec-path 
-              (append exec-path 
+        (setq exec-path
+              (append exec-path
                       '(
                         "C:/Windows/system32/"
                         "C:/Windows/"
@@ -656,7 +666,7 @@
                     (file-name-nondirectory (eshell/pwd))
                     (if (= (user-uid) 0) " # " " $ "))))
 
-    ;; shell-prompt not work for Windows. 
+    ;; shell-prompt not work for Windows.
     ;; We need fix .bashrc for windows (NOT .bash_profile, which is not read
     ;; by cygwin version of emacs)
     ;; export PS1="daji% "
@@ -664,7 +674,7 @@
     ;; STARTFGCOLOR='\e[0;35m';
     ;; STARTBGCOLOR="\e[40m"
     ;; ENDCOLOR="\e[0m"
-    ;; 
+    ;;
     ;; if [ "$PS" == "" ] ; then
     ;;     export PS1="daji\$ "
     ;;     if [ "$TERM" == "xterm" ] ; then
@@ -673,7 +683,7 @@
     ;;         export PS1="\[$STARTFGCOLOR$STARTBGCOLOR\]daji:\W\$ \[$ENDCOLOR\]"
     ;;     fi
     ;; fi
-    ;; 
+    ;;
     ;; if [ "$TERM" == "xterm" ] ; then
     ;;     PROMPT_COMMAND='echo -ne "\e]0;${HOSTNAME} - ${PWD}\007"'
     ;; fi
@@ -714,7 +724,7 @@
   (global-set-key [ns-drag-file] 'ns-find-file)
   (setq ns-pop-up-frames nil)
 
-  ;; reveal in Finder  
+  ;; reveal in Finder
   (require 'reveal-in-osx-finder)
   (defalias 'open-in-finder 'reveal-in-osx-finder)
 
@@ -770,12 +780,12 @@
 (global-set-key (kbd "C-x C-k") 'find-file-sudo)
 
 
-;;;;             
+;;;;
 ;;;;           set emacs PATH
 ;;;;
 (defun fx/set-exec-path ()
-  (let ((path-from-shell 
-         (replace-regexp-in-string "[[:space:]\n]*$" "" 
+  (let ((path-from-shell
+         (replace-regexp-in-string "[[:space:]\n]*$" ""
                                    (shell-command-to-string "$SHELL -l -c 'echo $PATH'"))))
     (setenv "PATH" path-from-shell)
     (setq exec-path (split-string path-from-shell path-separator))))
@@ -783,7 +793,7 @@
   (fx/set-exec-path))
 
 
-;;;; 
+;;;;
 ;;;;           mouse3
 ;;;;
 (when nil
@@ -826,7 +836,7 @@
           ("white" . "DeepPink")
           ("white" . "DarkOrange")
           ("white" . "OliveDrab4")
-          ("white" . "HotPink1")          
+          ("white" . "HotPink1")
           ("white" . "IndianRed3")
           ("white" . "RoyalBlue1")
           ("white" . "cyan3")
@@ -834,16 +844,16 @@
           ))
 
   (defvar-local highlight-symbol-line-overlay nil "Over used by ")
-  
+
   (defun highlight-symbol-add-overlay(symbol begin end face)
-    
+
     (setq highlight-symbol-line-overlay (make-overlay begin end))
     ;;                                             (line-beginning-position)
     ;;                                             (line-end-position)))
 
     (overlay-put highlight-symbol-line-overlay 'priority -10)
     (overlay-put highlight-symbol-line-overlay 'face face)
-    
+
     )
 
   (defun highlight-symbol-post-command-hook ()
@@ -859,7 +869,7 @@
       )
     )
   ;;(add-hook 'post-command-hook 'highlight-symbol-post-command-hook nil t)
-  
+
   (defun highlight-symbol-next-color-pair ()
     "Step to and return next color from the color ring."
     (let ((color (nth highlight-symbol-color-index
@@ -882,7 +892,7 @@
       (print (format "%d, %d" begin end))
       )
     )
-  
+
   (defun highlight-symbol-add-symbol (symbol &optional color)
     "Override this function for support convenience set foreground and background"
     (unless (highlight-symbol-symbol-highlighted-p symbol)
@@ -904,7 +914,7 @@
         ;;(push symbol highlight-symbol-list)
 
         ;;(highlight-symbol-add-overlay-at-point color)
-        
+
         )))
 
   ;;  (require 'highlight-thing)
@@ -925,7 +935,7 @@
         (setq fci-rule-color "darkblue")
       (setq fci-rule-color "green"))
     )
-  
+
   (add-hook 'after-change-major-mode-hook 'fci-mode)
 
   ;; will disrupt the auto-complte menu, hide the indicator
@@ -980,7 +990,7 @@
   (require 'magit)
 
   (setq magit-auto-revert-mode nil)
-  
+
   (global-set-key (kbd "C-x g") 'magit-status)
   (defalias 'magit 'magit-status)
   )
@@ -1006,7 +1016,7 @@
 
   (require 'tabbar)
   (tabbar-mode 1)
-  
+
   (when (not (display-graphic-p))
     (global-set-key (kbd "M-,") 'tabbar-backward)
     (global-set-key (kbd "M-.") 'tabbar-forward))
@@ -1077,7 +1087,7 @@
   (add-to-list 'dired-omit-extensions ".apdisk")
   (add-to-list 'dired-omit-extensions ".com.apple.timemachine.supported")
   (add-to-list 'dired-omit-extensions ".fseventsd")
-  
+
   ;; reuse the buffer
   (toggle-diredp-find-file-reuse-dir t)
   (put 'dired-find-alternate-file 'disabled nil)
@@ -1093,7 +1103,7 @@
   (add-hook 'dired-mode-hook 'fx/dired-mode-hook)
   (defun fx/dired-mode-hook ()
     (local-set-key (kbd "<mouse-2>") 'diredp-mouse-find-file-reuse-dir-buffer))
-  
+
   )
 ;;(fx/setup-dired)
 
@@ -1108,7 +1118,7 @@
     (interactive "e")
     (let ((current-window (selected-window)))
       (unwind-protect
-          (progn 
+          (progn
             (select-window (posn-window (event-start event)))
             (scroll-up 5))
         (select-window current-window))))
@@ -1118,7 +1128,7 @@
     (interactive "e")
     (let ((current-window (selected-window)))
       (unwind-protect
-          (progn 
+          (progn
             (select-window (posn-window (event-start event)))
             (scroll-down 5))
         (select-window current-window))))
@@ -1136,7 +1146,7 @@
       (define-key map (kbd "M-n") (lambda () (interactive) (next-line 5)))
       (define-key map (kbd "M-p") (lambda () (interactive) (previous-line 5)))
       (define-key map (kbd "M-b") (lambda () (interactive) (backward-word)))
-      
+
       (global-set-key (kbd "C-{") 'tabbar-backward)
       (global-set-key (kbd "C-}") 'tabbar-forward)
       (global-set-key (kbd "C-t") 'new-scratch)
@@ -1158,9 +1168,9 @@
   (defun fx/fast-nav/minibuffer-setup-hook ()
     (fx/fast-nav-mode 0))
   (add-hook 'minibuffer-setup-hook 'fx/fast-nav/minibuffer-setup-hook)
-  
+
   (fx/fast-nav-mode 1)
-  
+
   )
 
 
@@ -1174,7 +1184,7 @@
   (eval-after-load "auto-complete" '(diminish 'auto-complete-mode nil))
   (eval-after-load "p4" '(diminish 'p4-mode nil))
   (eval-after-load "abbrev" '(diminish 'abbrev-mode nil))
-  
+
   (diminish 'fx/fast-nav-mode nil)
   )
 
@@ -1222,7 +1232,7 @@
       (progn
         (menu-bar-mode -1)
         ;;        (set-face-background 'hl-line "color-235")
-        ;;        (set-face-attribute 'region nil :background "color-19")        
+        ;;        (set-face-attribute 'region nil :background "color-19")
         )
       )
     )
@@ -1234,7 +1244,7 @@
       (let ((face (or (get-char-property (point) 'read-face-name)
                       (get-char-property (point) 'face))))
         (if face (message "Face: %s" face) (message "No face at %d" pos))))
-    
+
     ;; Font stuff for emacs versions that support it
     ;;  (this stuff seems to be the least portable, comment this stuff out if it
     ;;   prevents the config file from loading)
@@ -1242,7 +1252,7 @@
       ;;(set-face-attribute 'default nil :font "Menlo 12")
       ;;(set-face-attribute 'default nil :font "Anonymous Pro-14")
       (set-face-attribute 'default nil :family "Source Code Pro" :weight 'light :height 130)
-      
+
       ;; fix gap at top when maximized
       (setq frame-resize-pixelwise t)
       )
@@ -1252,7 +1262,7 @@
 
     (when is-wsl
       (set-face-attribute 'default nil :font "DejaVu Sans Mono-14"))
-    )  
+    )
 
 
   (defun fx/setup-tabbar-theme()
@@ -1286,7 +1296,7 @@
      :background (face-attribute 'tabbar-default :background)
      :box '(:style released-button)
      )
-    
+
     (set-face-attribute
      'tabbar-unselected-modified nil
      :inherit 'tabbar-default
@@ -1297,7 +1307,7 @@
      :box '(:style released-button)
      )
 
-    
+
     (set-face-attribute
      'tabbar-selected nil
      :inherit 'tabbar-default
@@ -1308,7 +1318,7 @@
      :slant 'normal
      :box '(:style pressed-button)
      )
-    
+
     (set-face-attribute
      'tabbar-selected-modified nil
      :inherit 'tabbar-default
@@ -1316,7 +1326,7 @@
      :weight 'bold
      :height (face-attribute 'tabbar-default :height)
      :box '(:style pressed-button))
-    
+
     (set-face-attribute
      'tabbar-highlight nil
      :inherit 'highlight
@@ -1330,7 +1340,7 @@
      :background (face-attribute 'tabbar-default :background)
      :box '(:line-width 1 :style released-button)
      )
-    
+
     (set-face-attribute
      'tabbar-separator nil
      :inherit 'tabbar-default
@@ -1346,7 +1356,7 @@
      :weight 'bold
      :box '(:style pressed-button)
      )
-    
+
     )
 
   (defvar after-load-theme-hook nil
@@ -1356,13 +1366,13 @@
     (run-hooks 'after-load-theme-hook))
 
   (add-hook 'after-load-theme-hook 'fx/setup-tabbar-theme)
-  
+
   (load-theme 'dracula t)
   ;;(load-theme 'solarized-light t)
   ;;(load-theme 'monokai t)
   ;;(load-theme 'gotham t)
   ;;(load-theme 'afternoon t)
-  
+
   )
 
 (fx/setup-theme)
@@ -1400,7 +1410,7 @@
         (cons '("\\.m$" . octave-mode) auto-mode-alist))
 
   (setq inferior-octave-prompt ">> ")
-  
+
   (add-hook 'octave-mode-hook
             (lambda ()
               (abbrev-mode 1)
@@ -1429,7 +1439,7 @@
 ;;;;
 (when t
   (setq exec-path (append exec-path '("/Users/frinkr/.cabal/bin")))
-  
+
   ;; `cabal install ghc-mod` first
   (require 'haskell-mode)
   (add-to-list 'Info-default-directory-list (concat user-lisp-root "haskell-mode"))
@@ -1473,7 +1483,7 @@
          '(("\\.cmake\\'" . cmake-mode))
          '(("CMakeCache\\.txt\\'" . cmake-mode))
          auto-mode-alist))
-  
+
   (autoload 'cmake-mode "cmake-mode" nil t)
   (autoload 'cmake-font-lock-activate "cmake-font-lock" nil t)
   (add-hook 'cmake-mode-hook 'cmake-font-lock-activate)
@@ -1517,7 +1527,7 @@
 ;;;;                        pseudocode mode
 ;;;;
 (when t
-  (require 'generic-x) 
+  (require 'generic-x)
 
   (defface pseudocode-paragraph-face
     '((t (:foreground "green"
@@ -1640,7 +1650,7 @@
 (defun fx/setup-auto-complete()
   (require 'auto-complete-config)
   (require 'pos-tip)  ;; for a nice completion menu and help
-  
+
   (add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
 
   (ac-config-default)
@@ -1648,7 +1658,7 @@
 
   ;; tooltip
   (setq ac-use-quick-help t)
-  
+
   ;; menu font
   ;;(set-face-font 'ac-candidate-face "Courier New 13")
   ;;(set-face-font 'ac-selection-face "Courier New 13")
@@ -1678,17 +1688,17 @@
        (require 'ecb)
        (custom-set-variables '(ecb-options-version "2.40"))
 
-       ;; activate at start up  
+       ;; activate at start up
        (when (display-graphic-p)
          (setq ecb-auto-activate t))
 
        (setq ecb-auto-activate nil)
-       
+
        ;; no tip-of-day
        (setq ecb-tip-of-the-day nil)
 
        ;; layout
-       (setq ecb-layout-name "left15")  
+       (setq ecb-layout-name "left15")
        (setq ecb-layout-window-sizes nil)
        (setq ecb-fix-window-size (quote width)) ;; fixed witdh
 
@@ -1697,7 +1707,7 @@
                                      ("/usr/include/c++/4.2.1" "std c++")
                                      ("/Data/P4/" "P4")
                                      ("/Users/frinkr/Desktop/Dropbox/Tech/" "Tech"))))
-       
+
        (setq ecb-primary-secondary-mouse-buttons (quote mouse-1--C-mouse-1))
        (setq ecb-use-speedbar-instead-native-tree-buffer nil)
 
@@ -1706,9 +1716,9 @@
          (interactive)
          (ecb-toggle-ecb-windows)
          )
-       
+
        (global-set-key (kbd "M-SPC") 'ecb-toggle-windows)
-       
+
        )
      )
 (fx/setup-ecb)
@@ -1722,7 +1732,7 @@
     (require 'auto-virtualenv)
     (add-hook 'python-mode-hook 'auto-virtualenv-set-virtualenv)
     )
-  
+
   ;; python shell
   (setq gud-pdb-command-name "python -m pdb ")
   (defalias 'python 'run-python)
@@ -1779,7 +1789,7 @@
   (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++11")))
   (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++11")))
   (add-hook 'c++-mode-hook (lambda () (flyspell-prog-mode)))
-  
+
   (add-hook 'flycheck-mode-hook #'flycheck-haskell-setup)
 
   ;;(add-hook 'text-mode-hook 'flyspell-mode)
@@ -1812,10 +1822,10 @@
   (add-to-list 'semantic-default-submodes 'global-semantic-idle-scheduler-mode)
   (add-to-list 'semantic-default-submodes 'global-semantic-idle-summary-mode)
   ;;(add-to-list 'semantic-default-submodes 'global-semantic-idle-completions-mode) ;; fronzen?
-  
+
   ;; Activate semantic
   (semantic-mode 1)
-  
+
   ;; EDE
   (global-ede-mode 1)
   (ede-enable-generic-projects)
@@ -1832,7 +1842,7 @@
 
   ;; highlight the editing
   (global-semantic-highlight-edits-mode 1)
-  
+
   ;; ac source
   (defun fx/ac-cedet-hook ()
     (add-to-list 'ac-sources 'ac-source-gtags)
@@ -1860,7 +1870,7 @@
   ;; Appearance
   (if (display-graphic-p)
       (progn
-        
+
         )
     (progn
       (set-face-attribute 'semantic-highlight-func-current-tag-face  nil :background "color-234")
@@ -2001,14 +2011,14 @@
   ;; (based on work by Arndt Gulbrandsen, Troll Tech)
   (defun jk/c-mode-common-hook ()
     "Set up c-mode and related modes.
- 
+
  Includes support for Qt code (signal, slots and alikes)."
-    
+
     ;; base-style
     (c-set-style "stroustrup")
     ;; set auto cr mode
     ;;(c-toggle-auto-hungry-state 0)
-    
+
     ;; qt keywords and stuff ...
     ;; set up indenting correctly for new qt kewords
     (setq c-protection-key (concat "\\<\\(public\\|public slot\\|protected"
@@ -2034,7 +2044,7 @@
       ))
   (add-hook 'c-mode-common-hook 'jk/c-mode-common-hook)
 
-  
+
   ;; Construct a hook to be called when entering C mode
   (defun fx/c-mode ()
     (progn (define-key c-mode-base-map "\C-l" 'newline-and-indent)

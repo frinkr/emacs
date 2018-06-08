@@ -1,3 +1,8 @@
+(setq is-macos (eq system-type 'darwin))
+(setq is-windows (eq system-type 'windows-nt))
+(setq is-wsl (eq system-type 'gnu/linux))  ;; windows subsystem for linux
+
+
 (defun reload ()
   "Reload the buffer w/o prompt."
   (interactive)
@@ -10,9 +15,19 @@
   (global-hl-line-mode nil)
   (desktop-save-mode 1)  ;; save session
 
-  ;; transparent
-  (set-frame-parameter (selected-frame) 'alpha '(95 90))
-  (add-to-list 'default-frame-alist '(alpha 95 90))
+  (if is-macos
+      (progn
+        (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+        (add-to-list 'default-frame-alist '(ns-appearance . dark)) ;; assuming you are using a dark theme
+        (setq ns-use-proxy-icon nil)
+        (setq frame-title-format nil)
+        )
+    (progn
+      ;; transparent
+      (set-frame-parameter (selected-frame) 'alpha '(95 90))
+      (add-to-list 'default-frame-alist '(alpha 95 90))
+      )
+    )
 
   ;; line & column number
   (line-number-mode t)
@@ -336,7 +351,7 @@
       (font-lock-add-keywords 'c++-mode
                               '(("\\<Q[A-Z][A-Za-z]*" . 'qt-keywords-face)))
       ))
-  (add-hook 'c-mode-common-hook 'jk/c-mode-common-hook)
+  ;;(add-hook 'c-mode-common-hook 'jk/c-mode-common-hook)
 
 
   ;; Construct a hook to be called when entering C mode
@@ -346,6 +361,7 @@
            (c-add-style "fx4" efx/c4-style t))
     )
   (add-hook 'c-mode-common-hook 'fx/c-mode)
+  (add-hook 'c++-mode-common-hook 'fx/c-mode)
 
   (defadvice c-lineup-arglist (around my activate)
     "Improve indentation of continued C++11 lambda function opened as argument."
