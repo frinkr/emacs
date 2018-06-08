@@ -348,7 +348,5 @@
 (defun efx/user-setup()
   (efx/setup-general)
   (efx/fast-nav-mode 1)
-  ;;(efx/config-highlight-thing)
-  ;;(efx/config-undo-tree)
   (efx/setup-c++)
 )

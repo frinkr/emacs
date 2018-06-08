@@ -12,12 +12,19 @@
 
 (defconst efx-packages
   '(
+    fill-column-indicator
     highlight-symbol
     p4
     recentf
     reveal-in-osx-finder
     undo-tree
     ))
+
+(defun efx/post-init-fill-column-indicator()
+  (setq fci-rule-width 1)
+  (setq fci-rule-column 90)
+  (add-hook 'after-change-major-mode-hook 'fci-mode)
+  )
 
 (defun efx/init-highlight-symbol()
   (use-package highlight-symbol
