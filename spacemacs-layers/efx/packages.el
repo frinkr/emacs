@@ -12,6 +12,8 @@
 
 (defconst efx-packages
   '(
+    ;;dired-single
+    engine-mode
     fill-column-indicator
     highlight-symbol
     p4
@@ -19,6 +21,15 @@
     reveal-in-osx-finder
     undo-tree
     ))
+
+(defun efx/init-dired-single()
+  (use-package dired-single
+    :defer t
+    :config (efx/setup-dired)))
+
+(defun efx/init-engine-mode()
+  (use-package engine-mode
+    :config (efx/setup-google)))
 
 (defun efx/post-init-fill-column-indicator()
   (efx/config-fill-column-indicator))

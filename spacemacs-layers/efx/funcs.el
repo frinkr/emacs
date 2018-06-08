@@ -26,6 +26,26 @@
 
 
 ;;;;
+;;;;           set buffer modified
+;;;;
+(defun touch()
+  "Touch the buffer"
+  (interactive)
+  (set-buffer-modified-p t))
+
+
+;;;;
+;;;;          new scratch
+;;;;
+(defun new-scratch ()
+  "open up a guaranteed new scratch buffer"
+  (interactive)
+  (switch-to-buffer (loop for num from 0
+                          for name = (format "*scratch-%03i*" num)
+                          while (get-buffer name)
+                          finally return name)))
+
+;;;;
 ;;;;        Behavior Settings
 ;;;;
 (defun efx/setup-general()
@@ -107,6 +127,9 @@
   (global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
   (global-set-key (kbd "M-b") (lambda () (interactive) (backward-word)))
   (global-set-key (kbd "M-g") 'goto-line)
+  (global-set-key (kbd "M-J") 'helm-cscope-find-global-definition)
+  (global-set-key (kbd "M-K") 'helm-cscope-find-this-symbol)
+  (global-set-key (kbd "M-l") 'helm-semantic-or-imenu)
 
   (global-set-key (kbd "C-z") 'undo)
   (global-set-key (kbd "C-q") 'save-buffers-kill-terminal)
@@ -116,6 +139,7 @@
   (global-set-key "\C-x\ \C-r" 'recentf-open-files)
   (global-set-key (kbd "C-S-l") 'helm-semantic-or-imenu)
   (global-set-key (kbd "C-x j") 'kill-other-buffers)
+  (global-set-key (kbd "C-t") 'new-scratch)
 
   ;; mac: set control & meta key
   (setq mac-option-key-is-meta nil)
@@ -291,6 +315,81 @@
 
 
 ;;;;
+;;;;        Dired setup
+;;;;
+(defun efx/setup-dired()
+  ;; show link
+  (setq dired-details-hide-link-targets nil)
+
+  ;; reuse the buffer
+  (toggle-diredp-find-file-reuse-dir t)
+  (put 'dired-find-alternate-file 'disabled nil)
+
+  ;; ^ to go up
+  (add-hook 'dired-mode-hook
+            (lambda ()
+              (define-key dired-mode-map (kbd "^")
+                (lambda () (interactive) (find-alternate-file "..")))
+                                        ; was dired-up-directory
+              ))
+
+  (add-hook 'dired-mode-hook 'efx/dired-mode-hook)
+  (defun efx/dired-mode-hook ()
+    (local-set-key (kbd "<mouse-2>") 'diredp-mouse-find-file-reuse-dir-buffer))
+
+  )
+
+;;;;
+;;;;           google
+;;;;
+(defun efx/setup-google()
+  (engine-mode t)
+  (defengine google
+    "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s"
+    :keybinding "g")
+
+  (defun google (search)
+    (interactive (list (engine/get-query (symbol-name 'google))))
+    (engine/search-google search)
+    )
+  )
+
+
+;;;;
+;;;;        mouse scroll in terminal
+;;;;
+
+(defun efx/setup-terminal()
+  (when (not (display-graphic-p))
+
+    ;; Mousewheel
+    (defun efx/mousewheel-scroll-up (event)
+      "Scroll window under mouse up by five lines."
+      (interactive "e")
+      (let ((current-window (selected-window)))
+        (unwind-protect
+            (progn
+              (select-window (posn-window (event-start event)))
+              (scroll-up 5))
+          (select-window current-window))))
+
+    (defun efx/mousewheel-scroll-down (event)
+      "Scroll window under mouse down by five lines."
+      (interactive "e")
+      (let ((current-window (selected-window)))
+        (unwind-protect
+            (progn
+              (select-window (posn-window (event-start event)))
+              (scroll-down 5))
+          (select-window current-window))))
+
+    (global-set-key (kbd "<mouse-5>") 'efx/mousewheel-scroll-up)
+    (global-set-key (kbd "<mouse-4>") 'efx/mousewheel-scroll-down)
+    )
+  )
+
+
+;;;;
 ;;;;        C++
 ;;;;
 (defun efx/setup-c++()
@@ -379,5 +478,7 @@
   (efx/setup-keybindings)
   (efx/setup-fast-nav)
   (efx/setup-diminish)
+;;  (efx/setup-dired)
+  (efx/setup-terminal)
   (efx/setup-c++)
 )
