@@ -4,7 +4,7 @@
    (colors :variables
            colors-enable-nyan-cat-progress-bar nil)
 
-   themes-megapack
+   ;;themes-megapack
    better-defaults
    emacs-lisp
    markdown
