@@ -294,43 +294,24 @@
                                              empty-defun-braces
                                              defun-close-semi))))
 
-
-  (defun vlad-cc-style()
-    ;;(c-set-style "linux")
-    ;;(c-set-offset 'innamespace '0)
-    ;;(c-set-offset 'inextern-lang '0)
-    (c-set-offset 'inline-open '0)
-    ;;(c-set-offset 'label '*)
-    ;;(c-set-offset 'case-label '*)
-    ;;(c-set-offset 'access-label '/)
-    ;;(setq c-basic-offset 4)
-    ;;(setq tab-width 4)
-    ;;(setq indent-tabs-mode nil)
-    )
-
-  (add-hook 'c++-mode-hook 'vlad-cc-style)
-
-  ;; syntax-highlighting for Qt
-  ;; (based on work by Arndt Gulbrandsen, Troll Tech)
-  (defun jk/c-mode-common-hook ()
-    "Set up c-mode and related modes.
-
- Includes support for Qt code (signal, slots and alikes)."
-
-    ;; base-style
-    (c-set-style "stroustrup")
-    ;; set auto cr mode
-    ;;(c-toggle-auto-hungry-state 0)
-
-    ;; qt keywords and stuff ...
-    ;; set up indenting correctly for new qt kewords
+  ;; my c/c++ hook
+  (defun efx/c-c++-mode-hook ()
+    ;; Qt keywords
     (setq c-protection-key (concat "\\<\\(public\\|public slot\\|protected"
                                    "\\|protected slot\\|private\\|private slot"
                                    "\\)\\>")
           c-C++-access-key (concat "\\<\\(signals\\|public\\|protected\\|private"
                                    "\\|public slots\\|protected slots\\|private slots"
                                    "\\)\\>[ \t]*:"))
+
     (progn
+      (define-key c-mode-base-map "\C-l" 'newline-and-indent)
+      (c-add-style "fx2" efx/c2-style t)
+      (c-add-style "fx4" efx/c4-style t)
+
+      (c-set-offset 'inline-open '0)
+
+      ;; Qt colors
       ;; modify the colour of slots to match public, private, etc ...
       (font-lock-add-keywords 'c++-mode
                               '(("\\<\\(slots\\|signals\\)\\>" . font-lock-type-face)))
@@ -344,18 +325,10 @@
                               '(("\\<SIGNAL\\|SLOT\\>" . 'qt-keywords-face)))
       (font-lock-add-keywords 'c++-mode
                               '(("\\<Q[A-Z][A-Za-z]*" . 'qt-keywords-face)))
-      ))
-  ;;(add-hook 'c-mode-common-hook 'jk/c-mode-common-hook)
-
-
-  ;; Construct a hook to be called when entering C mode
-  (defun efx/c-mode ()
-    (progn (define-key c-mode-base-map "\C-l" 'newline-and-indent)
-           (c-add-style "fx2" efx/c2-style t)
-           (c-add-style "fx4" efx/c4-style t))
+      )
     )
-  (add-hook 'c-mode-common-hook 'fx/c-mode)
-  (add-hook 'c++-mode-common-hook 'fx/c-mode)
+  (add-hook 'c-mode-common-hook 'fx/c-c++-mode-hook)
+  (add-hook 'c++-mode-common-hook 'fx/c-c++-mode-hook)
 
   (defadvice c-lineup-arglist (around my activate)
     "Improve indentation of continued C++11 lambda function opened as argument."
