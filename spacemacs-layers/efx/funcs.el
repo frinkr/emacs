@@ -11,7 +11,7 @@
 ;;;;
 ;;;;        Behavior Settings
 ;;;;
-(defun efx/general-behavior()
+(defun efx/setup-general()
   (global-hl-line-mode nil)
   (desktop-save-mode 1)  ;; save session
 
@@ -69,21 +69,15 @@
   (setq-default tab-width 4)
   (setq indent-line-function 'insert-tab)
   (setq tab-stop-list (quote (4 8 12 16 20 24 28 32 36 40 44 48 52 56 60 64 68 72 76 80 84 88 92 96 100 104 108 112 116 120)))
+
+  ;; title bar shows full path
+  (setq-default frame-title-format
+                (list '((buffer-file-name " %f"
+                                          (dired-directory
+                                           dired-directory
+                                           (revert-buffer-function " %b"
+                                                                   ("%b - Dir:  " default-directory)))))))
   )
-
-(efx/general-behavior)
-
-
-;;;;
-;;;;           format title bar to show full path of current file
-;;;;
-(setq-default frame-title-format
-              (list '((buffer-file-name " %f"
-                                        (dired-directory
-                                         dired-directory
-                                         (revert-buffer-function " %b"
-                                                                 ("%b - Dir:  " default-directory)))))))
-
 
 
 ;;;;
@@ -123,7 +117,7 @@
 ;;;;
 ;;;;           highlight-thing
 ;;;;
-(defun efx/setup-highlight-thing()
+(defun efx/config-highlight-thing()
   (require 'highlight-symbol)
   (global-set-key [double-mouse-1] 'highlight-symbol)
   ;;  (global-set-key [mouse-1] 'highlight-symbol-remove-all)
@@ -223,7 +217,7 @@
 ;;;;
 ;;;;          undo-tree-mode
 ;;;;
-(defun efx/setup-undo()
+(defun efx/config-undo-tree()
   ;; override the function so undo-tree-mode can be
   ;; force enabled
   (defun undo-tree-overridden-undo-bindings-p ())
@@ -375,32 +369,13 @@
                        (looking-at ".*[(,][ \t]*\\[[^]]*\\][ \t]*[({][^}]*$"))))
               0                           ; no additional indent
             ad-do-it)))                   ; default behavior
-
-  ;; Setup font-lock syntax coloring package
-  (autoload 'font-lock-fontify-buffer "font-lock" "Fontify Buffer" t)
-  (condition-case err
-      (progn (add-hook 'c-mode-common-hook 'font-lock-fontify-buffer)
-             (add-hook 'emacs-lisp-mode-hook 'font-lock-fontify-buffer)
-             (global-font-lock t))
-    (error (progn
-             (message "Could not customize colors, disabling colored fonts.")
-             (setq-default font-lock-auto-fontify t))))
-
-
-  ;; Setup CPerl mode
-  (setq cperl-brace-offset -4)
-  (setq cperl-indent-level 4)
-
-
-  ;; Setup Assembler mode
-  (defun efx/asm-mode-hook ()
-    (progn (setq comment-column 36)
-           (setq tab-stop-list '(4 8 12 16 20 24 28 36 40 44 48))))
-  (add-hook 'asm-mode-hook 'fx/asm-mode-hook)
-  (add-to-list 'auto-mode-alist '("\\.s$" . asm-mode))
-  (add-to-list 'auto-mode-alist '("\\.asm$" . asm-mode))
-
-  (autoload 'cpp-font-lock "cpp-mode" "CPP Font Lock mode" t)
   )
 
-(efx/setup-c++)
+
+(defun efx/user-setup()
+  (efx/setup-general)
+  (efx/fast-nav-mode 1)
+  ;;(efx/config-highlight-thing)
+  ;;(efx/config-undo-tree)
+  (efx/setup-c++)
+)

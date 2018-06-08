@@ -21,7 +21,7 @@
 
 (defun efx/init-highlight-symbol()
   (use-package highlight-symbol
-    :config (efx/setup-highlight-thing)
+    :config (efx/config-highlight-thing)
     )
   )
 (defun efx/post-init-p4()
@@ -38,9 +38,8 @@
     )
   )
 
-(defun efx/init-undo-tree()
-  (use-package undo-tree
-    :config (efx/setup-undo)))
+(defun efx/post-init-undo-tree()
+  (efx/config-undo-tree))
 
 ;;; packages.el ends here
 
