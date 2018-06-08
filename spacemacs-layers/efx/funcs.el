@@ -304,13 +304,26 @@
   ;; Associate extensions with modes
   (add-to-list 'auto-mode-alist '("\\.h$" . c++-mode))
   (add-to-list 'auto-mode-alist '("\\.mm\\'" . objc-mode))
-  ;;(add-to-list 'auto-mode-alist '("\\.m\\'" . objc-mode))
+  (add-to-list 'auto-mode-alist '("\\.m\\'" . objc-mode))
+
+
+  (defadvice c-lineup-arglist (around my activate)
+    "Improve indentation of continued C++11 lambda function opened as argument."
+    (setq ad-return-value
+          (if (and (equal major-mode 'c++-mode)
+                   (ignore-errors
+                     (save-excursion
+                       (goto-char (c-langelem-pos langelem))
+                       ;; Detect "[...](" or "[...]{". preceded by "," or "(",
+                       ;;   and with unclosed brace.
+                       (looking-at ".*[(,][ \t]*\\[[^]]*\\][ \t]*[({][^}]*$"))))
+              0                           ; no additional indent
+            ad-do-it)))                   ; default behavior
 
   ;; Create my own coding style
   ;; No space before { and function sig indents 4 if argument overflow
-  (setq efx/c4-style
+  (setq efx/cc-base-style
         '((c-auto-newline                 . nil)
-          (c-basic-offset                 . 4)
           (c-comment-only-line-offset     . 0)
           (c-echo-syntactic-information-p . nil)
           (c-hungry-delete-key            . t)
@@ -319,7 +332,8 @@
           (c-hanging-braces-alist         . ((substatement-open after)
                                              (brace-list-open)))
           (c-offsets-alist                . ((arglist-close . c-lineup-arglist)
-                                             (case-label . 4)
+                                             (case-label . 0)
+                                             (inline-open . 0)
                                              (substatement-open . 0)
                                              (block-open . 0) ; no space before {
                                              (knr-argdecl-intro . -)))
@@ -332,29 +346,10 @@
                                              empty-defun-braces
                                              defun-close-semi))))
 
-  (setq efx/c2-style
-        '((c-auto-newline                 . nil)
-          (c-basic-offset                 . 2)
-          (c-comment-only-line-offset     . 0)
-          (c-echo-syntactic-information-p . nil)
-          (c-hungry-delete-key            . t)
-          (c-tab-always-indent            . t)
-          (c-toggle-hungry-state          . t)
-          (c-hanging-braces-alist         . ((substatement-open after)
-                                             (brace-list-open)))
-          (c-offsets-alist                . ((arglist-close . c-lineup-arglist)
-                                             (case-label . 4)
-                                             (substatement-open . 0)
-                                             (block-open . 0) ; no space before {
-                                             (knr-argdecl-intro . -)))
-          (c-hanging-colons-alist         . ((member-init-intro before)
-                                             (inher-intro)
-                                             (case-label after)
-                                             (label after)
-                                             (access-label after)))
-          (c-cleanup-list                 . (scope-operator
-                                             empty-defun-braces
-                                             defun-close-semi))))
+  (setq efx/c4-style efx/cc-base-style)
+  (setq efx/c2-style efx/cc-base-style)
+  (add-to-list 'efx/c4-style '(c-basic-offset . 4))
+  (add-to-list 'efx/c2-style '(c-basic-offset . 2))
 
   ;; my c/c++ hook
   (defun efx/c-c++-mode-hook ()
@@ -368,10 +363,8 @@
 
     (progn
       (define-key c-mode-base-map "\C-l" 'newline-and-indent)
-      (c-add-style "fx2" efx/c2-style t)
-      (c-add-style "fx4" efx/c4-style t)
-
-      (c-set-offset 'inline-open '0)
+      (c-add-style "efx2" efx/c2-style t)
+      (c-add-style "efx4" efx/c4-style t)
 
       ;; Qt colors
       ;; modify the colour of slots to match public, private, etc ...
@@ -392,18 +385,6 @@
   (add-hook 'c-mode-common-hook 'efx/c-c++-mode-hook)
   (add-hook 'c++-mode-common-hook 'efx/c-c++-mode-hook)
 
-  (defadvice c-lineup-arglist (around my activate)
-    "Improve indentation of continued C++11 lambda function opened as argument."
-    (setq ad-return-value
-          (if (and (equal major-mode 'c++-mode)
-                   (ignore-errors
-                     (save-excursion
-                       (goto-char (c-langelem-pos langelem))
-                       ;; Detect "[...](" or "[...]{". preceded by "," or "(",
-                       ;;   and with unclosed brace.
-                       (looking-at ".*[(,][ \t]*\\[[^]]*\\][ \t]*[({][^}]*$"))))
-              0                           ; no additional indent
-            ad-do-it)))                   ; default behavior
   )
 
 
