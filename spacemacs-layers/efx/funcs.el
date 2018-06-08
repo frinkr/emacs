@@ -3,10 +3,27 @@
 (setq is-wsl (eq system-type 'gnu/linux))  ;; windows subsystem for linux
 
 
+;;;;
+;;;;           kill all other buffers but current one
+;;;;
+(defun kill-other-buffers ()
+  "Kill all other buffers, but eshell and shell."
+  (interactive)
+  (mapc 'kill-buffer
+        (delq (current-buffer)
+              ;; keep eshell and shell
+              (cl-remove-if '(lambda (x) (member (buffer-local-value 'major-mode x)
+                                                 '(eshell-mode shell-mode)))
+                            (buffer-list)))))
+
+;;;;
+;;;;          reload current buffer
+;;;;
 (defun reload ()
   "Reload the buffer w/o prompt."
   (interactive)
   (revert-buffer nil t))
+
 
 ;;;;
 ;;;;        Behavior Settings
@@ -98,6 +115,7 @@
 
   (global-set-key "\C-x\ \C-r" 'recentf-open-files)
   (global-set-key (kbd "C-S-l") 'helm-semantic-or-imenu)
+  (global-set-key (kbd "C-x j") 'kill-other-buffers)
 
   ;; mac: set control & meta key
   (setq mac-option-key-is-meta nil)
@@ -149,6 +167,7 @@
 ;;;;           diminish
 ;;;;
 (defun efx/setup-diminish()
+  (spacemacs|diminish p4-mode)
   (spacemacs|diminish efx/fast-nav-mode)
   )
 
