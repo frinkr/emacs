@@ -131,15 +131,26 @@
   (global-set-key (kbd "M-K") 'helm-cscope-find-this-symbol)
   (global-set-key (kbd "M-l") 'helm-semantic-or-imenu)
 
+  ;; helm-find-files-map
+  (when nil
+    (progn
+      (define-key helm-find-files-map (kbd "C-j") 'helm-find-files-up-one-level)
+      (define-key helm-find-files-map (kbd "C-l") 'helm-execute-persistent-action)
+      (define-key helm-find-files-map (kbd "C-f") 'helm-ff-RET))
+  )
+
   (global-set-key (kbd "C-z") 'undo)
   (global-set-key (kbd "C-q") 'save-buffers-kill-terminal)
   (global-set-key (kbd "C-4") 'p4-edit)
   (global-set-key (kbd "C-x r") 'reload)
+  (global-set-key (kbd "C-x C-b") 'helm-buffers-list)
 
-  (global-set-key "\C-x\ \C-r" 'recentf-open-files)
+  (global-set-key (kbd "C-x C-r") 'helm-recentf)
   (global-set-key (kbd "C-S-l") 'helm-semantic-or-imenu)
   (global-set-key (kbd "C-x j") 'kill-other-buffers)
   (global-set-key (kbd "C-t") 'new-scratch)
+
+
 
   ;; mac: set control & meta key
   (setq mac-option-key-is-meta nil)
