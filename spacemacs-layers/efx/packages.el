@@ -21,10 +21,8 @@
     ))
 
 (defun efx/post-init-fill-column-indicator()
-  (setq fci-rule-width 1)
-  (setq fci-rule-column 90)
-  (add-hook 'after-change-major-mode-hook 'fci-mode)
-  )
+  (efx/config-fill-column-indicator))
+
 
 (defun efx/init-highlight-symbol()
   (use-package highlight-symbol

@@ -81,38 +81,82 @@
 
 
 ;;;;
+;;;;     General keybindings
+;;;;
+(defun efx/setup-keybindings()
+  ;; fast navigation
+  (global-set-key (kbd "M-m") 'set-mark-command)
+  (global-set-key (kbd "M-n") (lambda () (interactive) (next-line 5)))
+  (global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
+  (global-set-key (kbd "M-b") (lambda () (interactive) (backward-word)))
+  (global-set-key (kbd "M-g") 'goto-line)
+
+  (global-set-key (kbd "C-z") 'undo)
+  (global-set-key (kbd "C-q") 'save-buffers-kill-terminal)
+  (global-set-key (kbd "C-4") 'p4-edit)
+  (global-set-key (kbd "C-x r") 'reload)
+
+  (global-set-key "\C-x\ \C-r" 'recentf-open-files)
+  (global-set-key (kbd "C-S-l") 'helm-semantic-or-imenu)
+
+  ;; mac: set control & meta key
+  (setq mac-option-key-is-meta nil)
+  (setq mac-command-key-is-meta nil)
+  (setq mac-command-modifier 'control)
+  (setq mac-option-modifier 'meta)
+
+  ;; dis evil
+  (define-key evil-emacs-state-map (kbd "C-z") nil)
+  (global-set-key (kbd "C-z") 'undo-tree-undo)
+  )
+
+;;;;
 ;;;;             fast-nav-mode-map
 ;;;;
-(defvar efx/fast-nav-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "M-n") (lambda () (interactive) (next-line 5)))
-    (define-key map (kbd "M-p") (lambda () (interactive) (previous-line 5)))
-    (define-key map (kbd "M-b") (lambda () (interactive) (backward-word)))
+(defun efx/setup-fast-nav()
+  (defvar efx/fast-nav-mode-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map (kbd "M-n") (lambda () (interactive) (next-line 5)))
+      (define-key map (kbd "M-p") (lambda () (interactive) (previous-line 5)))
+      (define-key map (kbd "M-b") (lambda () (interactive) (backward-word)))
 
-    (global-set-key (kbd "C-{") 'tabbar-backward)
-    (global-set-key (kbd "C-}") 'tabbar-forward)
-    (global-set-key (kbd "C-t") 'new-scratch)
+      (global-set-key (kbd "C-{") 'tabbar-backward)
+      (global-set-key (kbd "C-}") 'tabbar-forward)
+      (global-set-key (kbd "C-t") 'new-scratch)
 
-    (define-key global-map [(meta m)] 'set-mark-command)
-    (global-set-key (kbd "<mouse-2>") (lambda () (interactive) (kill-buffer (current-buffer))))
-    ;;      (global-set-key (kbd "<mouse-3>") 'tabbar-forward)
-    ;;      (global-set-key (kbd "<mouse-5>") 'tabbar-backward)
+      (define-key global-map [(meta m)] 'set-mark-command)
+      (global-set-key (kbd "<mouse-2>") (lambda () (interactive) (kill-buffer (current-buffer))))
+      ;;      (global-set-key (kbd "<mouse-3>") 'tabbar-forward)
+      ;;      (global-set-key (kbd "<mouse-5>") 'tabbar-backward)
 
-    map)
-  "efx/fast-nav-mode keymap.")
+      map)
+    "efx/fast-nav-mode keymap.")
 
-(define-minor-mode efx/fast-nav-mode
-  "A minor mode so that my key settings override annoying major modes."
-  :init-value t
-  :lighter " fast-nav"
-  :keymap efx/fast-nav-mode-map)
+  (define-minor-mode efx/fast-nav-mode
+    "A minor mode so that my key settings override annoying major modes."
+    :init-value t
+    :lighter " fast-nav"
+    :keymap efx/fast-nav-mode-map)
 
-(defun efx/fast-nav/minibuffer-setup-hook ()
-  (efx/fast-nav-mode 0))
-(add-hook 'minibuffer-setup-hook 'efx/fast-nav/minibuffer-setup-hook)
+  (defun efx/fast-nav/minibuffer-setup-hook ()
+    (efx/fast-nav-mode 0))
+  (add-hook 'minibuffer-setup-hook 'efx/fast-nav/minibuffer-setup-hook)
 
-(efx/fast-nav-mode 1)
+  (efx/fast-nav-mode 1)
+  )
 
+;;;;
+;;;;           diminish
+;;;;
+(defun efx/setup-diminish()
+  (spacemacs|diminish efx/fast-nav-mode)
+  )
+
+(defun efx/config-fill-column-indicator()
+  (setq fci-rule-width 1)
+  (setq fci-rule-column 90)
+  (add-hook 'after-change-major-mode-hook 'fci-mode)
+  )
 
 ;;;;
 ;;;;           highlight-thing
@@ -222,7 +266,6 @@
   ;; force enabled
   (defun undo-tree-overridden-undo-bindings-p ())
   (global-undo-tree-mode)
-
   (global-set-key (kbd "C-z") 'undo-tree-undo)
   (global-set-key (kbd "C-S-z") 'undo-tree-redo)
   )
@@ -347,6 +390,8 @@
 
 (defun efx/user-setup()
   (efx/setup-general)
-  (efx/fast-nav-mode 1)
+  (efx/setup-keybindings)
+  (efx/setup-fast-nav)
+  (efx/setup-diminish)
   (efx/setup-c++)
 )
