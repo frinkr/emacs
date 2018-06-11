@@ -99,8 +99,8 @@
   (display-time-mode t)
 
   ;; Setup text mode
-  (add-hook 'text-mode-hook '(lambda() (auto-fill-mode 1)))
-  (add-hook 'text-mode-hook '(lambda() (setq fill-column 70)))
+  ;;(add-hook 'text-mode-hook '(lambda() (auto-fill-mode 1)))
+  ;;(add-hook 'text-mode-hook '(lambda() (setq fill-column 70)))
 
   ;; Tab stop
   (setq-default indent-tabs-mode nil)
