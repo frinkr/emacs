@@ -19,6 +19,7 @@
 ;;;;
 ;;;;          reload current buffer
 ;;;;
+
 (defun reload ()
   "Reload the buffer w/o prompt."
   (interactive)
@@ -53,17 +54,20 @@
   (global-hl-line-mode nil)
   ;;(desktop-save-mode 1)  ;; save session
 
-  (if is-macos
+  ;; no transpaency
+  (when nil 
+    (if is-macos
+        (progn
+          (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+          (add-to-list 'default-frame-alist '(ns-appearance . dark)) ;; assuming you are using a dark theme
+          (setq ns-use-proxy-icon nil)
+          (setq frame-title-format nil)
+          )
       (progn
-        (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-        (add-to-list 'default-frame-alist '(ns-appearance . dark)) ;; assuming you are using a dark theme
-        (setq ns-use-proxy-icon nil)
-        (setq frame-title-format nil)
+        ;; transparent
+        (set-frame-parameter (selected-frame) 'alpha '(95 90))
+        (add-to-list 'default-frame-alist '(alpha 95 90))
         )
-    (progn
-      ;; transparent
-      (set-frame-parameter (selected-frame) 'alpha '(95 90))
-      (add-to-list 'default-frame-alist '(alpha 95 90))
       )
     )
 
@@ -73,7 +77,7 @@
 
   ;; mouse in terminal
   (xterm-mouse-mode t)
-  (tool-bar-mode nil)
+  (tool-bar-mode -1)
 
   ;; Setup save options (auto and backup) -- still buggy need new Replace func
   ;; Disable backup and autosave
