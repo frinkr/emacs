@@ -135,6 +135,7 @@
   (global-set-key (kbd "M-J") 'helm-cscope-find-global-definition)
   (global-set-key (kbd "M-K") 'helm-cscope-find-this-symbol)
   (global-set-key (kbd "M-l") 'helm-semantic-or-imenu)
+  (global-set-key (kbd "M-`") 'set-mark-command)
 
   ;; helm-find-files-map
   (when nil
@@ -357,6 +358,78 @@
   )
 
 ;;;;
+;;;;           eshell
+;;;;
+
+(defun efx/setup-eshell()
+
+  ;; max lines
+  (setq eshell-buffer-maximum-lines 10000)
+
+  ;;           toggle shell buffer
+  ;;
+  (defun toggle-shell-buffer (name)
+    "Toggle *shell*/*eshell* (`NAME')buffer."
+    (interactive)
+    (if (string-equal name (buffer-name))
+        (previous-buffer)
+      (if (get-buffer name)
+          (switch-to-buffer name)
+        (message (format "buffer %s not exists!" name))
+        )))
+
+  (if is-windows
+      (define-key global-map "\M-`" (lambda() (interactive) (toggle-shell-buffer "*shell*")))
+    (define-key global-map "\M-`" (lambda() (interactive) (toggle-shell-buffer "*eshell*"))))
+
+
+
+  ;;           emacs prompt for eshell
+  ;;
+  (setq eshell-prompt-function
+        (lambda ()
+          (concat (getenv "USER") "@"
+                  (file-name-nondirectory (eshell/pwd))
+                  (if (= (user-uid) 0) " # " " $ "))))
+
+  ;; clear the buffer in eshell
+  (defun eshell/clear ()
+    "clear the eshell buffer."
+    (interactive)
+    (let ((inhibit-read-only t))
+      (erase-buffer)))
+
+
+
+  ;;           clear *shell* buffer
+  ;;
+  (defun clear-shell ()
+    "Clear eshell."
+    (interactive)
+    (let ((comint-buffer-maximum-size 0))
+      (comint-truncate-buffer)))
+
+  (defun clear-shell-hook ()
+    "Hook of shell mode."
+    (local-set-key "\C-l" 'clear-shell))
+
+  ;;(add-hook 'shell-mode-hook 'clear-shell-hook)
+
+  (defun eshell-clear-buffer ()
+    "Clear terminal."
+    (interactive)
+    (let ((inhibit-read-only t))
+      (erase-buffer)
+      (eshell-send-input)))
+
+  (add-hook 'eshell-mode-hook
+            '(lambda()
+               (local-set-key (kbd "C-l") 'eshell-clear-buffer)))
+
+  )
+
+
+;;;;
 ;;;;           google
 ;;;;
 (defun efx/setup-google()
@@ -406,6 +479,54 @@
   )
 
 
+
+;;;;
+;;;;        helm 
+;;;;
+(defun efx/setup-helm()
+  (setq helm-display-function 'helm-display-buffer-in-own-frame
+        helm-display-buffer-reuse-frame nil
+        helm-use-undecorated-frame-option nil)
+
+  
+  (defun efx/before-make-frame-hook()
+    (setq prev-frame (selected-frame))
+    )
+
+  (defun efx/after-make-frame-hook (&rest frame)
+    (let ((f (if (car frame) (car frame) (selected-frame)))
+          ppos
+          )
+	  (progn
+        (setq ppos (frame-position prev-frame))
+        (setq x (/ (- (display-pixel-width) (frame-width)) 2))
+        (setq y (/ (- (display-pixel-height) (frame-height)) 2))
+        (setq x (cdr ppos))
+        
+        (message "x == %d" x)
+        (if (previous-frame f)
+            (message "YESSSS")
+          (message "NOOO"))
+
+
+        (modify-frame-parameters f `((undecorated . t)
+                                     (internal-border-width . 0)
+                                     (alpha . 95)
+                                     (font . "Source Code Pro-13")
+                                     ;;(user-position . t)
+                                     ;;(left . ,x)
+                                     ;;(top . ,y)
+                                     ))
+        ;;(set-frame-position f (car ppos) (car ppos))
+        (set-face-background 'fringe (face-attribute 'hl-line :background) f)
+        )))
+
+  (when window-system
+    ;;(add-hook 'before-make-frame-hook 'efx/before-make-frame-hook)
+    ;;(add-hook 'after-make-frame-functions 'efx/after-make-frame-hook t)
+    )
+  )
+
 ;;;;
 ;;;;        C++
 ;;;;
@@ -421,6 +542,7 @@
   (add-to-list 'auto-mode-alist '("\\.h$" . c++-mode))
   (add-to-list 'auto-mode-alist '("\\.mm\\'" . objc-mode))
   (add-to-list 'auto-mode-alist '("\\.m\\'" . objc-mode))
+  (add-to-list 'auto-mode-alist '("\\.ipp\\'" . c++-mode))
 
   ;; Create my own coding style
   ;; No space before { and function sig indents 4 if argument overflow
@@ -497,5 +619,7 @@
   (efx/setup-diminish)
 ;;  (efx/setup-dired)
   (efx/setup-terminal)
+  (efx/setup-eshell)
+;;  (efx/setup-helm)
   (efx/setup-c++)
 )

@@ -1,32 +1,42 @@
 (configuration-layer/declare-layers
  '(
-   helm
-   (colors :variables
-           colors-enable-nyan-cat-progress-bar nil)
-
-   ;;themes-megapack
-   better-defaults
-   emacs-lisp
-   markdown
-
    (auto-completion :variables
                     auto-completion-enable-help-tooltip t
                     auto-completion-enable-sort-by-usage t)
+   autohotkey
 
-   semantic
-   cscope
+   better-defaults
+
+   (colors :variables
+           colors-enable-nyan-cat-progress-bar nil)
+
    (c-c++ :variables
           c-c++-default-mode-for-headers 'c++-mode
-          c-c++-enable-clang-support t
-    )
-   
-   
-   (spell-checking :variables
-                   enable-flyspell-auto-completion t)
+          c-c++-enable-clang-support t)
+   cscope
+   csv
 
+   emacs-lisp
+
+   helm
+   html
+
+   git
+
+   javascript
+   
+   markdown
+
+   perforce
+   python
+
+   semantic
+   (spell-checking :variables
+                   enable-flyspell-auto-completion nil)
    syntax-checking
 
+   themes-megapack
+   typescript
+
    version-control
-   git
-   perforce
    ))
