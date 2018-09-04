@@ -2,6 +2,9 @@
 ;; This file is loaded by Spacemacs at startup.
 ;; It must be stored in your home directory.
 
+;; The git repo of .emacs and .spacemacs
+(setq dot-emacs-git-repo (file-name-directory (file-truename load-file-name)))
+
 (defun dotspacemacs/layers ()
   "Configuration Layers declaration.
 You should not put any user code in this function besides modifying the variable
@@ -27,7 +30,7 @@ values."
    ;; If non-nil layers with lazy install support are lazy installed.
    ;; List of additional paths where to look for configuration layers.
    ;; Paths must have a trailing slash (i.e. `~/.mycontribs/')
-   dotspacemacs-configuration-layer-path '("/git/repos/github/emacs/spacemacs-layers")
+   dotspacemacs-configuration-layer-path (list (concat dot-emacs-git-repo "spacemacs-layers"))
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
