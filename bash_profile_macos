@@ -46,8 +46,11 @@ export LC_CTYPE=en_US.UTF-8
 # emacs without init file
 alias emacsq='emacs -q -nw'
 
+# brew with proxy
+alias brew='ALL_PROXY=http://eglbeprx001.esko-graphics.com:8080 brew'
+
 # cscope editor
-export EDITOR=emacsq
+export EDITOR='emacs -q -nw'
 
 # P4 config
 export P4CONFIG=p4.config
@@ -61,15 +64,14 @@ fi
 
 export PATH=$PATH:/opt/local/bin:/opt/local/sbin
 
-
 # Bash completion
 if [ -f /opt/local/etc/bash_completion ]; then
     . /opt/local/etc/bash_completion
 fi
 
 
-# auto env
-auto_env()
+# auto virtualenv
+auto_venv()
 {
     if [ -f .venv/bin/activate ]; then
         source .venv/bin/activate
@@ -88,11 +90,25 @@ auto_env()
 function cd
 {
     builtin cd "$@"
-    auto_env
+    auto_venv
 }
 
-export PROMMPT_COMMAND="auto_env"
-alias brew='ALL_PROXY=http://eglbeprx001.esko-graphics.com:8080 brew'
+function venv
+{
+    local py=`which python3`
+    if [ "$1" == "2" ]; then
+        py=`which python2`
+    fi
+    virtualenv -p $py .venv
+
+    auto_venv
+}
+
+# ai
+function ai
+{
+    cd /git/bitbucket/ai
+}
 
 # Docker
 function docker-env()
