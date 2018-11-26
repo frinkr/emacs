@@ -18,8 +18,8 @@ function curr_repo_imp()
         echo ""
     elif [ -f "$1/p4.config" ]; then
         curr_repo_p4 "$1"
-    elif [ -d "$1/.git" ]; then
-        curr_repo_git "$1"
+    #elif [ -d "$1/.git" ]; then
+    #    curr_repo_git "$1"
     else
         curr_repo_imp $(dirname "$1")
     fi
