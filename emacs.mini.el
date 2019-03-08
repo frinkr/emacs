@@ -4,18 +4,21 @@
 ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(global-hl-line-mode nil)
-(desktop-save-mode 1)  ;; save session
-
 ;; line & column number
+(global-hl-line-mode nil)
 (line-number-mode t)
 (column-number-mode t)
 (global-linum-mode t)
+
+;; mouse in terminal
+(xterm-mouse-mode t)
+(tool-bar-mode -1)
 
 ;; Setup save options (auto and backup) -- still buggy need new Replace func
 ;; Disable backup and autosave
 (setq backup-inhibited t)
 (setq auto-save-default nil)
+(desktop-save-mode 1)  ;; save session
 (save-place-mode t)   ;; save cursor position
 
 ;; recent files
@@ -50,7 +53,6 @@
 (setq-default tab-width 4)
 (setq indent-line-function 'insert-tab)
 (setq tab-stop-list (quote (4 8 12 16 20 24 28 32 36 40 44 48 52 56 60 64 68 72 76 80 84 88 92 96 100 104 108 112 116 120)))
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -125,3 +127,35 @@
   (revert-buffer nil t))
 
 (global-set-key (kbd "C-x r") 'reload)
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;
+;;;;          melpa
+;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun install-extra-packages()
+  (require 'package)
+  (add-to-list 'package-archives
+               '("melpa-stable" . "https://stable.melpa.org/packages/"))
+  (package-initialize)
+
+  (setq package-list '(
+                       dracula-theme))
+
+  ;; refresh
+  (unless package-archive-contents
+    (package-refresh-contents))
+
+  ;; install 
+  (dolist (package package-list)
+    (unless (package-installed-p package)
+      (package-install package)))
+  )
+
+(install-extra-packages)
+
+(if window-system
+    (load-theme 'dracula t)
+  )
