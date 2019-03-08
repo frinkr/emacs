@@ -66,19 +66,18 @@
 (setq mac-option-modifier 'meta)
 
 ;; set of glocal shortcut
-(define-key global-map "\C-xw" 'what-line)
-(define-key global-map "\C-z" 'undo)
-(define-key global-map "\M-g" 'goto-line)
-(define-key global-map "\C-o" 'ff-find-other-file)
-(define-key global-map "\C-q" 'save-buffers-kill-terminal)
-(define-key global-map [(meta m)] 'set-mark-command)
-(define-key global-map [delete] 'delete-char)
-(define-key global-map [backspace] 'delete-backward-char)
+(global-set-key "\C-xw" 'what-line)
+(global-set-key "\C-z" 'undo)
+(global-set-key "\M-g" 'goto-line)
+(global-set-key "\C-o" 'ff-find-other-file)
+(global-set-key "\C-q" 'save-buffers-kill-terminal)
+(global-set-key [(meta m)] 'set-mark-command)
+(global-set-key [delete] 'delete-char)
+(global-set-key [backspace] 'delete-backward-char)
 (define-key isearch-mode-map [backspace] 'isearch-delete-char)
-(global-set-key (kbd "M-SPC") 'set-mark-command)
-(global-set-key (kbd "M-n") (lambda () (interactive) (next-line 5)))
-(global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
-
+(global-set-key "\M-SPC" 'set-mark-command)
+(global-set-key "\M-n" (lambda () (interactive) (next-line 5)))
+(global-set-key "\M-p" (lambda () (interactive) (previous-line 5)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
