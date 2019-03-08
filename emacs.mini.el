@@ -10,6 +10,7 @@
 ;; line & column number
 (line-number-mode t)
 (column-number-mode t)
+(global-linum-mode t)
 
 ;; Setup save options (auto and backup) -- still buggy need new Replace func
 ;; Disable backup and autosave
