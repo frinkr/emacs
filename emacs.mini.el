@@ -38,22 +38,25 @@
 (put 'upcase-region 'disabled nil)
 (put 'narrow-to-region 'disabled nil)
 
-;; Setup time mode
+;; setup time mode
 (setq display-time-day-and-date t)
-(setq display-time-format "%I:%M %p %m/%d")
-(setq display-time-default-load-average nil)
+;;(setq display-time-format "%I:%M %p %m/%d")
+(setq display-time-format "%Y/%m/%d %H:%M")
+(setq display-time-default-load-average 0)
 (display-time-mode t)
 
-;; Setup text mode
+;; setup text mode
 (add-hook 'text-mode-hook '(lambda() (auto-fill-mode 1)))
 (add-hook 'text-mode-hook '(lambda() (setq fill-column 70)))
 
-;; Tab stop
+;; tab stop
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
 (setq indent-line-function 'insert-tab)
 (setq tab-stop-list (quote (4 8 12 16 20 24 28 32 36 40 44 48 52 56 60 64 68 72 76 80 84 88 92 96 100 104 108 112 116 120)))
 
+;; line ending and encoding
+(setq-default buffer-file-coding-system 'utf-8-unix)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;
@@ -156,6 +159,15 @@
 
 (install-extra-packages)
 
+;;;;
+;;;;       theme and font
+;;;;
 (if window-system
-    (load-theme 'dracula t)
+    (progn
+      (load-theme 'dracula t)
+      (set-face-attribute 'default nil :family "Source Code Pro" :weight 'light :height 110)
+      )
+  (progn
+    (menu-bar-mode -1)
+    )
   )
