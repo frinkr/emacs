@@ -85,12 +85,17 @@
   (setq auto-save-default nil)
   (save-place-mode t)   ;; save cursor position
 
+  (setq evil-emacs-state-cursor '((bar . 2)))
+  (blink-cursor-mode t)
+
   (setq inhibit-splash-screen t)
   (setq transient-mark-mode t)
   (setq delete-key-deletes-forward t)
   (setq mouse-yank-at-point nil)
   (setq bookmark-save-flag 1)  ;; autosave bookmarks
   (setq-default indent-tabs-mode nil)
+
+  (setq sp-escape-quotes-after-insert nil) ;; don't auto escape in smartparens-mode
 
   ;; upcase region is anoying
   (put 'upcase-region 'disabled nil)
@@ -121,6 +126,19 @@
                                                                    ("%b - Dir:  " default-directory)))))))
   )
 
+(defun efx/setup-indent(n)
+  ;; java/c/c++
+  (setq c-basic-offset n)
+  ;; web development
+  (setq coffee-tab-width n) ; coffeescript
+  (setq javascript-indent-level n) ; javascript-mode
+  (setq js-indent-level n) ; js-mode
+  (setq js2-basic-offset n) ; js2-mode, in latest js2-mode, it's alias of js-indent-level
+  (setq web-mode-markup-indent-offset n) ; web-mode, html tag in html file
+  (setq web-mode-css-indent-offset n) ; web-mode, css in html file
+  (setq web-mode-code-indent-offset n) ; web-mode, js code in html file
+  (setq css-indent-offset n) ; css-mode
+  )
 
 ;;;;
 ;;;;     General keybindings
@@ -218,6 +236,23 @@
   (add-hook 'prog-mode-hook 'fci-mode)
   (add-hook 'text-mode-hook 'fci-mode)
   )
+
+;;;;
+;;;;           org todo
+;;;;
+(defun efx/setup-org-mode()
+  (setq org-todo-keywords-back-up
+        '((sequence "TODO(t)" "WAIT(w@/!)" "|" "DONE(d!)" "CANCELED(c@)" "|" "DEFERRED(f@)")))
+  
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "DEFERRED(f)" "IN-PROGRESS(p)" "|" "DONE(d)" "|" "CANCELED(c)" )))
+  (setq org-todo-keyword-faces
+        '(("CANCELED" . org-warning)
+          ("DEFERRED" . org-warning)
+          ("IN-PROGRESS" . org-todo)
+          ))
+  )
+
 
 ;;;;
 ;;;;           highlight-thing
@@ -528,6 +563,13 @@
   )
 
 ;;;;
+;;;;        auto-complete
+;;;;
+(defun efx/ac()
+  (global-auto-complete-mode t)
+  )
+
+;;;;
 ;;;;        C++
 ;;;;
 (defun efx/setup-c++()
@@ -594,16 +636,6 @@
       ;; modify the colour of slots to match public, private, etc ...
       (font-lock-add-keywords 'c++-mode
                               '(("\\<\\(slots\\|signals\\)\\>" . font-lock-type-face)))
-      ;; make new font for rest of qt keywords
-      (make-face 'qt-keywords-face)
-      (set-face-foreground 'qt-keywords-face "BlueViolet")
-      ;; qt keywords
-      (font-lock-add-keywords 'c++-mode
-                              '(("\\<Q_OBJECT\\>" . 'qt-keywords-face)))
-      (font-lock-add-keywords 'c++-mode
-                              '(("\\<SIGNAL\\|SLOT\\>" . 'qt-keywords-face)))
-      (font-lock-add-keywords 'c++-mode
-                              '(("\\<Q[A-Z][A-Za-z]*" . 'qt-keywords-face)))
       )
     )
   (add-hook 'c-mode-common-hook 'efx/c-c++-mode-hook)
@@ -611,15 +643,34 @@
 
   )
 
+(defun efx/setup-web()
+  (setq-default js2-basic-offset 2
+                js-indent-level 2)
+  (setq web-mode-markup-indent-offset 2)
+  (setq web-mode-css-indent-offset 2)
+  (setq web-mode-code-indent-offset 2)
+  (setq web-mode-indent-style 2)
+  )
+
+(defun efx/setup-monkeyc()
+  (add-to-list 'load-path "/git/github/emacs/spacemacs-layers/efx/addons")
+  (require 'monkeyc-mode)
+  (add-to-list 'auto-mode-alist '("\\.mc\\'" . monkeyc-mode))
+  )
 
 (defun efx/user-setup()
   (efx/setup-general)
+  (efx/setup-indent 4)
   (efx/setup-keybindings)
   (efx/setup-fast-nav)
   (efx/setup-diminish)
+  (efx/setup-org-mode)
 ;;  (efx/setup-dired)
   (efx/setup-terminal)
   (efx/setup-eshell)
-;;  (efx/setup-helm)
+  ;;  (efx/setup-helm)
+  ;;(efx/ac)
   (efx/setup-c++)
+  (efx/setup-monkeyc)
+  (efx/setup-web)
 )
