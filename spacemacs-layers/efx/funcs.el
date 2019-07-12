@@ -16,6 +16,23 @@
                                                  '(eshell-mode shell-mode)))
                             (buffer-list)))))
 
+
+;;;;
+;;;;           copy file path clipboard
+;;;;
+(defun copy-file-path ()
+  "Copy the current file path to the clipboard"
+  (interactive)
+  (let ((filename (if (equal major-mode 'dired-mode)
+                      default-directory
+                    (buffer-file-name))))
+    (when filename
+      (with-temp-buffer
+        (insert filename)
+        (clipboard-kill-region (point-min) (point-max)))
+      (message filename))))
+
+
 ;;;;
 ;;;;          reload current buffer
 ;;;;
@@ -85,7 +102,7 @@
   (setq auto-save-default nil)
   (save-place-mode t)   ;; save cursor position
 
-  (setq evil-emacs-state-cursor '((bar . 2)))
+  (setq evil-emacs-state-cursor '(box "red"))
   (blink-cursor-mode t)
 
   (setq inhibit-splash-screen t)
@@ -171,6 +188,7 @@
 
   (global-set-key (kbd "C-x C-r") 'helm-recentf)
   (global-set-key (kbd "C-S-l") 'helm-semantic-or-imenu)
+  (global-set-key (kbd "C-S-n") 'ns-next-frame)
   (global-set-key (kbd "C-x j") 'kill-other-buffers)
   (global-set-key (kbd "C-t") 'new-scratch)
 

@@ -34,7 +34,7 @@ function curr_repo() {
 # PS1 prompt
 export PS1="\e[0;33m\u@\h:\W\e[m\$ "
 export PS1='\[\e[0;33m\]\u@\h:\W\$\[\e[0m\]'  # fix the command wrapping problem
-export PS1='\[\e[0;33m\]\u🌀\W\[\e[0m\]\[\e[36m\]`curr_repo`\[\e[0m\]\[\e[0;33m\]💰\[\e[0m\] '  # fix the command wrapping problem
+export PS1='\[\e[0;33m\]\u🌀\W\[\e[0m\]\[\e[36m\]`curr_repo`\[\e[0m\]\[\e[0;33m\]🍻\[\e[0m\] '  # fix the command wrapping problem
 
 #export PS1="\e[0;33m\h:\W \u\$ \e[m"
 # Tell grep to highlight matches
@@ -44,13 +44,13 @@ export GREP_OPTIONS='--color=auto'
 export LC_CTYPE=en_US.UTF-8
 
 # emacs without init file
-alias emacsq='emacs -q -nw'
+alias emacsq='emacs -q -nw --load /git/github/emacs/emacs.mini.el'
 
 # brew with proxy
 alias brew='ALL_PROXY=http://eglbeprx001.esko-graphics.com:8080 brew'
 
 # cscope editor
-export EDITOR='emacs -q -nw'
+export EDITOR='emacs -q -nw --load /git/github/emacs/emacs.mini.el'
 
 # P4 config
 export P4CONFIG=p4.config
@@ -118,3 +118,24 @@ function docker-env()
     #export DOCKER_OPTS="-H $DOCKER_HOST --insecure-registry atlantis:5000 --tls --tlskey $DOCKER_CERT_PATH/server-key.pem --tlscert $DOCKER_CERT_PATH/server.pem --tlsverify --tlscacert $DOCKER_CERT_PATH/ca.pem"
     alias docker="docker $DOCKER_OPTS"
 }
+
+# Proxy
+function proxy
+{
+    export HTTP_PROXY="http://eglbeprx001.esko-graphics.com:8080"
+    export HTTPS_PROXY=$HTTP_PROXY
+    export SOCKS_PROXY=$HTTP_PROXY
+
+    export NO_PROXY="localhost,127.0.0.1,$USERDNSDOMAIN"
+
+    $1 $2 $3 $4 $5 $6
+
+    unset HTTP_PROXY
+    unset HTTPS_PROXY
+    unset SOCKS_PROXY
+    unset NO_PROXY
+}
+
+test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"
+
+export PATH="/usr/local/sbin:$PATH"
