@@ -64,6 +64,28 @@
                           finally return name))
   (text-mode))
 
+
+;;;;
+;;;;            switch buffer
+;;;;
+(setq switch-buffer-state t)
+
+(defun switch-buffer()
+  "Switch next/previous buffer"
+  (interactive)
+  (if switch-buffer-state
+      (progn
+        (setq switch-buffer-state nil)
+        (next-buffer)
+        )
+    (progn
+      (setq switch-buffer-state t)
+      (previous-buffer)
+      )
+      )
+    )
+
+
 ;;;;
 ;;;;        Behavior Settings
 ;;;;
@@ -189,9 +211,12 @@
   (global-set-key (kbd "C-x C-r") 'helm-recentf)
   (global-set-key (kbd "C-S-l") 'helm-semantic-or-imenu)
   (global-set-key (kbd "C-S-n") 'ns-next-frame)
+  (global-set-key (kbd "C-S-o") 'ns-next-frame)
+  (global-set-key (kbd "M-`") 'ns-next-frame)
+  (global-set-key (kbd "C-`") 'switch-buffer)
   (global-set-key (kbd "C-x j") 'kill-other-buffers)
   (global-set-key (kbd "C-t") 'new-scratch)
-
+  (global-set-key (kbd "C-1") 'switch-buffer)
 
 
   ;; mac: set control & meta key
@@ -679,7 +704,7 @@
 (defun efx/user-setup()
   (efx/setup-general)
   (efx/setup-indent 4)
-  (efx/setup-keybindings)
+  
   (efx/setup-fast-nav)
   (efx/setup-diminish)
   (efx/setup-org-mode)
@@ -689,6 +714,7 @@
   ;;  (efx/setup-helm)
   ;;(efx/ac)
   (efx/setup-c++)
-  (efx/setup-monkeyc)
+  ;;(efx/setup-monkeyc)
   (efx/setup-web)
+  (efx/setup-keybindings)
 )

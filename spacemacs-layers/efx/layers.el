@@ -3,7 +3,8 @@
    (auto-completion :variables
                     auto-completion-enable-help-tooltip t
                     auto-completion-enable-sort-by-usage t
-                    ;;spacemacs-default-company-backends '(company-files company-capf)
+                    spacemacs-default-company-backends '(company-files company-capf company-semantic)
+                    ;;spacemacs-default-company-backends '(company-semantic)
                     )
    autohotkey
 
@@ -14,7 +15,8 @@
 
    (c-c++ :variables
           c-c++-default-mode-for-headers 'c++-mode
-          c-c++-enable-clang-support t)
+          ;; c-c++-enable-clang-support nil ;; doesn't work well for Esko projects
+          ) 
    cscope
    csv
 
