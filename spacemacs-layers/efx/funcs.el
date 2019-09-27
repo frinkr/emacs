@@ -1,7 +1,13 @@
+
 (setq is-macos (eq system-type 'darwin))
 (setq is-windows (eq system-type 'windows-nt))
 (setq is-wsl (eq system-type 'gnu/linux))  ;; windows subsystem for linux
 
+;;;;
+;;;;           include addons directory    
+;;;;            
+(setq efx-dir (file-name-directory (file-truename load-file-name)))
+(add-to-list 'load-path (concat efx-dir "addons"))
 
 ;;;;
 ;;;;           kill all other buffers but current one
@@ -84,6 +90,18 @@
       )
       )
     )
+
+
+;;;;
+;;;;           code
+;;;;
+(defun code (path)
+  "Open file or folder  in vscode"
+  (interactive "sOpen in vs-code (default current file): ")
+  (if (string= "" path)
+      (shell-command (concat "code " buffer-file-name))
+    (shell-command (concat "code " path)))
+  )
 
 
 ;;;;
@@ -696,9 +714,26 @@
   )
 
 (defun efx/setup-monkeyc()
-  (add-to-list 'load-path "/git/github/emacs/spacemacs-layers/efx/addons")
   (require 'monkeyc-mode)
   (add-to-list 'auto-mode-alist '("\\.mc\\'" . monkeyc-mode))
+  )
+
+(defun efx/install-find-file-hook()
+  (defun efx/find-file-hook()
+    ;; disable useless minor modes
+    ;; (persp-mode -1)
+    ;; (projectile-mode -1)
+    ;; (hs-minor-mode -1)
+
+    ;; remove useless menu items to make the menubar short
+    (define-key persp-mode-map [menu-bar Perspectives] nil)
+    (define-key projectile-mode-map [menu-bar Projectile] nil)
+    (define-key hs-minor-mode-map [menu-bar Hide/Show] nil)
+    (define-key semantic-mode-map [menu-bar cedet-menu] nil)
+
+
+    )
+  (add-hook 'find-file-hook 'efx/find-file-hook)
   )
 
 (defun efx/user-setup()
@@ -714,7 +749,12 @@
   ;;  (efx/setup-helm)
   ;;(efx/ac)
   (efx/setup-c++)
-  ;;(efx/setup-monkeyc)
+  (efx/setup-monkeyc)
   (efx/setup-web)
+  (efx/install-find-file-hook)
+
+  ;; this comes to last to override key bindings
   (efx/setup-keybindings)
 )
+
+

@@ -3,7 +3,7 @@
    (auto-completion :variables
                     auto-completion-enable-help-tooltip t
                     auto-completion-enable-sort-by-usage t
-                    spacemacs-default-company-backends '(company-files company-capf company-semantic)
+                    spacemacs-default-company-backends '(company-files company-keywords company-capf company-semantic)
                     ;;spacemacs-default-company-backends '(company-semantic)
                     )
    autohotkey
