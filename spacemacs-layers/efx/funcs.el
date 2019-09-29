@@ -704,6 +704,7 @@
 
   )
 
+
 (defun efx/setup-web()
   (setq-default js2-basic-offset 2
                 js-indent-level 2)
@@ -713,10 +714,13 @@
   (setq web-mode-indent-style 2)
   )
 
-(defun efx/setup-monkeyc()
+
+(defun efx/setup-private-addons()
   (require 'monkeyc-mode)
-  (add-to-list 'auto-mode-alist '("\\.mc\\'" . monkeyc-mode))
+  (require 'asc-mode)
+  ;;(add-to-list 'auto-mode-alist '("\\.mc\\'" . monkeyc-mode))
   )
+
 
 (defun efx/install-find-file-hook()
   (defun efx/find-file-hook()
@@ -736,6 +740,13 @@
   (add-hook 'find-file-hook 'efx/find-file-hook)
   )
 
+
+(defun efx/esko-links()
+  (add-to-list 'browse-url-filename-alist
+               '("/var/www/cgi/files/" . "http://my.website.com/cgi?"))
+  )
+
+
 (defun efx/user-setup()
   (efx/setup-general)
   (efx/setup-indent 4)
@@ -749,12 +760,10 @@
   ;;  (efx/setup-helm)
   ;;(efx/ac)
   (efx/setup-c++)
-  (efx/setup-monkeyc)
+  (efx/setup-private-addons)
   (efx/setup-web)
   (efx/install-find-file-hook)
 
   ;; this comes to last to override key bindings
   (efx/setup-keybindings)
 )
-
-
