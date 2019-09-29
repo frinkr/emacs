@@ -580,47 +580,13 @@
 ;;;;        helm 
 ;;;;
 (defun efx/setup-helm()
-  (setq helm-display-function 'helm-display-buffer-in-own-frame
-        helm-display-buffer-reuse-frame nil
-        helm-use-undecorated-frame-option nil)
-
-  
-  (defun efx/before-make-frame-hook()
-    (setq prev-frame (selected-frame))
-    )
-
-  (defun efx/after-make-frame-hook (&rest frame)
-    (let ((f (if (car frame) (car frame) (selected-frame)))
-          ppos
-          )
-	  (progn
-        (setq ppos (frame-position prev-frame))
-        (setq x (/ (- (display-pixel-width) (frame-width)) 2))
-        (setq y (/ (- (display-pixel-height) (frame-height)) 2))
-        (setq x (cdr ppos))
-        
-        (message "x == %d" x)
-        (if (previous-frame f)
-            (message "YESSSS")
-          (message "NOOO"))
-
-
-        (modify-frame-parameters f `((undecorated . t)
-                                     (internal-border-width . 0)
-                                     (alpha . 95)
-                                     (font . "Source Code Pro-13")
-                                     ;;(user-position . t)
-                                     ;;(left . ,x)
-                                     ;;(top . ,y)
-                                     ))
-        ;;(set-frame-position f (car ppos) (car ppos))
-        (set-face-background 'fringe (face-attribute 'hl-line :background) f)
-        )))
-
-  (when window-system
-    ;;(add-hook 'before-make-frame-hook 'efx/before-make-frame-hook)
-    ;;(add-hook 'after-make-frame-functions 'efx/after-make-frame-hook t)
-    )
+  (setq
+   ;;helm-display-function 'helm-display-buffer-in-own-frame
+   helm-display-buffer-reuse-frame nil
+   helm-use-undecorated-frame-option nil
+   helm-echo-input-in-header-line nil ;; hide helm echo
+   helm-buffers-fuzzy-matching t
+   )
   )
 
 ;;;;
@@ -718,7 +684,6 @@
 (defun efx/setup-private-addons()
   (require 'monkeyc-mode)
   (require 'asc-mode)
-  ;;(add-to-list 'auto-mode-alist '("\\.mc\\'" . monkeyc-mode))
   )
 
 
@@ -757,7 +722,7 @@
 ;;  (efx/setup-dired)
   (efx/setup-terminal)
   (efx/setup-eshell)
-  ;;  (efx/setup-helm)
+  (efx/setup-helm)
   ;;(efx/ac)
   (efx/setup-c++)
   (efx/setup-private-addons)
@@ -767,3 +732,11 @@
   ;; this comes to last to override key bindings
   (efx/setup-keybindings)
 )
+
+;;;;
+;;;;      fix desktop-mode + spacemacs
+;;;;
+(add-hook 'spacemacs-post-user-config-hook
+          (lambda ()
+            (desktop-save-mode)
+            (desktop-read)))
