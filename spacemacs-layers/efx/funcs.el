@@ -713,20 +713,30 @@
 (defun efx/esko-links()
   (require 'goto-addr)
   (require 'browse-url)
+
+  ;; Esko project code
+  (setq esko-project-codes '("DPP" "DPI" "JP"))
+
+  (setq esko-project-regexp
+        (string-join (mapcar (lambda (x) (concat x "-[0-9]+"))
+                             esko-project-codes) "\\|"))
+
+  ;; trap goto-address-url-regexp
   (setq goto-address-url-regexp-old goto-address-url-regexp)
   (setq goto-address-url-regexp
         (concat
          goto-address-url-regexp-old
-         "\\|DPI-[0-9]+"
-         "\\|JP-[0-9]+"))
+         "\\|" esko-project-regexp))
 
+  ;; trap browse-url-url-at-point
   (defadvice browse-url-url-at-point (after efx/browse-url-url-at-point () activate)
-    (if (string-match "DPI-[0-9+]\\|JP-[0-9]+" ad-return-value)
+    (if (string-match esko-project-regexp ad-return-value)
         (setq ad-return-value
               (concat "http://jira.esko.com/browse/"
-                      (string-remove-prefix "http://" ad-return-value)))
+                      (progn (string-match esko-project-regexp ad-return-value)
+                             (match-string 0 ad-return-value))))
       )
-  )
+    )
 )
 
 
