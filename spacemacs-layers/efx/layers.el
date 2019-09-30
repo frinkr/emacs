@@ -30,6 +30,9 @@
    javascript
    
    markdown
+   
+   (multiple-cursors :variables
+                     multiple-cursors-backend 'evil-mc)
 
    perforce
    python

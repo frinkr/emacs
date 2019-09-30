@@ -246,6 +246,10 @@
   ;; dis evil
   (define-key evil-emacs-state-map (kbd "C-z") nil)
   (global-set-key (kbd "C-z") 'undo-tree-undo)
+
+  ;; multiple-cursors
+  (global-unset-key (kbd "M-<down-mouse-1>"))
+  (global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click)
   )
 
 ;;;;
@@ -707,9 +711,23 @@
 
 
 (defun efx/esko-links()
-  (add-to-list 'browse-url-filename-alist
-               '("/var/www/cgi/files/" . "http://my.website.com/cgi?"))
+  (require 'goto-addr)
+  (require 'browse-url)
+  (setq goto-address-url-regexp-old goto-address-url-regexp)
+  (setq goto-address-url-regexp
+        (concat
+         goto-address-url-regexp-old
+         "\\|DPI-[0-9]+"
+         "\\|JP-[0-9]+"))
+
+  (defadvice browse-url-url-at-point (after efx/browse-url-url-at-point () activate)
+    (if (string-match "DPI-[0-9+]\\|JP-[0-9]+" ad-return-value)
+        (setq ad-return-value
+              (concat "http://jira.esko.com/browse/"
+                      (string-remove-prefix "http://" ad-return-value)))
+      )
   )
+)
 
 
 (defun efx/user-setup()
@@ -728,15 +746,7 @@
   (efx/setup-private-addons)
   (efx/setup-web)
   (efx/install-find-file-hook)
-
+  (efx/esko-links)
   ;; this comes to last to override key bindings
   (efx/setup-keybindings)
 )
-
-;;;;
-;;;;      fix desktop-mode + spacemacs
-;;;;
-(add-hook 'spacemacs-post-user-config-hook
-          (lambda ()
-            (desktop-save-mode)
-            (desktop-read)))
