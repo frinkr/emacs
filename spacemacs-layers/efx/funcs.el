@@ -248,8 +248,8 @@
   (global-set-key (kbd "C-z") 'undo-tree-undo)
 
   ;; multiple-cursors
-  (global-unset-key (kbd "M-<down-mouse-1>"))
-  (global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click)
+  ;;(global-unset-key (kbd "M-<down-mouse-1>"))
+  ;;(global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click)
   )
 
 ;;;;

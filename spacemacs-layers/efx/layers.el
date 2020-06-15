@@ -31,8 +31,8 @@
    
    markdown
    
-   (multiple-cursors :variables
-                     multiple-cursors-backend 'evil-mc)
+   ;;(multiple-cursors :variables
+   ;;                  multiple-cursors-backend 'evil-mc)
 
    perforce
    python
