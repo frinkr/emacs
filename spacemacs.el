@@ -71,6 +71,7 @@ values."
    dotspacemacs-excluded-packages
    '(
      ;;company
+     company-tern
      yasnippet
      )
    ;; Defines the behaviour of Spacemacs when installing packages.
