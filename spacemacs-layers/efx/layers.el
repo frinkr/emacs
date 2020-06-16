@@ -10,6 +10,8 @@
 
    better-defaults
 
+   bm
+   
    (colors :variables
            colors-enable-nyan-cat-progress-bar nil)
 

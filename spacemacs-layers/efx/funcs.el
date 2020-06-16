@@ -55,6 +55,8 @@
 (defun touch()
   "Touch the buffer"
   (interactive)
+  (shell-command-to-string (concat "chmod +w " (buffer-file-name (current-buffer))))
+  (revert-buffer)
   (set-buffer-modified-p t))
 
 
@@ -143,6 +145,7 @@
   (save-place-mode t)   ;; save cursor position
 
   (setq evil-emacs-state-cursor '(box "red"))
+  (setq evil-emacs-state-cursor '(bar "red"))
   (blink-cursor-mode t)
 
   (setq inhibit-splash-screen t)
@@ -231,10 +234,11 @@
   (global-set-key (kbd "C-S-n") 'ns-next-frame)
   (global-set-key (kbd "C-S-o") 'ns-next-frame)
   (global-set-key (kbd "M-`") 'ns-next-frame)
-  (global-set-key (kbd "C-`") 'switch-buffer)
+  (global-set-key (kbd "C-`") 'ns-next-frame)
+  (global-set-key (kbd "C-1") 'switch-buffer)
   (global-set-key (kbd "C-x j") 'kill-other-buffers)
   (global-set-key (kbd "C-t") 'new-scratch)
-  (global-set-key (kbd "C-1") 'switch-buffer)
+  ;;(global-set-key (kbd "C-w") 'delete-frame)
 
 
   ;; mac: set control & meta key
