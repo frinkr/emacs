@@ -251,6 +251,19 @@
   (define-key evil-emacs-state-map (kbd "C-z") nil)
   (global-set-key (kbd "C-z") 'undo-tree-undo)
 
+  ;; Zoom
+  (global-set-key (kbd "<C-wheel-up>") nil)
+  (global-set-key (kbd "<C-wheel-down>") nil)
+  (global-set-key (kbd "C-+") 'spacemacs/zoom-frm-in)
+  (global-set-key (kbd "C-_") 'spacemacs/zoom-frm-out)
+  (define-key undo-tree-map (kbd "C-_") 'spacemacs/zoom-frm-out)
+
+  ;; Comment key-binding
+  (define-key undo-tree-map (kbd "C-/") nil)
+  (define-key undo-tree-map (kbd "C-?") nil)
+  (global-set-key (kbd "C-/") 'comment-region)
+  (global-set-key (kbd "C-?") 'uncomment-region)
+
   ;; multiple-cursors
   ;;(global-unset-key (kbd "M-<down-mouse-1>"))
   ;;(global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click)
@@ -271,7 +284,12 @@
       (global-set-key (kbd "C-t") 'new-scratch)
 
       (define-key global-map [(meta m)] 'set-mark-command)
-      (global-set-key (kbd "<mouse-2>") (lambda () (interactive) (kill-buffer (current-buffer))))
+      (global-set-key (kbd "<mouse-2>")
+                      (lambda ()
+                        (interactive)
+                        (when (y-or-n-p (format "Close the buffer %s?" (or buffer-file-name (buffer-name))))
+                          (kill-buffer (current-buffer)))
+                        ))
       ;;      (global-set-key (kbd "<mouse-3>") 'tabbar-forward)
       ;;      (global-set-key (kbd "<mouse-5>") 'tabbar-backward)
 
