@@ -9,6 +9,18 @@
 (setq efx-dir (file-name-directory (file-truename load-file-name)))
 (add-to-list 'load-path (concat efx-dir "addons"))
 
+
+;;;;
+;;;;           clear the recentf 
+;;;;
+
+(defun clear-recentf ()
+  "Clear the recent file list."
+  (interactive)
+  (setq recentf-list '())
+  )
+
+
 ;;;;
 ;;;;           kill all other buffers but current one
 ;;;;
@@ -264,6 +276,8 @@
   (global-set-key (kbd "C-/") 'comment-region)
   (global-set-key (kbd "C-?") 'uncomment-region)
 
+  ;; Mouse-3
+  (global-set-key (kbd "<mouse-3>") 'mouse-set-point)
   ;; multiple-cursors
   ;;(global-unset-key (kbd "M-<down-mouse-1>"))
   ;;(global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click)
@@ -613,7 +627,24 @@
    helm-echo-input-in-header-line nil ;; hide helm echo
    helm-buffers-fuzzy-matching t
    )
+
+  ;;; prefer the candidate with prefix (ignore case)
+  (defun helm-score-candidate-fix (orig-fun &rest args)
+    (let* ((res (apply orig-fun args))
+           (cand (nth 0 args))
+           (pattern (nth 1 args))
+           (bonus (if (and (stringp cand)
+                           (stringp pattern)
+                           (string-prefix-p pattern cand t)                   
+                           )
+                      10000
+                    0)))
+      ;;(message "cand: %S, pat: %S, bonus %d " cand pattern bonus)
+      (+ res bonus)))
+  (advice-add 'helm-score-candidate-for-pattern :around #'helm-score-candidate-fix)
+  
   )
+
 
 ;;;;
 ;;;;        auto-complete
@@ -621,6 +652,7 @@
 (defun efx/ac()
   (global-auto-complete-mode t)
   )
+
 
 ;;;;
 ;;;;        C++
