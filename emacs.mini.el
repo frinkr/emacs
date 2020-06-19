@@ -429,7 +429,7 @@
       )
     )
 
-  (defun highlight-symbol-add-symbol (symbol &optional color)
+  (defun highlight-symbol-add-symbol-backup (symbol &optional color)
     "Override this function for support convenience set foreground and background"
     (unless (highlight-symbol-symbol-highlighted-p symbol)
       (when (equal symbol highlight-symbol)
@@ -452,6 +452,31 @@
         ;;(highlight-symbol-add-overlay-at-point color)
 
         )))
+
+  (setq highlight-symbol-foreground-color "white")
+  (setq highlight-symbol-colors '("SpringGreen3"
+                                  "MediumPurple1"
+                                  "DarkOrchid4"
+                                  "DeepPink"
+                                  "DarkOrange"
+                                  "OliveDrab4"
+                                  "HotPink1"
+                                  "IndianRed3"
+                                  "RoyalBlue1"
+                                  "cyan3"
+                                  "RoyalBlue4"))
+
+  (defun add-symbol-with-face-with-overlay(symbol color)
+    (let* ((symbol (thing-at-point 'symbol))
+           (bounds (bounds-of-thing-at-point 'symbol))
+           (begin (car bounds))
+           (end (cdr bounds)))
+
+      (highlight-symbol-add-overlay symbol begin end color)
+      (print (format "%d, %d" begin end))
+      )
+    )
+  (advice-add 'highlight-symbol-add-symbol-with-face :after #'add-symbol-with-face-with-overlay)
   )
 
 ;;;;
