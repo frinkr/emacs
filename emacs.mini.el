@@ -3,7 +3,7 @@
 (setq is-wsl (eq system-type 'gnu/linux))  ;; windows subsystem for linux
 
 (setq efx-dir (file-name-directory (file-truename load-file-name)))
-(add-to-list 'load-path (concat efx-dir "addons")) ;; include addons directory    
+(add-to-list 'load-path (concat efx-dir "extra-packages")) ;; include addons directory (not in melpa)
 
 
 ;;;;
@@ -24,6 +24,7 @@
   (package-initialize)
 
   (setq package-list '(
+                       cl-lib
                        diminish
                        helm
                        highlight-parentheses
@@ -215,6 +216,14 @@
 
   ;; font
   (set-face-attribute 'default nil :family "Source Code Pro" :weight 'regular :height 140)
+
+  ;; PATH
+  (add-to-list 'exec-path "/opt/local/bin/")
+
+  ;; Common packages
+  (require 'cl)
+  (require 'cl-lib)
+  (require 'subr-x)
   )
 
 
@@ -241,6 +250,7 @@
 
   (global-set-key (kbd "C-x b") 'helm-buffers-list)
   (global-set-key (kbd "C-x m") 'helm-M-x)
+  (global-set-key (kbd "M-x") 'helm-M-x)
   (global-set-key (kbd "C-x C-f") 'helm-find-files)
   (global-set-key (kbd "C-x C-r") 'helm-recentf)
   (global-set-key (kbd "C-S-l") 'helm-semantic-or-imenu)
@@ -277,7 +287,8 @@
   (global-set-key (kbd "C-?") 'uncomment-region)
 
   ;; Mouse-3
-  (global-set-key (kbd "<mouse-3>") 'mouse-set-point)
+  (global-set-key (kbd "<mouse-3>") 'mouse-popup-menubar-stuff)
+
   ;; multiple-cursors
   ;;(global-unset-key (kbd "M-<down-mouse-1>"))
   ;;(global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click)
@@ -612,6 +623,10 @@
 (defun fx/setup-miniconfig-packages()
   (require 'p4)
   (setenv "P4CONFIG" "p4.config")
+  (require 'monkeyc-mode)
+  (require 'asc-mode)
+
+  ;;(require 'mouse3)
 )
 
 
@@ -747,7 +762,7 @@
   (fx/setup-miniconfig-packages)
   (fx/setup-c++)
   (fx/setup-indent 4)
-  ;;(fx/setup-esko-links)
+  (fx/setup-esko-links)
   (fx/setup-keybindings)  ;; this comes to last to override key bindings
   )
 
