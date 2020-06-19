@@ -360,44 +360,36 @@
   ;;(require 'highlight-symbol)
   ;;(require 'highlight-thing)
   (require 'highlight)
-  (global-set-key [double-mouse-1] 'smart-highlight)
-  (global-set-key [M-double-mouse-1] 'hlt-unhighlight-symbol)
+  (global-set-key [double-mouse-1] 'fx/smart-highlight)
   
-  (setq highlight-symbol-foreground-color "white")
-  (setq highlight-symbol-colors '("SpringGreen3" 
-                                  "MediumPurple1"
-                                  "DarkOrchid4"
-                                  "DeepPink"
-                                  "DarkOrange"
-                                  "OliveDrab4"
-                                  "HotPink1"
-                                  "IndianRed3"
-                                  "RoyalBlue1"
-                                  "cyan3"
-                                  "RoyalBlue4"))
+  (setq hlt-auto-face-backgrounds '("SpringGreen3" 
+                                    "MediumPurple1"
+                                    "DarkOrchid4"
+                                    "DeepPink"
+                                    "DarkOrange"
+                                    "OliveDrab4"
+                                    "HotPink1"
+                                    "IndianRed3"
+                                    "RoyalBlue1"
+                                    "cyan3"
+                                    "RoyalBlue4"))
 
-  (setq hlt-auto-face-backgrounds highlight-symbol-colors)
-
-
-  (defun smart-highlight()
+  (defun fx/smart-highlight()
     (interactive)
-    (let* (
-           (symbol (thing-at-point 'symbol))
-           (bounds (bounds-of-thing-at-point 'symbol))
-           (begin (car bounds))
-           (end (cdr bounds)))
-
-
-      (dolist (ov (overlays-in begin end))
-        ;;(print (overlay-get ov 'hlt-highlight))
-        (if (overlay-get ov 'hlt-highlight)
-            (hlt-unhighlight-symbol symbol)
-          (hlt-highlight-symbol symbol)
+    (when-let ((symbol (thing-at-point 'symbol)))
+      (let* ((bounds (bounds-of-thing-at-point 'symbol))
+             (begin (car bounds))
+             (end (cdr bounds)))
+        (dolist (ov (overlays-in begin end))
+          (if (overlay-get ov 'hlt-highlight) ;; check if been highlighed
+              (hlt-unhighlight-symbol symbol)
+            (hlt-highlight-symbol symbol)
+            )
           )
         )
-      )    
+      )
     )
-
+  
   )
 
 ;;;;
