@@ -12,8 +12,8 @@
 (when t
   (setq url-proxy-services
         '(("no_proxy" . "^\\(localhost\\|10.*\\)")
-          ("http" . "eglbeprx001:8080")
-          ("https" . "eglbeprx001:8080")))
+          ("http" . "127.0.0.1:6667")
+          ("https" . "127.0.0.1:6667")))
   )
 
 (defun install-extra-packages()
@@ -30,6 +30,7 @@
                        diminish
                        helm
                        helm-posframe
+                       highlight
                        highlight-parentheses
                        highlight-symbol
                        highlight-thing
@@ -356,105 +357,14 @@
 ;;;;           highlight-thing
 ;;;;
 (defun fx/setup-highlight-thing()
-  (require 'highlight-symbol)
-  (require 'highlight-thing)
-
-  (global-set-key [double-mouse-1] 'highlight-symbol)
-  ;;  (global-set-key [mouse-1] 'highlight-symbol-remove-all)
-
-  (overlay-lists)
-
-  (setq highlight-symbol-color-pairs
-        '(
-          ("white" . "SpringGreen3")
-          ("white" . "MediumPurple1")
-          ("white" . "DarkOrchid4")
-          ("white" . "DeepPink")
-          ("white" . "DarkOrange")
-          ("white" . "OliveDrab4")
-          ("white" . "HotPink1")
-          ("white" . "IndianRed3")
-          ("white" . "RoyalBlue1")
-          ("white" . "cyan3")
-          ("white" . "RoyalBlue4")
-          ))
-
-  (defvar-local highlight-symbol-line-overlay nil "Over used by ")
-
-  (defun highlight-symbol-add-overlay(symbol begin end face)
-
-    (setq highlight-symbol-line-overlay (make-overlay begin end))
-    ;;                                             (line-beginning-position)
-    ;;                                             (line-end-position)))
-
-    (overlay-put highlight-symbol-line-overlay 'priority -10)
-    (overlay-put highlight-symbol-line-overlay 'face face)
-
-    )
-
-  (defun highlight-symbol-post-command-hook ()
-    (if highlight-symbol-line-overlay
-        (delete-overlay highlight-symbol-line-overlay))
-    (let ((begin (line-beginning-position))
-          (end (line-end-position))
-
-          )
-
-      ;; find symbols on current line
-      ;;(print begin)
-      )
-    )
-  ;;(add-hook 'post-command-hook 'highlight-symbol-post-command-hook nil t)
-
-  (defun highlight-symbol-next-color-pair ()
-    "Step to and return next color from the color ring."
-    (let ((color (nth highlight-symbol-color-index
-                      highlight-symbol-color-pairs)))
-      (if color ;; wrap
-          (incf highlight-symbol-color-index)
-        (setq highlight-symbol-color-index 1
-              color (car highlight-symbol-color-pairs)))
-      color))
-
-  (defun highlight-symbol-add-overlay-at-point (face)
-    "Add overlay at current symbol of current line"
-    (let (symbol bounds begin end)
-      (setq symbol (thing-at-point 'symbol))
-      (setq bounds (bounds-of-thing-at-point 'symbol))
-      (setq begin (car bounds))
-      (setq end (cdr bounds))
-
-      (highlight-symbol-add-overlay symbol begin end color)
-      (print (format "%d, %d" begin end))
-      )
-    )
-
-  (defun highlight-symbol-add-symbol-backup (symbol &optional color)
-    "Override this function for support convenience set foreground and background"
-    (unless (highlight-symbol-symbol-highlighted-p symbol)
-      (when (equal symbol highlight-symbol)
-        (highlight-symbol-mode-remove-temp))
-      (let ((color (or color (highlight-symbol-next-color-pair)))
-            f-color b-color)
-        (unless (facep color)
-          (if (consp color)
-              (setq f-color (car color)
-                    b-color (cdr color))
-            (setq f-color highlight-symbol-foreground-color
-                  b-color color))
-          (setq color `((background-color . ,b-color)
-                        (foreground-color . ,f-color))))
-        ;; (highlight-symbol-remove-all) ;; remove others
-        ;; highlight
-        (highlight-symbol-add-symbol-with-face symbol color)
-        ;;(push symbol highlight-symbol-list)
-
-        ;;(highlight-symbol-add-overlay-at-point color)
-
-        )))
-
+  ;;(require 'highlight-symbol)
+  ;;(require 'highlight-thing)
+  (require 'highlight)
+  (global-set-key [double-mouse-1] 'smart-highlight)
+  (global-set-key [M-double-mouse-1] 'hlt-unhighlight-symbol)
+  
   (setq highlight-symbol-foreground-color "white")
-  (setq highlight-symbol-colors '("SpringGreen3"
+  (setq highlight-symbol-colors '("SpringGreen3" 
                                   "MediumPurple1"
                                   "DarkOrchid4"
                                   "DeepPink"
@@ -466,21 +376,32 @@
                                   "cyan3"
                                   "RoyalBlue4"))
 
-  (defun add-symbol-with-face-with-overlay(symbol color)
-    (let* ((symbol (thing-at-point 'symbol))
+  (setq hlt-auto-face-backgrounds highlight-symbol-colors)
+
+
+  (defun smart-highlight()
+    (interactive)
+    (let* (
+           (symbol (thing-at-point 'symbol))
            (bounds (bounds-of-thing-at-point 'symbol))
            (begin (car bounds))
            (end (cdr bounds)))
 
-      (highlight-symbol-add-overlay symbol begin end color)
-      (print (format "%d, %d" begin end))
-      )
+
+      (dolist (ov (overlays-in begin end))
+        ;;(print (overlay-get ov 'hlt-highlight))
+        (if (overlay-get ov 'hlt-highlight)
+            (hlt-unhighlight-symbol symbol)
+          (hlt-highlight-symbol symbol)
+          )
+        )
+      )    
     )
-  (advice-add 'highlight-symbol-add-symbol-with-face :after #'add-symbol-with-face-with-overlay)
+
   )
 
 ;;;;
-;;;;          highlight-parentheses
+;;;;          Highlight-parentheses
 ;;;;
 (defun fx/setup-highlight-parentheses()
   (require 'highlight-parentheses)
@@ -701,8 +622,8 @@
 (defun fx/setup-miniconfig-packages()
   (require 'p4)
   (setenv "P4CONFIG" "p4.config")
-  (require 'monkeyc-mode)
-  (require 'asc-mode)
+  ;;(require 'monkeyc-mode)
+  ;;(require 'asc-mode)
 
   (require 'default-text-scale)
 )
@@ -844,7 +765,7 @@
   )
 
 (fx/user-setup)
-(load-theme 'sanityinc-tomorrow-blue t)
+(load-theme 'dracula t)
 
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file 'noerror)
