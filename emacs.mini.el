@@ -26,8 +26,10 @@
   (setq package-list '(
                        auto-complete
                        cl-lib
+                       default-text-scale
                        diminish
                        helm
+                       helm-posframe
                        highlight-parentheses
                        highlight-symbol
                        highlight-thing
@@ -37,14 +39,18 @@
                        projectile
                        pos-tip
                        undo-tree
-                       dracula-theme))
+                       ))
 
+  (setq theme-list '(
+                     color-theme-sanityinc-tomorrow
+                     dracula-theme
+                     ))
   ;; refresh
   (unless package-archive-contents
     (package-refresh-contents))
 
   ;; install 
-  (dolist (package package-list)
+  (dolist (package (append package-list theme-list))
     (unless (package-installed-p package)
       (package-install package)))
   )
@@ -280,9 +286,9 @@
   ;; Zoom
   (global-set-key (kbd "<C-wheel-up>") nil)
   (global-set-key (kbd "<C-wheel-down>") nil)
-  (global-set-key (kbd "C-+") 'spacemacs/zoom-frm-in)
-  (global-set-key (kbd "C-_") 'spacemacs/zoom-frm-out)
-  (define-key undo-tree-map (kbd "C-_") 'spacemacs/zoom-frm-out)
+  (global-set-key (kbd "C-+") 'default-text-scale-increase)
+  (global-set-key (kbd "C-_") 'default-text-scale-decrease)
+  (define-key undo-tree-map (kbd "C-_") 'default-text-scale-decrease)
 
   ;; Comment key-binding
   (define-key undo-tree-map (kbd "C-/") nil)
@@ -563,6 +569,7 @@
 (defun fx/setup-helm()
   (setq
    ;;helm-display-function 'helm-display-buffer-in-own-frame
+   helm-default-display-buffer-functions '(display-buffer-in-side-window)
    helm-display-buffer-reuse-frame nil
    helm-use-undecorated-frame-option nil
    helm-echo-input-in-header-line nil ;; hide helm echo
@@ -633,7 +640,7 @@
 
   ;; ac conflicts with fill-column-indicator
   ;; https://github.com/alpaker/Fill-Column-Indicator/issues/21#issuecomment-6959718
-  (when t
+  (when nil
     (defvar sanityinc/fci-mode-suppressed nil)
     (defadvice popup-create (before suppress-fci-mode activate)
       "Suspend fci-mode while popups are visible"
@@ -674,6 +681,8 @@
   (setenv "P4CONFIG" "p4.config")
   (require 'monkeyc-mode)
   (require 'asc-mode)
+
+  (require 'default-text-scale)
 )
 
 
@@ -794,7 +803,7 @@
 
 (defun fx/user-setup()
   (fx/setup-general)
-  (fx/setup-fill-column-indicator) ;; conflicts with auto-complete
+;;  (fx/setup-fill-column-indicator) ;; conflicts with auto-complete
   (fx/setup-fast-nav)
   (fx/setup-highlight-thing)
   (fx/setup-highlight-parentheses)
@@ -812,7 +821,7 @@
   )
 
 (fx/user-setup)
-(load-theme 'dracula t)
+(load-theme 'sanityinc-tomorrow-blue t)
 
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file 'noerror)
