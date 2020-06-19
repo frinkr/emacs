@@ -24,14 +24,18 @@
   (package-initialize)
 
   (setq package-list '(
+                       auto-complete
                        cl-lib
                        diminish
                        helm
                        highlight-parentheses
                        highlight-symbol
+                       highlight-thing
                        fill-column-indicator
                        p4
                        persp-mode
+                       projectile
+                       pos-tip
                        undo-tree
                        dracula-theme))
 
@@ -91,7 +95,6 @@
 ;;;;
 ;;;;          reload current buffer
 ;;;;
-
 (defun reload ()
   "Reload the buffer w/o prompt."
   (interactive)
@@ -219,7 +222,8 @@
 
   ;; PATH
   (add-to-list 'exec-path "/opt/local/bin/")
-
+  (setenv "PATH" (format "%s:%s" "/opt/local/bin/" (getenv "PATH")))
+  
   ;; Common packages
   (require 'cl)
   (require 'cl-lib)
@@ -288,10 +292,6 @@
 
   ;; Mouse-3
   (global-set-key (kbd "<mouse-3>") 'mouse-popup-menubar-stuff)
-
-  ;; multiple-cursors
-  ;;(global-unset-key (kbd "M-<down-mouse-1>"))
-  ;;(global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click)
   )
 
 ;;;;
@@ -348,6 +348,8 @@
 ;;;;
 (defun fx/setup-highlight-thing()
   (require 'highlight-symbol)
+  (require 'highlight-thing)
+
   (global-set-key [double-mouse-1] 'highlight-symbol)
   ;;  (global-set-key [mouse-1] 'highlight-symbol-remove-all)
 
@@ -447,7 +449,6 @@
 ;;;;          highlight-parentheses
 ;;;;
 (defun fx/setup-highlight-parentheses()
-  
   (require 'highlight-parentheses)
   (global-highlight-parentheses-mode t)
   (setq hl-paren-highlight-adjacent t)
@@ -596,7 +597,55 @@
 ;;;;        auto-complete
 ;;;;
 (defun fx/ac()
+  (require 'auto-complete-config)
+  (require 'auto-complete)
+  (require 'pos-tip)  ;; for a nice completion menu and help
+
+  (ac-config-default)
   (global-auto-complete-mode t)
+  
+  (setq-default
+   ac-sources '(
+                ac-source-words-in-all-buffer
+                ac-source-words-in-buffer
+                ;;ac-source-files-in-current-dir              
+                )
+   )
+  (defun auto-complete-mode-maybe ()
+    "Overwrite auto-complete-mode-maybe which by defaults turns autocomplete only on for buffers listed in ac-modes."
+    (unless (minibufferp (current-buffer))
+      (auto-complete-mode 1)))
+  
+  ;; Face
+  (set-face-background 'popup-scroll-bar-foreground-face "red3")
+  
+  ;; Trigger key
+  (if (display-graphic-p)
+      (global-set-key [(control ?/)] 'auto-complete)
+    (ac-set-trigger-key "TAB"))
+
+  (setq ac-auto-start t)
+  (setq ac-use-quick-help nil)
+  (setq ac-dwim t)
+  (setq ac-use-fuzzy t)
+  (setq ac-ignore-case t)
+  (ac-linum-workaround)
+
+  ;; ac conflicts with fill-column-indicator
+  ;; https://github.com/alpaker/Fill-Column-Indicator/issues/21#issuecomment-6959718
+  (when t
+    (defvar sanityinc/fci-mode-suppressed nil)
+    (defadvice popup-create (before suppress-fci-mode activate)
+      "Suspend fci-mode while popups are visible"
+      (set (make-local-variable 'sanityinc/fci-mode-suppressed) fci-mode)
+      (when fci-mode
+        (turn-off-fci-mode)))
+    (defadvice popup-delete (after restore-fci-mode activate)
+      "Restore fci-mode when all popups have closed"
+      (when (and (not popup-instances) sanityinc/fci-mode-suppressed)
+        (setq sanityinc/fci-mode-suppressed nil)
+        (turn-on-fci-mode)))
+    )
   )
 
 
@@ -625,8 +674,6 @@
   (setenv "P4CONFIG" "p4.config")
   (require 'monkeyc-mode)
   (require 'asc-mode)
-
-  ;;(require 'mouse3)
 )
 
 
@@ -680,13 +727,10 @@
 
   ;; my c/c++ hook
   (defun fx/c-c++-mode-hook ()
-
-
-    (progn
-      (define-key c-mode-base-map "\C-l" 'newline-and-indent)
-      (c-add-style "efx2" fx/c2-style t)
-      (c-add-style "efx4" fx/c4-style t)
-      )
+    (define-key c-mode-base-map "\C-l" 'newline-and-indent)
+    (c-add-style "efx2" fx/c2-style t)
+    (c-add-style "efx4" fx/c4-style t)
+    (goto-address-mode t)  
     )
   (add-hook 'c-mode-common-hook 'fx/c-c++-mode-hook)
   (add-hook 'c++-mode-common-hook 'fx/c-c++-mode-hook)
@@ -750,7 +794,7 @@
 
 (defun fx/user-setup()
   (fx/setup-general)
-  (fx/setup-fill-column-indicator)
+  (fx/setup-fill-column-indicator) ;; conflicts with auto-complete
   (fx/setup-fast-nav)
   (fx/setup-highlight-thing)
   (fx/setup-highlight-parentheses)
@@ -761,6 +805,7 @@
   (fx/setup-diminish)
   (fx/setup-miniconfig-packages)
   (fx/setup-c++)
+  (fx/ac)
   (fx/setup-indent 4)
   (fx/setup-esko-links)
   (fx/setup-keybindings)  ;; this comes to last to override key bindings
