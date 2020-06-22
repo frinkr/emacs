@@ -484,6 +484,17 @@
 
 
 ;;;;
+;;;;        projectile
+;;;;
+(use-package helm-projectile
+  :config
+  (projectile-global-mode)
+  (setq projectile-completion-system 'helm)
+  (helm-projectile-on)
+  :bind(("C-x C-o" . helm-projectile-find-file))
+  )
+
+;;;;
 ;;;;       git
 ;;;;
 (use-package magit)
