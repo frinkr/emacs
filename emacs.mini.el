@@ -236,10 +236,6 @@
 
   ;; font
   (set-face-attribute 'default nil :family "Source Code Pro" :weight 'regular :height 140)
-
-  ;; PATH
-  (add-to-list 'exec-path "/opt/local/bin/")
-  (setenv "PATH" (format "%s:%s" "/opt/local/bin/" (getenv "PATH")))
   
   ;; Common packages
   (require 'cl)
@@ -258,23 +254,12 @@
   (global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
   (global-set-key (kbd "M-b") (lambda () (interactive) (backward-word)))
   (global-set-key (kbd "M-g") 'goto-line)
-  (global-set-key (kbd "M-J") 'helm-cscope-find-global-definition)
-  (global-set-key (kbd "M-K") 'helm-cscope-find-this-symbol)
-  (global-set-key (kbd "M-l") 'helm-semantic-or-imenu)
   (global-set-key (kbd "M-`") 'set-mark-command)
 
   (global-set-key (kbd "C-z") 'undo)
   (global-set-key (kbd "C-q") 'save-buffers-kill-terminal)
   (global-set-key (kbd "C-4") 'p4-edit)
   (global-set-key (kbd "C-x r") 'reload)
-  (global-set-key (kbd "C-x C-b") 'helm-buffers-list)
-
-  (global-set-key (kbd "C-x b") 'helm-buffers-list)
-  (global-set-key (kbd "C-x m") 'helm-M-x)
-  (global-set-key (kbd "M-x") 'helm-M-x)
-  (global-set-key (kbd "C-x C-f") 'helm-find-files)
-  (global-set-key (kbd "C-x C-r") 'helm-recentf)
-  (global-set-key (kbd "C-S-l") 'helm-semantic-or-imenu)
   (global-set-key (kbd "C-S-n") 'ns-next-frame)
   (global-set-key (kbd "C-S-o") 'ns-next-frame)
   (global-set-key (kbd "M-`") 'ns-next-frame)
@@ -297,13 +282,8 @@
   ;; Zoom
   (global-set-key (kbd "<C-wheel-up>") nil)
   (global-set-key (kbd "<C-wheel-down>") nil)
-  (global-set-key (kbd "C-+") 'default-text-scale-increase)
-  (global-set-key (kbd "C-_") 'default-text-scale-decrease)
-  (define-key undo-tree-map (kbd "C-_") 'default-text-scale-decrease)
 
-  ;; Comment key-binding
-  (define-key undo-tree-map (kbd "C-/") nil)
-  (define-key undo-tree-map (kbd "C-?") nil)
+  ;; Comments
   (global-set-key (kbd "C-/") 'comment-region)
   (global-set-key (kbd "C-?") 'uncomment-region)
 
@@ -352,11 +332,13 @@
   )
 
 (defun fx/setup-fill-column-indicator()
-  (require 'fill-column-indicator)
-  (setq fci-rule-width 1)
-  (setq fci-rule-column 90)
-  (add-hook 'prog-mode-hook 'fci-mode)
-  (add-hook 'text-mode-hook 'fci-mode)
+  (use-package fill-column-indicator
+    :config
+    (setq fci-rule-width 1)
+    (setq fci-rule-column 90)
+    (add-hook 'prog-mode-hook 'fci-mode)
+    (add-hook 'text-mode-hook 'fci-mode)
+    )
   )
 
 
@@ -364,64 +346,66 @@
 ;;;;           highlight-thing
 ;;;;
 (defun fx/setup-highlight-thing()
-  ;;(require 'highlight-symbol)
-  ;;(require 'highlight-thing)
-  (require 'highlight)
-  (global-set-key [double-mouse-1] 'fx/smart-highlight)
-  
-  (setq hlt-auto-face-backgrounds '("SpringGreen3" 
-                                    "MediumPurple1"
-                                    "DarkOrchid4"
-                                    "DeepPink"
-                                    "DarkOrange"
-                                    "OliveDrab4"
-                                    "HotPink1"
-                                    "IndianRed3"
-                                    "RoyalBlue1"
-                                    "cyan3"
-                                    "RoyalBlue4"))
+  (use-package highlight
+    :preface
+    (defun fx/smart-highlight()
+      (interactive)
+      (when-let ((symbol (thing-at-point 'symbol)))
+        (let* ((bounds (bounds-of-thing-at-point 'symbol))
+               (begin (car bounds))
+               (end (cdr bounds)))
+          (dolist (ov (overlays-in begin end))
+            (if (overlay-get ov 'hlt-highlight) ;; check if been highlighed
+                (hlt-unhighlight-symbol symbol)
+              (hlt-highlight-symbol symbol)
+              )))))
+    :init
+    (setq hlt-auto-face-backgrounds '("SpringGreen3" 
+                                      "MediumPurple1"
+                                      "DarkOrchid4"
+                                      "DeepPink"
+                                      "DarkOrange"
+                                      "OliveDrab4"
+                                      "HotPink1"
+                                      "IndianRed3"
+                                      "RoyalBlue1"
+                                      "cyan3"
+                                      "RoyalBlue4"))
 
-  (defun fx/smart-highlight()
-    (interactive)
-    (when-let ((symbol (thing-at-point 'symbol)))
-      (let* ((bounds (bounds-of-thing-at-point 'symbol))
-             (begin (car bounds))
-             (end (cdr bounds)))
-        (dolist (ov (overlays-in begin end))
-          (if (overlay-get ov 'hlt-highlight) ;; check if been highlighed
-              (hlt-unhighlight-symbol symbol)
-            (hlt-highlight-symbol symbol)
-            )
-          )
-        )
-      )
+    :bind(([double-mouse-1] . fx/smart-highlight))
     )
-  
   )
 
 ;;;;
 ;;;;          Highlight-parentheses
 ;;;;
 (defun fx/setup-highlight-parentheses()
-  (require 'highlight-parentheses)
-  (global-highlight-parentheses-mode t)
-  (setq hl-paren-highlight-adjacent t)
-  (set-face-attribute
-   'hl-paren-face nil
-   :slant 'italic
-   :weight 'bold
-   )
-)
+  (use-package highlight-parentheses
+    :config
+    (global-highlight-parentheses-mode t)
+    (setq hl-paren-highlight-adjacent t)
+    :custom-face (hl-paren-face ((t (:slant italic :weight bold))))
+    )
+  )
 
 ;;;;
 ;;;;          undo-tree-mode
 ;;;;
 (defun fx/setup-undo-tree()
-  (require 'undo-tree)
-  ;; override the function so undo-tree-mode can be
-  ;; force enabled
-  (defun undo-tree-overridden-undo-bindings-p ())
-  (global-undo-tree-mode)
+  (use-package undo-tree
+    :preface
+    (defun undo-tree-overridden-undo-bindings-p ())   ;; override the function so undo-tree-mode can be force enabled 
+    :config
+    (global-undo-tree-mode)
+    :bind
+    (("C-z" . undo-tree-undo)
+     ("C-S-z" . undo-tree-redo)
+     :map undo-tree-map
+     ("C-/" . nil)
+     ("C-?" . nil)
+     ("C-_" . default-text-scale-decrease)
+     )
+    )  
   )
 
 
@@ -504,13 +488,12 @@
 ;;;;        persp
 ;;;;
 (defun fx/setup-persp()
-
-  (with-eval-after-load "persp-mode-autoloads"
+  (use-package persp-mode
+    :config
     (setq wg-morph-on nil)
-    ;; switch off the animation of restoring window configuration
-    (setq persp-autokill-buffer-on-remove 'kill-weak)
+    (setq persp-autokill-buffer-on-remove 'kill-weak)     ;; switch off the animation of restoring window configuration
     (add-hook 'after-init-hook #'(lambda () (persp-mode 1))))
-  )
+)
 
 
 ;;;;
@@ -528,7 +511,7 @@
      helm-buffers-fuzzy-matching t
      )
     
-    :config
+    :preface
     ;;; prefer the candidate with prefix (ignore case)
     (defun helm-score-candidate-fix (orig-fun &rest args)
       (let* ((res (apply orig-fun args))
@@ -541,10 +524,17 @@
                         10000
                       0)))
         (+ res bonus)))
+    
+    :config
     (advice-add 'helm-score-candidate-for-pattern :around #'helm-score-candidate-fix)
 
     :bind
-    (:map helm-map
+    (("M-l" . helm-semantic-or-imenu)
+     ("C-S-l" . helm-semantic-or-imenu)
+     ("C-x C-f" . helm-find-files)
+     ("C-x b" . helm-buffers-list)
+     ("M-x" . helm-M-x)
+     :map helm-map
           ("<tab>" . helm-execute-persistent-action)
           ("C-z"  . helm-select-action))
     )    ;; end of helm
@@ -577,42 +567,42 @@
 ;;;;        auto-complete
 ;;;;
 (defun fx/ac()
-  (require 'auto-complete-config)
-  (require 'auto-complete)
-  (require 'pos-tip)  ;; for a nice completion menu and help
-
-  (ac-config-default)
-  (global-auto-complete-mode t)
+  (use-package pos-tip)  ;; for a nice completion menu and help
+  (use-package auto-complete-config
+    :config (ac-config-default))
   
-  (setq-default
-   ac-sources '(
-                ac-source-abbrev
-                ac-source-dictionary
-                ac-source-words-in-same-mode-buffers
-                ac-source-words-in-buffer
-                ;;ac-source-files-in-current-dir              
-                )
-   )
-  (defun auto-complete-mode-maybe ()
-    "Overwrite auto-complete-mode-maybe which by defaults turns autocomplete only on for buffers listed in ac-modes."
-    (unless (minibufferp (current-buffer))
-      (auto-complete-mode 1)))
-  
-  ;; Face
-  (set-face-background 'popup-scroll-bar-foreground-face "red3")
-  
-  ;; Trigger key
-  (if (display-graphic-p)
-      (global-set-key [(control ?/)] 'auto-complete)
-    (ac-set-trigger-key "TAB"))
+  (use-package auto-complete  
+    :preface
+    (defun auto-complete-mode-maybe ()
+      "Overwrite auto-complete-mode-maybe which by defaults turns autocomplete only on for buffers listed in ac-modes."
+      (unless (minibufferp (current-buffer))
+        (auto-complete-mode 1)))
+    
+    :init
+    (setq-default ac-sources '(
+                               ac-source-abbrev
+                               ac-source-dictionary
+                               ac-source-words-in-same-mode-buffers
+                               ac-source-words-in-buffer
+                               ac-source-files-in-current-dir      
+                               ))
+        (setq ac-auto-start t
+              ac-use-quick-help nil
+              ac-dwim t
+              ac-use-fuzzy t
+              ac-ignore-case t)
+    :config
+    (global-auto-complete-mode t)    
+    ;; Face
+    (set-face-background 'popup-scroll-bar-foreground-face "red3")
 
-  (setq ac-auto-start t)
-  (setq ac-use-quick-help nil)
-  (setq ac-dwim t)
-  (setq ac-use-fuzzy t)
-  (setq ac-ignore-case t)
-  (ac-linum-workaround)
+    ;; Trigger key
+    (if (display-graphic-p)
+        (global-set-key [(control ?/)] 'auto-complete)
+      (ac-set-trigger-key "TAB"))
 
+    (ac-linum-workaround)
+    )
   ;; ac conflicts with fill-column-indicator
   ;; https://github.com/alpaker/Fill-Column-Indicator/issues/21#issuecomment-6959718
   )
@@ -660,7 +650,9 @@
   ;;(require 'monkeyc-mode)
   ;;(require 'asc-mode)
 
-  (use-package default-text-scale)
+  (use-package default-text-scale
+    :bind(("C-+" . default-text-scale-increase)
+          ("C-_" . default-text-scale-decrease)))
 )
 
 
@@ -750,34 +742,33 @@
 ;;;;    Esko links
 ;;;;
 (defun fx/setup-esko-links()
-  (require 'goto-addr)
-  (require 'browse-url)
+  (use-package browse-url)
+  (use-package goto-addr
+    :init
+    (setq esko-project-codes '("DPP" "DPI" "JP"))  ;; Esko project code
+    (setq esko-project-regexp
+          (string-join (mapcar (lambda (x) (concat x "-[0-9]+"))
+                               esko-project-codes) "\\|"))
 
-  ;; Esko project code
-  (setq esko-project-codes '("DPP" "DPI" "JP"))
+    :config
+    ;; trap goto-address-url-regexp
+    (setq goto-address-url-regexp-old goto-address-url-regexp)
+    (setq goto-address-url-regexp
+          (concat
+           goto-address-url-regexp-old
+           "\\|" esko-project-regexp))
 
-  (setq esko-project-regexp
-        (string-join (mapcar (lambda (x) (concat x "-[0-9]+"))
-                             esko-project-codes) "\\|"))
-
-  ;; trap goto-address-url-regexp
-  (setq goto-address-url-regexp-old goto-address-url-regexp)
-  (setq goto-address-url-regexp
-        (concat
-         goto-address-url-regexp-old
-         "\\|" esko-project-regexp))
-
-  ;; trap browse-url-url-at-point
-  (defadvice browse-url-url-at-point (after fx/browse-url-url-at-point () activate)
-    (if (string-match esko-project-regexp ad-return-value)
-        (setq ad-return-value
-              (concat "http://jira.esko.com/browse/"
-                      (progn (string-match esko-project-regexp ad-return-value)
-                             (match-string 0 ad-return-value))))
+    ;; trap browse-url-url-at-point
+    (defadvice browse-url-url-at-point (after fx/browse-url-url-at-point () activate)
+      (if (string-match esko-project-regexp ad-return-value)
+          (setq ad-return-value
+                (concat "http://jira.esko.com/browse/"
+                        (progn (string-match esko-project-regexp ad-return-value)
+                               (match-string 0 ad-return-value))))
+        )
       )
     )
   )
-
 
 
 (defun fx/user-setup()
