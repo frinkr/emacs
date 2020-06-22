@@ -6,8 +6,8 @@
 (add-to-list 'load-path (concat efx-dir "extra-packages")) ;; include addons directory (not in melpa)
 
 (when is-macos
-  (setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
-  (setq exec-path (append exec-path '("/usr/local/bin")))
+  (setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin:/opt/local/bin"))
+  (setq exec-path (append exec-path '("/usr/local/bin" "/opt/local/bin")))
   )
 
 ;;;;
@@ -28,27 +28,8 @@
   (package-initialize)
 
   (setq package-list '(
-                       auto-complete
                        cl-lib
-                       default-text-scale
-                       diminish
-                       diff-hl
-                       engine-mode
-                       helm
-                       helm-posframe
-                       highlight
-                       highlight-parentheses
-                       highlight-symbol
-                       highlight-thing
-                       fill-column-indicator
-                       magit
-                       p4
-                       persp-mode
-                       projectile
-                       pos-tip
-                       undo-tree
                        use-package
-                       swiper-helm
                        ))
 
   (setq theme-list '(
@@ -67,7 +48,8 @@
 
 (install-extra-packages)
 (require 'use-package)
-
+(require 'use-package-ensure)
+(setq use-package-always-ensure t)
 
 ;;;;
 ;;;;           clear the recentf 
@@ -177,11 +159,10 @@
 
 
 ;;;;
-;;;;        Behavior Settings
+;;;;        Core Settings
 ;;;;
-(defun fx/setup-general()
+(when t
   (global-hl-line-mode nil)
-  ;;(desktop-save-mode 1)  ;; save session
 
   ;; line & column number
   (line-number-mode t)
@@ -226,7 +207,7 @@
 
   ;; Auto close bracket insertion
   (electric-pair-mode 1)
-  
+
   ;; title bar shows full path
   (setq-default frame-title-format
                 (list '((buffer-file-name " %f"
@@ -240,7 +221,7 @@
 
   ;; auto revert
   (global-auto-revert-mode)
-  
+
   ;; Common packages
   (require 'cl)
   (require 'cl-lib)
@@ -249,56 +230,9 @@
 
 
 ;;;;
-;;;;     General keybindings
-;;;;
-(defun fx/setup-keybindings()
-  ;; fast navigation
-  (global-set-key (kbd "M-m") 'set-mark-command)
-  (global-set-key (kbd "M-n") (lambda () (interactive) (next-line 5)))
-  (global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
-  (global-set-key (kbd "M-b") (lambda () (interactive) (backward-word)))
-  (global-set-key (kbd "M-g") 'goto-line)
-  (global-set-key (kbd "M-`") 'set-mark-command)
-
-  (global-set-key (kbd "C-z") 'undo)
-  (global-set-key (kbd "C-q") 'save-buffers-kill-terminal)
-  (global-set-key (kbd "C-4") 'p4-edit)
-  (global-set-key (kbd "C-x r") 'reload)
-  (global-set-key (kbd "C-S-n") 'ns-next-frame)
-  (global-set-key (kbd "C-S-o") 'ns-next-frame)
-  (global-set-key (kbd "M-`") 'ns-next-frame)
-  (global-set-key (kbd "C-`") 'ns-next-frame)
-  (global-set-key (kbd "C-1") 'switch-buffer)
-  (global-set-key (kbd "C-x j") 'kill-other-buffers)
-  (global-set-key (kbd "C-t") 'new-scratch)
-  ;;(global-set-key (kbd "C-w") 'delete-frame)
-
-
-  ;; mac: set control & meta key
-  (setq mac-option-key-is-meta nil)
-  (setq mac-command-key-is-meta nil)
-  (setq mac-command-modifier 'control)
-  (setq mac-option-modifier 'meta)
-
-  ;; dis evil
-  (global-set-key (kbd "C-z") 'undo-tree-undo)
-
-  ;; Zoom
-  (global-set-key (kbd "<C-wheel-up>") nil)
-  (global-set-key (kbd "<C-wheel-down>") nil)
-
-  ;; Comments
-  (global-set-key (kbd "C-/") 'comment-region)
-  (global-set-key (kbd "C-?") 'uncomment-region)
-
-  ;; Mouse-3
-  (global-set-key (kbd "<mouse-3>") 'mouse-popup-menubar-stuff)
-  )
-
-;;;;
 ;;;;             fast-nav-mode-map
 ;;;;
-(defun fx/setup-fast-nav()
+(when t
   (defvar fx/fast-nav-mode-map
     (let ((map (make-sparse-keymap)))
       (define-key map (kbd "M-n") (lambda () (interactive) (next-line 5)))
@@ -311,13 +245,10 @@
 
       (define-key global-map [(meta m)] 'set-mark-command)
       (global-set-key (kbd "<mouse-2>")
-                      (lambda ()
-                        (interactive)
+                      (lambda () (interactive)
                         (when (y-or-n-p (format "Close the buffer %s?" (or buffer-file-name (buffer-name))))
                           (kill-buffer (current-buffer)))
                         ))
-      ;;      (global-set-key (kbd "<mouse-3>") 'tabbar-forward)
-      ;;      (global-set-key (kbd "<mouse-5>") 'tabbar-backward)
 
       map)
     "fx/fast-nav-mode keymap.")
@@ -333,107 +264,123 @@
   (add-hook 'minibuffer-setup-hook 'fx/fast-nav/minibuffer-setup-hook)
 
   (fx/fast-nav-mode 1)
-  )
-
-(defun fx/setup-fill-column-indicator()
-  (use-package fill-column-indicator
+  
+  (use-package diminish 
     :config
-    (setq fci-rule-width 1)
-    (setq fci-rule-column 90)
-    (add-hook 'prog-mode-hook 'fci-mode)
-    (add-hook 'text-mode-hook 'fci-mode)
-    )
+    (diminish 'fx/fast-nav-mode nil))
   )
 
+;;;;
+;;;;         default-text-scale
+;;;;
+(use-package default-text-scale
+  :bind(("C-+" . default-text-scale-increase)
+        ("C-_" . default-text-scale-decrease)))
+
+
+;;;;
+;;;;         fill-column-indicator
+;;;;
+(use-package fill-column-indicator
+  :disabled ;; conflicit with ac
+  ;; https://github.com/alpaker/Fill-Column-Indicator/issues/21#issuecomment-6959718
+  :config
+  (setq fci-rule-width 1)
+  (setq fci-rule-column 90)
+  (add-hook 'prog-mode-hook 'fci-mode)
+  (add-hook 'text-mode-hook 'fci-mode)
+  )
 
 ;;;;
 ;;;;           highlight-thing
 ;;;;
-(defun fx/setup-highlight-thing()
-  (use-package highlight
-    :preface
-    (defun fx/smart-highlight()
-      (interactive)
-      (when-let ((symbol (thing-at-point 'symbol)))
-        (let* ((bounds (bounds-of-thing-at-point 'symbol))
-               (begin (car bounds))
-               (end (cdr bounds)))
-          (dolist (ov (overlays-in begin end))
-            (if (overlay-get ov 'hlt-highlight) ;; check if been highlighed
-                (hlt-unhighlight-symbol symbol)
-              (hlt-highlight-symbol symbol)
-              )))))
-    :init
-    (setq hlt-auto-face-backgrounds '("SpringGreen3" 
-                                      "MediumPurple1"
-                                      "DarkOrchid4"
-                                      "DeepPink"
-                                      "DarkOrange"
-                                      "OliveDrab4"
-                                      "HotPink1"
-                                      "IndianRed3"
-                                      "RoyalBlue1"
-                                      "cyan3"
-                                      "RoyalBlue4"))
+(use-package highlight
+  :preface
+  (defun fx/smart-highlight()
+    (interactive)
+    (when-let ((symbol (thing-at-point 'symbol)))
+      (let* ((bounds (bounds-of-thing-at-point 'symbol))
+             (begin (car bounds))
+             (end (cdr bounds)))
+        (dolist (ov (overlays-in begin end))
+          (if (overlay-get ov 'hlt-highlight) ;; check if been highlighed
+              (hlt-unhighlight-symbol symbol)
+            (hlt-highlight-symbol symbol)
+            )))))
+  :init
+  (setq hlt-auto-face-backgrounds '("SpringGreen3" 
+                                    "MediumPurple1"
+                                    "DarkOrchid4"
+                                    "DeepPink"
+                                    "DarkOrange"
+                                    "OliveDrab4"
+                                    "HotPink1"
+                                    "IndianRed3"
+                                    "RoyalBlue1"
+                                    "cyan3"
+                                    "RoyalBlue4"))
 
-    :bind(([double-mouse-1] . fx/smart-highlight))
-    )
+  :bind(([double-mouse-1] . fx/smart-highlight))
   )
+
 
 ;;;;
 ;;;;          Highlight-parentheses
 ;;;;
-(defun fx/setup-highlight-parentheses()
-  (use-package highlight-parentheses
-    :config
-    (global-highlight-parentheses-mode t)
-    (setq hl-paren-highlight-adjacent t)
-    :custom-face (hl-paren-face ((t (:slant italic :weight bold))))
-    )
+
+(use-package highlight-parentheses
+  :diminish highlight-parentheses-mode
+  :config
+  (global-highlight-parentheses-mode t)
+  :custom
+  (hl-paren-highlight-adjacent t)
+  :custom-face (hl-paren-face ((t (:slant italic :weight bold))))
   )
+
 
 ;;;;
 ;;;;          undo-tree-mode
 ;;;;
-(defun fx/setup-undo-tree()
-  (use-package undo-tree
-    :preface
-    (defun undo-tree-overridden-undo-bindings-p ())   ;; override the function so undo-tree-mode can be force enabled 
-    :config
-    (global-undo-tree-mode)
-    :bind
-    (("C-z" . undo-tree-undo)
-     ("C-S-z" . undo-tree-redo)
-     :map undo-tree-map
-     ("C-/" . nil)
-     ("C-?" . nil)
-     ("C-_" . default-text-scale-decrease)
-     )
-    )  
-  )
+(use-package undo-tree
+  :diminish undo-tree-mode
+  :preface
+  (defun undo-tree-overridden-undo-bindings-p ())   ;; override the function so undo-tree-mode can be force enabled 
+  :config
+  (global-undo-tree-mode)
+  :bind
+  (("C-z" . undo-tree-undo)
+   ("C-S-z" . undo-tree-redo)
+   :map undo-tree-map
+   ("C-/" . nil)
+   ("C-?" . nil)
+   ("C-_" . default-text-scale-decrease)
+   )
+  )  
+
 
 
 ;;;;
 ;;;;        Dired setup
 ;;;;
-(defun fx/setup-dired()
-  (use-package dired-x
-    :init
-    (setq dired-details-hide-link-targets nil)
-    :config
-    (put 'dired-find-alternate-file 'disabled nil)
-    :bind (:map dired-mode-map
-                ("RET" . dired-find-alternate-file)
-                ("^" . (lambda () (interactive) (find-alternate-file ".."))))
-    )
+(use-package dired-x
+  :ensure nil
+  :init
+  (setq dired-details-hide-link-targets nil)
+  :config
+  (put 'dired-find-alternate-file 'disabled nil)
+  :bind (:map dired-mode-map
+              ("RET" . dired-find-alternate-file)
+              ("^" . (lambda () (interactive) (find-alternate-file ".."))))
   )
 
 
 ;;;;
 ;;;;           google
 ;;;;
-(defun fx/setup-google()
+(use-package engine-mode
+  :config
   (engine-mode t)
+  
   (defengine google
     "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s"
     :keybinding "g")
@@ -444,211 +391,185 @@
     )
   )
 
-
 ;;;;
 ;;;;        mouse scroll in terminal
 ;;;;
+(unless (display-graphic-p)
+  ;; Mousewheel
+  (defun fx/mousewheel-scroll-up (event)
+    "Scroll window under mouse up by five lines."
+    (interactive "e")
+    (let ((current-window (selected-window)))
+      (unwind-protect
+          (progn
+            (select-window (posn-window (event-start event)))
+            (scroll-up 5))
+        (select-window current-window))))
 
-(defun fx/setup-terminal()
-  (when (not (display-graphic-p))
+  (defun fx/mousewheel-scroll-down (event)
+    "Scroll window under mouse down by five lines."
+    (interactive "e")
+    (let ((current-window (selected-window)))
+      (unwind-protect
+          (progn
+            (select-window (posn-window (event-start event)))
+            (scroll-down 5))
+        (select-window current-window))))
 
-    ;; Mousewheel
-    (defun fx/mousewheel-scroll-up (event)
-      "Scroll window under mouse up by five lines."
-      (interactive "e")
-      (let ((current-window (selected-window)))
-        (unwind-protect
-            (progn
-              (select-window (posn-window (event-start event)))
-              (scroll-up 5))
-          (select-window current-window))))
-
-    (defun fx/mousewheel-scroll-down (event)
-      "Scroll window under mouse down by five lines."
-      (interactive "e")
-      (let ((current-window (selected-window)))
-        (unwind-protect
-            (progn
-              (select-window (posn-window (event-start event)))
-              (scroll-down 5))
-          (select-window current-window))))
-
-    (global-set-key (kbd "<mouse-5>") 'fx/mousewheel-scroll-up)
-    (global-set-key (kbd "<mouse-4>") 'fx/mousewheel-scroll-down)
-    )
+  (global-set-key (kbd "<mouse-5>") 'fx/mousewheel-scroll-up)
+  (global-set-key (kbd "<mouse-4>") 'fx/mousewheel-scroll-down)
   )
 
 ;;;;
 ;;;;        persp
 ;;;;
-(defun fx/setup-persp()
-  (use-package persp-mode
-    :config
-    (setq wg-morph-on nil)
-    (setq persp-autokill-buffer-on-remove 'kill-weak)     ;; switch off the animation of restoring window configuration
-    (add-hook 'after-init-hook #'(lambda () (persp-mode 1))))
-)
+(use-package persp-mode
+  :disabled
+  :diminish persp
+  :config
+  (setq wg-morph-on nil)
+  (setq persp-autokill-buffer-on-remove 'kill-weak)     ;; switch off the animation of restoring window configuration
+  (add-hook 'after-init-hook #'(lambda () (persp-mode 1))))
+
 
 
 ;;;;
 ;;;;        helm 
 ;;;;
-(defun fx/setup-helm()
-  (use-package helm
-    :init
-    (setq
-     ;;helm-display-function 'helm-display-buffer-in-own-frame
-     helm-default-display-buffer-functions '(display-buffer-in-side-window)
-     helm-display-buffer-reuse-frame nil
-     helm-use-undecorated-frame-option nil
-     helm-echo-input-in-header-line nil ;; hide helm echo
-     helm-buffers-fuzzy-matching t
-     )
-    
-    :preface
-    ;;; prefer the candidate with prefix (ignore case)
-    (defun helm-score-candidate-fix (orig-fun &rest args)
-      (let* ((res (apply orig-fun args))
-             (cand (nth 0 args))
-             (pattern (nth 1 args))
-             (bonus (if (and (stringp cand)
-                             (stringp pattern)
-                             (string-prefix-p pattern cand t)                   
-                             )
-                        10000
-                      0)))
-        (+ res bonus)))
-    
-    :config
-    (advice-add 'helm-score-candidate-for-pattern :around #'helm-score-candidate-fix)
-
-    :bind
-    (("M-l" . helm-semantic-or-imenu)
-     ("C-S-l" . helm-semantic-or-imenu)
-     ("C-x C-f" . helm-find-files)
-     ("C-x C-r" . helm-recentf)
-     ("C-x b" . helm-buffers-list)
-     ("M-x" . helm-M-x)
-     :map helm-map
-          ("<tab>" . helm-execute-persistent-action)
-          ("C-z"  . helm-select-action))
-    )    ;; end of helm
+(use-package helm
+  :init
+  (setq
+   ;;helm-display-function 'helm-display-buffer-in-own-frame
+   helm-default-display-buffer-functions '(display-buffer-in-side-window)
+   helm-display-buffer-reuse-frame nil
+   helm-use-undecorated-frame-option nil
+   helm-echo-input-in-header-line nil ;; hide helm echo
+   helm-buffers-fuzzy-matching t
+   ;;helm-move-to-line-cycle-in-source t
+   )
   
-  (use-package swiper-helm
-    :init
-    (setq swiper-goto-start-of-match t
-          swiper-include-line-number-in-search t)
-    :bind (("C-s" . swiper)))
-  )
+  :preface
+    ;;; prefer the candidate with prefix (ignore case)
+  (defun helm-score-candidate-fix (orig-fun &rest args)
+    (let* ((res (apply orig-fun args))
+           (cand (nth 0 args))
+           (pattern (nth 1 args))
+           (bonus (if (and (stringp cand)
+                           (stringp pattern)
+                           (string-prefix-p pattern cand t)                   
+                           )
+                      10000
+                    0)))
+      (+ res bonus)))
+  
+  :config
+  (advice-add 'helm-score-candidate-for-pattern :around #'helm-score-candidate-fix)
+
+  :bind
+  (("M-l" . helm-semantic-or-imenu)
+   ("C-S-l" . helm-semantic-or-imenu)
+   ("C-x C-f" . helm-find-files)
+   ("C-x C-r" . helm-recentf)
+   ("C-x b" . helm-buffers-list)
+   ("M-x" . helm-M-x)
+   :map helm-map
+   ("<tab>" . helm-execute-persistent-action)
+   ("C-z"  . helm-select-action))
+  )    ;; end of helm
+
+
+;;;;
+;;;;         swiper
+;;;;
+(use-package swiper-helm
+  :init
+  (setq swiper-goto-start-of-match t
+        swiper-include-line-number-in-search t)
+  :bind (("C-s" . swiper)))
 
 
 ;;;;
 ;;;;       git
 ;;;;
-(defun fx/setup-git()
-  (use-package magit)
-
-  (use-package diff-hl
-    :config
-    (global-diff-hl-mode)
-    (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
-    (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+(use-package magit)
+(use-package diff-hl
+  :config
+  (global-diff-hl-mode)
+  (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
+  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+  :bind (("C-S-p" . diff-hl-previous-hunk)
+         ("C-S-n" . diff-hl-next-hunk))
   )
-)
-
 
 
 ;;;;
 ;;;;        auto-complete
 ;;;;
-(defun fx/ac()
-  (use-package pos-tip)  ;; for a nice completion menu and help
-  (use-package auto-complete-config
-    :config (ac-config-default))
+(use-package pos-tip)  ;; for a nice completion menu and help
+
+(use-package auto-complete
+  :diminish auto-complete-mode
+  :preface
+  (defun auto-complete-mode-maybe ()
+    "Overwrite auto-complete-mode-maybe which by defaults turns autocomplete only on for buffers listed in ac-modes."
+    (unless (minibufferp (current-buffer))
+      (auto-complete-mode 1)))
   
-  (use-package auto-complete  
-    :preface
-    (defun auto-complete-mode-maybe ()
-      "Overwrite auto-complete-mode-maybe which by defaults turns autocomplete only on for buffers listed in ac-modes."
-      (unless (minibufferp (current-buffer))
-        (auto-complete-mode 1)))
-    
-    :init
-    (setq-default ac-sources '(
-                               ac-source-abbrev
-                               ac-source-dictionary
-                               ac-source-words-in-same-mode-buffers
-                               ac-source-words-in-buffer
-                               ac-source-files-in-current-dir      
-                               ))
-        (setq ac-auto-start t
-              ac-use-quick-help nil
-              ac-dwim t
-              ac-use-fuzzy t
-              ac-ignore-case t)
-    :config
-    (global-auto-complete-mode t)    
-    ;; Face
-    (set-face-background 'popup-scroll-bar-foreground-face "red3")
+  :init
+  (setq-default ac-sources '(
+                             ac-source-abbrev
+                             ac-source-dictionary
+                             ac-source-words-in-same-mode-buffers
+                             ac-source-words-in-buffer
+                             ac-source-files-in-current-dir      
+                             ))
+  (setq ac-auto-start t
+        ac-use-quick-help nil
+        ac-dwim t
+        ac-use-fuzzy t
+        ac-ignore-case t)
+  :config
+  (global-auto-complete-mode t)
+  (ac-config-default)
+  
+  ;; Face
+  (set-face-background 'popup-scroll-bar-foreground-face "red3")
 
-    ;; Trigger key
-    (if (display-graphic-p)
-        (global-set-key [(control ?/)] 'auto-complete)
-      (ac-set-trigger-key "TAB"))
+  ;; Trigger key
+  (if (display-graphic-p)
+      (global-set-key [(control ?/)] 'auto-complete)
+    (ac-set-trigger-key "TAB"))
 
-    (ac-linum-workaround)
-    )
-  ;; ac conflicts with fill-column-indicator
-  ;; https://github.com/alpaker/Fill-Column-Indicator/issues/21#issuecomment-6959718
+  (ac-linum-workaround)
   )
 
 
 ;;;;
 ;;;;            flyspell
 ;;;;
-(defun fx/setup-flyspell()
-  (use-package flyspell
-    :config
-    (dolist (hook '(text-mode-hook))
-      (add-hook hook (lambda () (flyspell-mode 1))))
-    (dolist (hook '(change-log-mode-hook log-edit-mode-hook))
-      (add-hook hook (lambda () (flyspell-mode -1))))
+(use-package flyspell
+  :diminish flyspell-mode
+  :config
+  (dolist (hook '(text-mode-hook))
+    (add-hook hook (lambda () (flyspell-mode 1))))
+  (dolist (hook '(change-log-mode-hook log-edit-mode-hook))
+    (add-hook hook (lambda () (flyspell-mode -1))))
 
-    (add-hook 'c++-mode-hook  (lambda () (flyspell-prog-mode)))
-    )
+  (add-hook 'c++-mode-hook  (lambda () (flyspell-prog-mode)))
   )
 
+(use-package abbrev
+  :ensure nil
+  :diminish abbrev-mode)
+
+
 ;;;;
+;;;;            misc packages
 ;;;;
-;;;;
-(defun fx/setup-diminish()
-
-  (require 'diminish)
-
-  (eval-after-load "flycheck" '(diminish 'flycheck-mode nil))
-  (eval-after-load "auto-complete" '(diminish 'auto-complete-mode nil))
-  (eval-after-load "p4" '(diminish 'p4-mode nil))
-  (eval-after-load "abbrev" '(diminish 'abbrev-mode nil))
-  (eval-after-load "Undo-Tree" '(diminish 'undo-tree-mode nil))
-  (eval-after-load "hl-p" '(diminish 'highlight-parentheses-mode nil))
-
-  (diminish 'persp nil)
-  (diminish 'highlight-parentheses-mode nil)
-  (diminish 'fx/fast-nav-mode nil)
-  
-  )
-
-(defun fx/setup-miniconfig-packages()
-  (use-package p4
-    :init (setenv "P4CONFIG" "p4.config"))
-
-  ;;(require 'monkeyc-mode)
-  ;;(require 'asc-mode)
-
-  (use-package default-text-scale
-    :bind(("C-+" . default-text-scale-increase)
-          ("C-_" . default-text-scale-decrease)))
-)
+(use-package p4
+  :diminish p4-mode
+  :init (setenv "P4CONFIG" "p4.config")
+  :bind (("C-4" . p4-edit)))
 
 
 ;;;;
@@ -710,6 +631,8 @@
   (add-hook 'c++-mode-common-hook 'fx/c-c++-mode-hook)
   )
 
+(fx/setup-c++)
+
 ;;;;
 ;;;;     indent
 ;;;;
@@ -727,6 +650,8 @@
   (setq css-indent-offset n) ; css-mode
   )
 
+(fx/setup-indent 4)
+
 
 (defun fx/setup-private-addons()
   (require 'monkeyc-mode)
@@ -736,61 +661,82 @@
 ;;;;
 ;;;;    Esko links
 ;;;;
-(defun fx/setup-esko-links()
-  (use-package browse-url)
-  (use-package goto-addr
-    :init
-    (setq esko-project-codes '("DPP" "DPI" "JP"))  ;; Esko project code
-    (setq esko-project-regexp
-          (string-join (mapcar (lambda (x) (concat x "-[0-9]+"))
-                               esko-project-codes) "\\|"))
+(use-package browse-url)
+(use-package goto-addr
+  :init
+  (setq esko-project-codes '("DPP" "DPI" "JP"))  ;; Esko project code
+  (setq esko-project-regexp
+        (string-join (mapcar (lambda (x) (concat x "-[0-9]+"))
+                             esko-project-codes) "\\|"))
 
-    :config
-    ;; trap goto-address-url-regexp
-    (setq goto-address-url-regexp-old goto-address-url-regexp)
-    (setq goto-address-url-regexp
-          (concat
-           goto-address-url-regexp-old
-           "\\|" esko-project-regexp))
+  :config
+  ;; trap goto-address-url-regexp
+  (setq goto-address-url-regexp-old goto-address-url-regexp)
+  (setq goto-address-url-regexp
+        (concat
+         goto-address-url-regexp-old
+         "\\|" esko-project-regexp))
 
-    ;; trap browse-url-url-at-point
-    (defadvice browse-url-url-at-point (after fx/browse-url-url-at-point () activate)
-      (if (string-match esko-project-regexp ad-return-value)
-          (setq ad-return-value
-                (concat "http://jira.esko.com/browse/"
-                        (progn (string-match esko-project-regexp ad-return-value)
-                               (match-string 0 ad-return-value))))
-        )
+  ;; trap browse-url-url-at-point
+  (defadvice browse-url-url-at-point (after fx/browse-url-url-at-point () activate)
+    (if (string-match esko-project-regexp ad-return-value)
+        (setq ad-return-value
+              (concat "http://jira.esko.com/browse/"
+                      (progn (string-match esko-project-regexp ad-return-value)
+                             (match-string 0 ad-return-value))))
       )
     )
   )
 
 
-(defun fx/user-setup()
-  (fx/setup-general)
-;;  (fx/setup-fill-column-indicator) ;; conflicts with auto-complete
-  (fx/setup-fast-nav)
-  (fx/setup-highlight-thing)
-  (fx/setup-highlight-parentheses)
-  (fx/setup-undo-tree)
-  (fx/setup-dired)
-  (fx/setup-google)
-  (fx/setup-terminal)
-  (fx/setup-persp)
-  (fx/setup-helm)
-  (fx/setup-diminish)
-  (fx/setup-miniconfig-packages)
-  (fx/setup-c++)
-  (fx/ac)
-  (fx/setup-flyspell)
-  (fx/setup-git)
-  (fx/setup-indent 4)
-  (fx/setup-esko-links)
-  (fx/setup-keybindings)  ;; this comes to last to override key bindings
-  )
+;;;;
+;;;;     General keybindings
+;;;;
+(global-set-key (kbd "M-m") 'set-mark-command)
+(global-set-key (kbd "M-n") (lambda () (interactive) (next-line 5)))
+(global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
+(global-set-key (kbd "M-b") (lambda () (interactive) (backward-word)))
+(global-set-key (kbd "M-g") 'goto-line)
+(global-set-key (kbd "M-`") 'set-mark-command)
+(global-set-key (kbd "C-z") 'undo)
+(global-set-key (kbd "C-q") 'save-buffers-kill-terminal)
+(global-set-key (kbd "C-x r") 'reload)
+;;(global-set-key (kbd "C-S-n") 'ns-next-frame)
+;;(global-set-key (kbd "C-S-o") 'ns-next-frame)
+(global-set-key (kbd "M-`") 'ns-next-frame)
+(global-set-key (kbd "C-`") 'ns-next-frame)
+(global-set-key (kbd "C-1") 'switch-buffer)
+(global-set-key (kbd "C-x j") 'kill-other-buffers)
+(global-set-key (kbd "C-t") 'new-scratch)
 
-(fx/user-setup)
-(load-theme 'sanityinc-tomorrow-blue t)
+;; mac: set control & meta key
+(setq mac-option-key-is-meta nil)
+(setq mac-command-key-is-meta nil)
+(setq mac-command-modifier 'control)
+(setq mac-option-modifier 'meta)
+
+;; dis evil
+(global-set-key (kbd "C-z") 'undo-tree-undo)
+
+;; Zoom
+(global-set-key (kbd "<C-wheel-up>") nil)
+(global-set-key (kbd "<C-wheel-down>") nil)
+
+;; Comments
+(global-set-key (kbd "C-/") 'comment-region)
+(global-set-key (kbd "C-?") 'uncomment-region)
+
+;; Mouse-3
+(global-set-key (kbd "<mouse-3>") 'mouse-popup-menubar-stuff)
+
+
+;;;;
+;;;;          theme & customization
+;;;;
+(use-package color-theme-sanityinc-tomorrow
+  :config
+  (load-theme 'sanityinc-tomorrow-eighties t)
+  )
 
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file 'noerror)
