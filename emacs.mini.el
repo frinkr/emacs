@@ -1,9 +1,7 @@
+(setq root-dir (file-name-directory (file-truename load-file-name)))
 (setq is-macos (eq system-type 'darwin))
 (setq is-windows (eq system-type 'windows-nt))
 (setq is-wsl (eq system-type 'gnu/linux))  ;; windows subsystem for linux
-
-(setq efx-dir (file-name-directory (file-truename load-file-name)))
-(add-to-list 'load-path (concat efx-dir "extra-packages")) ;; include addons directory (not in melpa)
 
 (when is-macos
   (setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin:/opt/local/bin"))
@@ -36,7 +34,7 @@
     (package-refresh-contents))
 
   ;; install 
-  (dolist (package (append package-list))
+  (dolist (package package-list)
     (unless (package-installed-p package)
       (package-install package)))
   )
@@ -45,6 +43,12 @@
 (require 'use-package)
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
+
+(use-package benchmark-init
+  :ensure t
+  :config
+  ;; To disable collection of benchmark data after init is done.
+  (add-hook 'after-init-hook 'benchmark-init/deactivate))
 
 ;;;;
 ;;;;           clear the recentf 
@@ -497,8 +501,10 @@
 ;;;;
 ;;;;       git
 ;;;;
-(use-package magit)
+(use-package magit
+  :if (not is-windows))
 (use-package diff-hl
+  :if (not is-windows)
   :config
   (global-diff-hl-mode)
   (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
@@ -554,6 +560,7 @@
 ;;;;            flyspell
 ;;;;
 (use-package flyspell
+  :if (not is-windows)
   :diminish flyspell-mode
   :config
   (dolist (hook '(text-mode-hook))
@@ -659,7 +666,14 @@
 (fx/setup-indent 4)
 
 
-(defun fx/setup-private-addons()
+;;;;
+;;;;         local packages
+;;;;
+(when t
+  (setq local-packages-dir (concat root-dir "local-packages"))
+  (when (file-directory-p local-packages-dir)
+    (add-to-list 'load-path local-packages-dir))
+
   (require 'monkeyc-mode)
   (require 'asc-mode)
   )
@@ -667,8 +681,10 @@
 ;;;;
 ;;;;    Esko links
 ;;;;
-(use-package browse-url)
+(use-package browse-url
+  :if (not is-windows))
 (use-package goto-addr
+  :if (not is-windows)
   :init
   (setq esko-project-codes '("DPP" "DPI" "JP"))  ;; Esko project code
   (setq esko-project-regexp
