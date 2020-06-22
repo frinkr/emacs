@@ -68,6 +68,7 @@
 (install-extra-packages)
 (require 'use-package)
 
+
 ;;;;
 ;;;;           clear the recentf 
 ;;;;
@@ -236,6 +237,9 @@
 
   ;; font
   (set-face-attribute 'default nil :family "Source Code Pro" :weight 'regular :height 140)
+
+  ;; auto revert
+  (global-auto-revert-mode)
   
   ;; Common packages
   (require 'cl)
@@ -413,25 +417,15 @@
 ;;;;        Dired setup
 ;;;;
 (defun fx/setup-dired()
-  ;; show link
-  (setq dired-details-hide-link-targets nil)
-
-  ;; reuse the buffer
-  (toggle-diredp-find-file-reuse-dir t)
-  (put 'dired-find-alternate-file 'disabled nil)
-
-  ;; ^ to go up
-  (add-hook 'dired-mode-hook
-            (lambda ()
-              (define-key dired-mode-map (kbd "^")
-                (lambda () (interactive) (find-alternate-file "..")))
-                                        ; was dired-up-directory
-              ))
-
-  (add-hook 'dired-mode-hook 'fx/dired-mode-hook)
-  (defun fx/dired-mode-hook ()
-    (local-set-key (kbd "<mouse-2>") 'diredp-mouse-find-file-reuse-dir-buffer))
-
+  (use-package dired-x
+    :init
+    (setq dired-details-hide-link-targets nil)
+    :config
+    (put 'dired-find-alternate-file 'disabled nil)
+    :bind (:map dired-mode-map
+                ("RET" . dired-find-alternate-file)
+                ("^" . (lambda () (interactive) (find-alternate-file ".."))))
+    )
   )
 
 
@@ -532,6 +526,7 @@
     (("M-l" . helm-semantic-or-imenu)
      ("C-S-l" . helm-semantic-or-imenu)
      ("C-x C-f" . helm-find-files)
+     ("C-x C-r" . helm-recentf)
      ("C-x b" . helm-buffers-list)
      ("M-x" . helm-M-x)
      :map helm-map
@@ -778,6 +773,7 @@
   (fx/setup-highlight-thing)
   (fx/setup-highlight-parentheses)
   (fx/setup-undo-tree)
+  (fx/setup-dired)
   (fx/setup-google)
   (fx/setup-terminal)
   (fx/setup-persp)
