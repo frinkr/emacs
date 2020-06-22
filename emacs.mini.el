@@ -5,11 +5,15 @@
 (setq efx-dir (file-name-directory (file-truename load-file-name)))
 (add-to-list 'load-path (concat efx-dir "extra-packages")) ;; include addons directory (not in melpa)
 
+(when is-macos
+  (setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
+  (setq exec-path (append exec-path '("/usr/local/bin")))
+  )
 
 ;;;;
 ;;;;          melpa
 ;;;;
-(when t
+(when nil
   (setq url-proxy-services
         '(("no_proxy" . "^\\(localhost\\|10.*\\)")
           ("http" . "127.0.0.1:6667")
@@ -28,6 +32,8 @@
                        cl-lib
                        default-text-scale
                        diminish
+                       diff-hl
+                       engine-mode
                        helm
                        helm-posframe
                        highlight
@@ -35,6 +41,7 @@
                        highlight-symbol
                        highlight-thing
                        fill-column-indicator
+                       magit
                        p4
                        persp-mode
                        projectile
@@ -503,46 +510,66 @@
     ;; switch off the animation of restoring window configuration
     (setq persp-autokill-buffer-on-remove 'kill-weak)
     (add-hook 'after-init-hook #'(lambda () (persp-mode 1))))
-  ) 
+  )
+
+
 ;;;;
 ;;;;        helm 
 ;;;;
 (defun fx/setup-helm()
-  (setq
-   ;;helm-display-function 'helm-display-buffer-in-own-frame
-   helm-default-display-buffer-functions '(display-buffer-in-side-window)
-   helm-display-buffer-reuse-frame nil
-   helm-use-undecorated-frame-option nil
-   helm-echo-input-in-header-line nil ;; hide helm echo
-   helm-buffers-fuzzy-matching t
-   )
+  (use-package helm
+    :init
+    (setq
+     ;;helm-display-function 'helm-display-buffer-in-own-frame
+     helm-default-display-buffer-functions '(display-buffer-in-side-window)
+     helm-display-buffer-reuse-frame nil
+     helm-use-undecorated-frame-option nil
+     helm-echo-input-in-header-line nil ;; hide helm echo
+     helm-buffers-fuzzy-matching t
+     )
+    
+    :config
+    ;;; prefer the candidate with prefix (ignore case)
+    (defun helm-score-candidate-fix (orig-fun &rest args)
+      (let* ((res (apply orig-fun args))
+             (cand (nth 0 args))
+             (pattern (nth 1 args))
+             (bonus (if (and (stringp cand)
+                             (stringp pattern)
+                             (string-prefix-p pattern cand t)                   
+                             )
+                        10000
+                      0)))
+        (+ res bonus)))
+    (advice-add 'helm-score-candidate-for-pattern :around #'helm-score-candidate-fix)
 
-  ;;; prefer the candidate with prefix (ignore case)
-  (defun helm-score-candidate-fix (orig-fun &rest args)
-    (let* ((res (apply orig-fun args))
-           (cand (nth 0 args))
-           (pattern (nth 1 args))
-           (bonus (if (and (stringp cand)
-                           (stringp pattern)
-                           (string-prefix-p pattern cand t)                   
-                           )
-                      10000
-                    0)))
-      ;;(message "cand: %S, pat: %S, bonus %d " cand pattern bonus)
-      (+ res bonus)))
-  (advice-add 'helm-score-candidate-for-pattern :around #'helm-score-candidate-fix)
+    :bind
+    (:map helm-map
+          ("<tab>" . helm-execute-persistent-action)
+          ("C-z"  . helm-select-action))
+    )    ;; end of helm
   
-  ;; TAB
-  (with-eval-after-load 'helm
-    (define-key helm-map (kbd "TAB") #'helm-execute-persistent-action)
-    (define-key helm-map (kbd "<tab>") #'helm-execute-persistent-action)
-    (define-key helm-map (kbd "C-z") #'helm-select-action)
-    )
-
-
   (use-package swiper-helm
-               :bind (("C-s" . swiper)))
+    :init
+    (setq swiper-goto-start-of-match t
+          swiper-include-line-number-in-search t)
+    :bind (("C-s" . swiper)))
   )
+
+
+;;;;
+;;;;       git
+;;;;
+(defun fx/setup-git()
+  (use-package magit)
+
+  (use-package diff-hl
+    :config
+    (global-diff-hl-mode)
+    (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
+    (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+  )
+)
 
 
 
@@ -592,6 +619,21 @@
 
 
 ;;;;
+;;;;            flyspell
+;;;;
+(defun fx/setup-flyspell()
+  (use-package flyspell
+    :config
+    (dolist (hook '(text-mode-hook))
+      (add-hook hook (lambda () (flyspell-mode 1))))
+    (dolist (hook '(change-log-mode-hook log-edit-mode-hook))
+      (add-hook hook (lambda () (flyspell-mode -1))))
+
+    (add-hook 'c++-mode-hook  (lambda () (flyspell-prog-mode)))
+    )
+  )
+
+;;;;
 ;;;;
 ;;;;
 (defun fx/setup-diminish()
@@ -612,12 +654,13 @@
   )
 
 (defun fx/setup-miniconfig-packages()
-  (require 'p4)
-  (setenv "P4CONFIG" "p4.config")
+  (use-package p4
+    :init (setenv "P4CONFIG" "p4.config"))
+
   ;;(require 'monkeyc-mode)
   ;;(require 'asc-mode)
 
-  (require 'default-text-scale)
+  (use-package default-text-scale)
 )
 
 
@@ -744,6 +787,7 @@
   (fx/setup-highlight-thing)
   (fx/setup-highlight-parentheses)
   (fx/setup-undo-tree)
+  (fx/setup-google)
   (fx/setup-terminal)
   (fx/setup-persp)
   (fx/setup-helm)
@@ -751,13 +795,15 @@
   (fx/setup-miniconfig-packages)
   (fx/setup-c++)
   (fx/ac)
+  (fx/setup-flyspell)
+  (fx/setup-git)
   (fx/setup-indent 4)
   (fx/setup-esko-links)
   (fx/setup-keybindings)  ;; this comes to last to override key bindings
   )
 
 (fx/user-setup)
-(load-theme 'dracula t)
+(load-theme 'sanityinc-tomorrow-blue t)
 
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file 'noerror)
