@@ -27,21 +27,16 @@
 
   (package-initialize)
 
-  (setq package-list '(
-                       cl-lib
+  (setq package-list '(cl-lib
                        use-package
                        ))
 
-  (setq theme-list '(
-                     color-theme-sanityinc-tomorrow
-                     dracula-theme
-                     ))
   ;; refresh
   (unless package-archive-contents
     (package-refresh-contents))
 
   ;; install 
-  (dolist (package (append package-list theme-list))
+  (dolist (package (append package-list))
     (unless (package-installed-p package)
       (package-install package)))
   )
@@ -692,43 +687,44 @@
 ;;;;
 ;;;;     General keybindings
 ;;;;
-(global-set-key (kbd "M-m") 'set-mark-command)
-(global-set-key (kbd "M-n") (lambda () (interactive) (next-line 5)))
-(global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
-(global-set-key (kbd "M-b") (lambda () (interactive) (backward-word)))
-(global-set-key (kbd "M-g") 'goto-line)
-(global-set-key (kbd "M-`") 'set-mark-command)
-(global-set-key (kbd "C-z") 'undo)
-(global-set-key (kbd "C-q") 'save-buffers-kill-terminal)
-(global-set-key (kbd "C-x r") 'reload)
-;;(global-set-key (kbd "C-S-n") 'ns-next-frame)
-;;(global-set-key (kbd "C-S-o") 'ns-next-frame)
-(global-set-key (kbd "M-`") 'ns-next-frame)
-(global-set-key (kbd "C-`") 'ns-next-frame)
-(global-set-key (kbd "C-1") 'switch-buffer)
-(global-set-key (kbd "C-x j") 'kill-other-buffers)
-(global-set-key (kbd "C-t") 'new-scratch)
+(when t
+  (global-set-key (kbd "M-m") 'set-mark-command)
+  (global-set-key (kbd "M-n") (lambda () (interactive) (next-line 5)))
+  (global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
+  (global-set-key (kbd "M-b") (lambda () (interactive) (backward-word)))
+  (global-set-key (kbd "M-g") 'goto-line)
+  (global-set-key (kbd "M-`") 'set-mark-command)
+  (global-set-key (kbd "C-z") 'undo)
+  (global-set-key (kbd "C-q") 'save-buffers-kill-terminal)
+  (global-set-key (kbd "C-x r") 'reload)
+  ;;(global-set-key (kbd "C-S-n") 'ns-next-frame)
+  ;;(global-set-key (kbd "C-S-o") 'ns-next-frame)
+  (global-set-key (kbd "M-`") 'ns-next-frame)
+  (global-set-key (kbd "C-`") 'ns-next-frame)
+  (global-set-key (kbd "C-1") 'switch-buffer)
+  (global-set-key (kbd "C-x j") 'kill-other-buffers)
+  (global-set-key (kbd "C-t") 'new-scratch)
 
-;; mac: set control & meta key
-(setq mac-option-key-is-meta nil)
-(setq mac-command-key-is-meta nil)
-(setq mac-command-modifier 'control)
-(setq mac-option-modifier 'meta)
+  ;; mac: set control & meta key
+  (setq mac-option-key-is-meta nil)
+  (setq mac-command-key-is-meta nil)
+  (setq mac-command-modifier 'control)
+  (setq mac-option-modifier 'meta)
 
-;; dis evil
-(global-set-key (kbd "C-z") 'undo-tree-undo)
+  ;; dis evil
+  (global-set-key (kbd "C-z") 'undo-tree-undo)
 
-;; Zoom
-(global-set-key (kbd "<C-wheel-up>") nil)
-(global-set-key (kbd "<C-wheel-down>") nil)
+  ;; Zoom
+  (global-set-key (kbd "<C-wheel-up>") nil)
+  (global-set-key (kbd "<C-wheel-down>") nil)
 
-;; Comments
-(global-set-key (kbd "C-/") 'comment-region)
-(global-set-key (kbd "C-?") 'uncomment-region)
+  ;; Comments
+  (global-set-key (kbd "C-/") 'comment-region)
+  (global-set-key (kbd "C-?") 'uncomment-region)
 
-;; Mouse-3
-(global-set-key (kbd "<mouse-3>") 'mouse-popup-menubar-stuff)
-
+  ;; Mouse-3
+  (global-set-key (kbd "<mouse-3>") 'mouse-popup-menubar-stuff)
+  )
 
 ;;;;
 ;;;;          theme & customization
@@ -737,6 +733,5 @@
   :config
   (load-theme 'sanityinc-tomorrow-eighties t)
   )
-
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file 'noerror)
