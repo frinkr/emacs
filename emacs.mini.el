@@ -307,6 +307,7 @@
             (hlt-highlight-symbol symbol)
             )))))
   :init
+  (setq hlt-auto-face-foreground "white")
   (setq hlt-auto-face-backgrounds '("SpringGreen3" 
                                     "MediumPurple1"
                                     "DarkOrchid4"
@@ -494,9 +495,29 @@
   :config
   (projectile-global-mode)
   (setq projectile-completion-system 'helm)
+  (setq projectile-switch-project-action 'venv-projectile-auto-workon)
   (helm-projectile-on)
-  :bind(("C-x C-o" . helm-projectile-find-file))
+  :bind(("C-S-x C-S-f" . helm-projectile-find-file)
+        ("C-1" . helm-projectile-find-other-file)
+        ("C-S-b" . projectile-compile-project))
   )
+
+
+;;;;
+;;;;       cmake
+;;;;
+;;(use-package rtags)
+(use-package cmake-ide
+  :disabled ;; too slow
+  ;;:requires rtags
+  :init
+  (setq cmake-ide-header-search-other-file nil
+        cmake-ide-header-search-first-including nil)
+  :config
+  (cmake-ide-setup)
+  )
+(use-package cmake-mode)
+
 
 ;;;;
 ;;;;       git
@@ -511,6 +532,12 @@
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
   :bind (("C-S-p" . diff-hl-previous-hunk)
          ("C-S-n" . diff-hl-next-hunk))
+  )
+(use-package ediff
+  :ensure nil
+  :init
+  (setq ediff-split-window-function 'split-window-horizontally
+        ediff-window-setup-function 'ediff-setup-windows-plain)
   )
 
 
@@ -533,7 +560,7 @@
                              ac-source-dictionary
                              ac-source-words-in-same-mode-buffers
                              ac-source-words-in-buffer
-                             ac-source-files-in-current-dir      
+                             ;;ac-source-files-in-current-dir  ;; slow    
                              ))
   (setq ac-auto-start t
         ac-use-quick-help nil
@@ -575,6 +602,15 @@
   :ensure nil
   :diminish abbrev-mode)
 
+
+;;;;
+;;;;            macOS
+;;;;
+(when is-macos
+  (use-package reveal-in-osx-finder
+    :config (defalias 'open-in-finder 'reveal-in-osx-finder)
+    )
+  )
 
 ;;;;
 ;;;;            misc packages
@@ -725,10 +761,10 @@
   (global-set-key (kbd "C-q") 'save-buffers-kill-terminal)
   (global-set-key (kbd "C-x r") 'reload)
   ;;(global-set-key (kbd "C-S-n") 'ns-next-frame)
-  ;;(global-set-key (kbd "C-S-o") 'ns-next-frame)
+  (global-set-key (kbd "C-S-o") 'ns-next-frame)
   (global-set-key (kbd "M-`") 'ns-next-frame)
   (global-set-key (kbd "C-`") 'ns-next-frame)
-  (global-set-key (kbd "C-1") 'switch-buffer)
+  ;;(global-set-key (kbd "C-1") 'switch-buffer)
   (global-set-key (kbd "C-x j") 'kill-other-buffers)
   (global-set-key (kbd "C-t") 'new-scratch)
 
@@ -756,9 +792,10 @@
 ;;;;
 ;;;;          theme & customization
 ;;;;
-(use-package color-theme-sanityinc-tomorrow
-  :config
-  (load-theme 'sanityinc-tomorrow-eighties t)
-  )
+(use-package solarized-theme)
+(use-package cyberpunk-theme)
+(use-package color-theme-sanityinc-tomorrow)
+(load-theme 'sanityinc-tomorrow-bright t)
+
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file 'noerror)
