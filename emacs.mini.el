@@ -286,7 +286,7 @@
 ;;;;         fill-column-indicator
 ;;;;
 (use-package fill-column-indicator
-  :disabled ;; conflicit with ac
+  ;;:disabled ;; conflicit with ac
   ;; https://github.com/alpaker/Fill-Column-Indicator/issues/21#issuecomment-6959718
   :config
   (setq fci-rule-width 1)
@@ -294,6 +294,7 @@
   (add-hook 'prog-mode-hook 'fci-mode)
   (add-hook 'text-mode-hook 'fci-mode)
   )
+
 
 ;;;;
 ;;;;           highlight-thing
@@ -362,6 +363,12 @@
    )
   )  
 
+
+;;;;
+;;;;         comment-dwim-2
+;;;;
+(use-package comment-dwim-2
+  :bind ("C-/" . comment-dwim-2))
 
 ;;;;
 ;;;;        mode-line
@@ -609,17 +616,24 @@
   (add-hook 'after-init-hook 'global-company-mode)
   :config
   (add-to-list 'company-backends '(company-abbrev
+                                   company-c-headers
                                    company-dabbrev
                                    company-dabbrev-code
                                    company-etags
                                    company-files
-                                   company-keywords))
+                                   company-keywords
+                                   ;;company-tabnine
+                                   ))
   (add-hook 'python-mode-hook
           (lambda ()
             (add-to-list (make-local-variable 'company-backends)
                          'company-anaconda)))
   
   (setq company-dabbrev-downcase nil)
+
+  (use-package company-c-headers)
+  (use-package company-tabnine)
+  
   :bind(("C-." . company-complete)
         :map company-active-map
              ("C-n" . company-select-next)
@@ -627,11 +641,6 @@
              )
   )
 
-(use-package company-c-headers
-  :requires (company)
-  :config
-  (add-to-list 'company-backends 'company-c-headers)
-  )
 
 ;;;;
 ;;;;            flyspell
@@ -839,8 +848,8 @@
   (global-set-key (kbd "<C-wheel-down>") nil)
 
   ;; Comments
-  (global-set-key (kbd "C-/") 'comment-region)
-  (global-set-key (kbd "C-?") 'uncomment-region)
+  ;; (global-set-key (kbd "C-/") 'comment-region)
+  ;; (global-set-key (kbd "C-?") 'uncomment-region)
 
   ;; Mouse-3
   (global-set-key (kbd "<mouse-3>") 'mouse-popup-menubar-stuff)
@@ -852,7 +861,7 @@
 (use-package solarized-theme)
 (use-package cyberpunk-theme)
 (use-package color-theme-sanityinc-tomorrow)
-(load-theme 'sanityinc-tomorrow-bright t)
+(load-theme 'sanityinc-tomorrow-blue t)
 
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file 'noerror)
