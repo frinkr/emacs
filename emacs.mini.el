@@ -847,10 +847,6 @@
   (global-set-key (kbd "<C-wheel-up>") nil)
   (global-set-key (kbd "<C-wheel-down>") nil)
 
-  ;; Comments
-  ;; (global-set-key (kbd "C-/") 'comment-region)
-  ;; (global-set-key (kbd "C-?") 'uncomment-region)
-
   ;; Mouse-3
   (global-set-key (kbd "<mouse-3>") 'mouse-popup-menubar-stuff)
   )
@@ -861,7 +857,16 @@
 (use-package solarized-theme)
 (use-package cyberpunk-theme)
 (use-package color-theme-sanityinc-tomorrow)
-(load-theme 'sanityinc-tomorrow-blue t)
+(use-package remember-last-theme
+  :ensure t
+  :config (remember-last-theme-enable)
+  )
+(use-package smart-mode-line
+  :disabled
+  :after (remember-last-theme)
+  :config (add-hook 'after-init-hook #'sml/setup)
+  )
+
 
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file 'noerror)
