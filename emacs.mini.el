@@ -561,6 +561,7 @@
 (use-package pos-tip)  ;; for a nice completion menu and help
 
 (use-package auto-complete
+  :disabled
   :diminish auto-complete-mode
   :preface
   (defun auto-complete-mode-maybe ()
@@ -596,6 +597,41 @@
   (ac-linum-workaround)
   )
 
+;;;;
+;;;;             company
+;;;;
+(use-package company
+  :init
+  (setq company-idle-delay 0
+        company-minimum-prefix-length 1
+        company-selection-wrap-around t)
+  :init
+  (add-hook 'after-init-hook 'global-company-mode)
+  :config
+  (add-to-list 'company-backends '(company-abbrev
+                                   company-dabbrev
+                                   company-dabbrev-code
+                                   company-etags
+                                   company-files
+                                   company-keywords))
+  (add-hook 'python-mode-hook
+          (lambda ()
+            (add-to-list (make-local-variable 'company-backends)
+                         'company-anaconda)))
+  
+  (setq company-dabbrev-downcase nil)
+  :bind(("C-." . company-complete)
+        :map company-active-map
+             ("C-n" . company-select-next)
+             ("C-p" . company-select-previous)
+             )
+  )
+
+(use-package company-c-headers
+  :requires (company)
+  :config
+  (add-to-list 'company-backends 'company-c-headers)
+  )
 
 ;;;;
 ;;;;            flyspell
@@ -610,6 +646,8 @@
     (add-hook hook (lambda () (flyspell-mode -1))))
 
   (add-hook 'c++-mode-hook  (lambda () (flyspell-prog-mode)))
+  :bind (:map flyspell-mode-map
+              ("C-." . nil))
   )
 
 (use-package abbrev
