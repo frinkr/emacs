@@ -21,8 +21,13 @@
 (defun install-extra-packages()
   (require 'package)
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
+  (setq package-archives
+        '(("melpa" . "http://elpa.emacs-china.org/melpa/")
+          ("org"   . "http://elpa.emacs-china.org/org/")
+          ("gnu"   . "http://elpa.emacs-china.org/gnu/")))
 
+  (when is-macos
+    (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")) ;;https://www.reddit.com/r/emacs/comments/cdf48c/failed_to_download_gnu_archive/
   (package-initialize)
 
   (setq package-list '(cl-lib
@@ -357,6 +362,15 @@
    )
   )  
 
+
+;;;;
+;;;;        mode-line
+;;;;
+(use-package mode-line-stats
+  :disabled
+  :config (mode-line-stats-mode)
+  :quelpa (mode-line-stats :fetcher github :repo "Idorobots/mode-line-stats")
+)
 
 
 ;;;;
@@ -710,8 +724,13 @@
   (when (file-directory-p local-packages-dir)
     (add-to-list 'load-path local-packages-dir))
 
-  (require 'monkeyc-mode)
-  (require 'asc-mode)
+  (use-package monkeyc-mode
+    :ensure nil
+    :mode "\\.mc\\'")
+  
+  (use-package asc-mode
+    :ensure nil
+    :mode "\\.asc\\'")
   )
 
 ;;;;
