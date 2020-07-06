@@ -306,12 +306,17 @@
     (when-let ((symbol (thing-at-point 'symbol)))
       (let* ((bounds (bounds-of-thing-at-point 'symbol))
              (begin (car bounds))
-             (end (cdr bounds)))
+             (end (cdr bounds))
+             (have-hlt nil))
         (dolist (ov (overlays-in begin end))
-          (if (overlay-get ov 'hlt-highlight) ;; check if been highlighed
-              (hlt-unhighlight-symbol symbol)
-            (hlt-highlight-symbol symbol)
-            )))))
+          (when (overlay-get ov 'hlt-highlight) ;; check if been highlighed
+            (setq have-hlt t)
+            ))
+        (if have-hlt
+            (hlt-unhighlight-symbol symbol)
+          (hlt-highlight-symbol symbol)
+          )
+        )))
   :init
   (setq hlt-auto-face-foreground "white")
   (setq hlt-auto-face-backgrounds '("SpringGreen3" 
@@ -333,16 +338,25 @@
 ;;;;
 ;;;;          Highlight-parentheses
 ;;;;
-
 (use-package highlight-parentheses
   :diminish highlight-parentheses-mode
   :config
+  (setq hl-paren-background-colors '("red"
+                                     "DarkCyan"
+                                     "DeepPink"
+                                     "SpringGreen3"
+                                     "MediumPurple1"
+                                     "DarkOrange"
+                                     "RoyalBlue1"
+                                     ))
+  (setq hl-paren-colors '("white"))
   (global-highlight-parentheses-mode t)
   :custom
   (hl-paren-highlight-adjacent t)
-  :custom-face (hl-paren-face ((t (:slant italic :weight bold))))
+  ;:custom-face (hl-paren-face ((t (:slant italic :weight bold))))
   )
 
+(use-package rainbow-mode)
 
 ;;;;
 ;;;;          undo-tree-mode
@@ -361,7 +375,7 @@
    ("C-?" . nil)
    ("C-_" . default-text-scale-decrease)
    )
-  )  
+  )
 
 
 ;;;;
@@ -608,6 +622,7 @@
 ;;;;             company
 ;;;;
 (use-package company
+  :diminish company-mode
   :init
   (setq company-idle-delay 0
         company-minimum-prefix-length 1
