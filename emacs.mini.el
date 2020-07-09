@@ -221,11 +221,16 @@
                                                                    ("%b - Dir:  " default-directory)))))))
 
   ;; font
-  (set-face-attribute 'default nil :family "Source Code Pro" :weight 'regular :height 140)
+  (set-face-attribute 'default nil :family "Source Code Pro" :weight 'light :height 140)
 
   ;; auto revert
   (global-auto-revert-mode)
 
+  ;; Emacs27 has builtin
+  (when (require 'display-fill-column-indicator nil 'noerror)
+      (global-display-fill-column-indicator-mode t)
+      )
+  
   ;; Common packages
   (require 'cl)
   (require 'cl-lib)
@@ -286,7 +291,7 @@
 ;;;;         fill-column-indicator
 ;;;;
 (use-package fill-column-indicator
-  ;;:disabled ;; conflicit with ac
+  :disabled ;; conflicit with ac and Emacs27 has builtin
   ;; https://github.com/alpaker/Fill-Column-Indicator/issues/21#issuecomment-6959718
   :config
   (setq fci-rule-width 1)
@@ -331,7 +336,9 @@
                                     "cyan3"
                                     "RoyalBlue4"))
 
-  :bind(([double-mouse-1] . fx/smart-highlight))
+  :bind(([double-mouse-1] . fx/smart-highlight)
+        ("M-N" . hlt-next-highlight)
+        ("M-P" . hlt-previous-highlight))
   )
 
 
@@ -503,7 +510,7 @@
   
   :config
   (advice-add 'helm-score-candidate-for-pattern :around #'helm-score-candidate-fix)
-
+  (helm-autoresize-mode t)
   :bind
   (("M-l" . helm-semantic-or-imenu)
    ("C-S-l" . helm-semantic-or-imenu)
