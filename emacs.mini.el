@@ -482,7 +482,11 @@
    helm-buffers-fuzzy-matching t
    ;;helm-move-to-line-cycle-in-source t
    )
-  
+
+  (setq helm-ack-grep-executable "ack"
+      helm-grep-default-command "ack -Hn --no-group --no-color %c %e %p %f"
+      helm-grep-default-recurse-command "ack -H --no-group --no-color %c %e %p %f")
+
   :preface
     ;;; prefer the candidate with prefix (ignore case)
   (defun helm-score-candidate-fix (orig-fun &rest args)
@@ -511,6 +515,15 @@
    ("<tab>" . helm-execute-persistent-action)
    ("C-z"  . helm-select-action))
   )    ;; end of helm
+
+(use-package helm-files
+  :ensure nil
+  :bind
+  (:map helm-find-files-map
+        ("C-s" . helm-ff-run-grep-ag)
+        ("C-r" . helm-ff-run-query-replace-regexp)
+        )
+)
 
 
 ;;;;
@@ -793,6 +806,9 @@
   (use-package asc-mode
     :ensure nil
     :mode "\\.asc\\'")
+
+  (use-package help-fns+
+    :ensure nil)
   )
 
 ;;;;
