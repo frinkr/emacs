@@ -213,15 +213,20 @@
   (electric-pair-mode 1)
 
   ;; title bar shows full path
-  (setq-default frame-title-format
+  (setq-default frame-title-format-2
                 (list '((buffer-file-name " %f"
                                           (dired-directory
                                            dired-directory
                                            (revert-buffer-function " %b"
                                                                    ("%b - Dir:  " default-directory)))))))
 
+  ;; macOS transparent titlebar
+  (when is-macos
+    (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+    )
+
   ;; font
-  (set-face-attribute 'default nil :family "Source Code Pro" :weight 'light :height 140)
+  (set-face-attribute 'default nil :family "Source Code Pro" :weight 'normal :height 140)
 
   ;; auto revert
   (global-auto-revert-mode)
@@ -343,8 +348,12 @@
 
 
 ;;;;
-;;;;          Highlight-parentheses
+;;;;          Highlighting
 ;;;;
+(use-package rainbow-delimiters
+  :config
+  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+  )
 (use-package highlight-parentheses
   :diminish highlight-parentheses-mode
   :config
@@ -360,10 +369,9 @@
   (global-highlight-parentheses-mode t)
   :custom
   (hl-paren-highlight-adjacent t)
-  ;:custom-face (hl-paren-face ((t (:slant italic :weight bold))))
+  :custom-face (hl-paren-face ((t (:slant italic :weight bold))))
   )
 
-(use-package rainbow-mode)
 
 ;;;;
 ;;;;          undo-tree-mode
@@ -394,12 +402,34 @@
 ;;;;
 ;;;;        mode-line
 ;;;;
-(use-package mode-line-stats
-  :disabled
-  :config (mode-line-stats-mode)
-  :quelpa (mode-line-stats :fetcher github :repo "Idorobots/mode-line-stats")
-)
-
+(use-package mood-line
+  :config (mood-line-mode)
+  :config
+  (defun my-mood-line-segment-modified()
+    "Displays the modification/read-only indicator in the mode-line"
+    (if (buffer-file-name)
+        (if (buffer-modified-p)
+            (propertize "！ " 'face 'mood-line-modified)
+          (if (and buffer-read-only (buffer-file-name))
+              (propertize "● " 'face 'mood-line-unimportant)
+            "  "))
+        "  ")
+    )
+  (defun my-mood-line-segment-buffer-name()
+    "Display full path of current buffer in the mode-line"
+    (propertize (concat (if (buffer-file-name) default-directory "") "%b ") 'face 'mood-line-buffer-name)
+    )
+  (defun my-mood-line-segment-position()
+    "Display line:column and percentage in the mode-line"
+    (propertize "(%l:%c) %p%% " 'face 'mood-line-unimportant)
+    )
+  (advice-add #'mood-line-segment-modified :override #'my-mood-line-segment-modified)
+  (advice-add #'mood-line-segment-buffer-name :override #'my-mood-line-segment-buffer-name)
+  (advice-add #'mood-line-segment-position :override #'my-mood-line-segment-position)
+  :custom
+  (mood-line-show-eol-style t)
+  (mood-line-show-encoding-information t)
+  )
 
 ;;;;
 ;;;;        Dired setup
@@ -517,6 +547,7 @@
    ("C-x C-f" . helm-find-files)
    ("C-x C-r" . helm-recentf)
    ("C-x b" . helm-buffers-list)
+   ("C-x C-b" . helm-mini)
    ("M-x" . helm-M-x)
    :map helm-map
    ("<tab>" . helm-execute-persistent-action)
@@ -532,6 +563,11 @@
         )
 )
 
+(use-package helm-ag
+  :commands (helm-do-ag)
+  :init (defalias 'ag 'helm-do-ag)
+  :bind
+  ("C-S-s" . helm-do-ag))
 
 ;;;;
 ;;;;         swiper
