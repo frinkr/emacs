@@ -447,6 +447,40 @@
 
 
 ;;;;
+;;;;          Sidebar
+;;;;
+(use-package neotree)
+
+;;;;
+;;;;           bm
+;;;;
+(use-package bm
+  :demand t
+  :init
+  (setq bm-restore-repository-on-load t)
+  :config
+  (setq bm-cycle-all-buffers t)
+  (setq bm-repository-file "~/.emacs.d/bm-repository")
+  (setq-default bm-buffer-persistence t)
+  (add-hook 'after-init-hook 'bm-repository-load)
+  (add-hook 'kill-buffer-hook #'bm-buffer-save)
+  (add-hook 'kill-emacs-hook #'(lambda nil
+                                 (bm-buffer-save-all)
+                                 (bm-repository-save)))
+  (add-hook 'after-save-hook #'bm-buffer-save)
+  (add-hook 'find-file-hooks   #'bm-buffer-restore)
+  (add-hook 'after-revert-hook #'bm-buffer-restore)
+  (add-hook 'vc-before-checkin-hook #'bm-buffer-save)
+  :bind (("<left-margin> <mouse-1>" . bm-toggle-mouse))
+  )
+
+(use-package helm-bm
+  :requires bm
+  :init (defalias 'bm 'helm-bm)
+  :bind(("C-c b" . helm-bm))
+  )
+
+;;;;
 ;;;;           google
 ;;;;
 (use-package engine-mode
