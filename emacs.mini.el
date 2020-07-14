@@ -161,6 +161,21 @@
     (shell-command (concat "code " path)))
   )
 
+;;;;
+;;;;          open-with-default-application
+;;;;
+(defun open-with-default-application()
+  "Copy current file with system default application"
+  (interactive)
+  (let ((filename (if (equal major-mode 'dired-mode) default-directory (buffer-file-name))))
+    (when filename
+      (message filename)
+      (cond (is-macos
+             (shell-command (concat "open " (shell-quote-argument filename))))
+            (is-windows
+             (w32-shell-execute "open" filename))
+            ))))
+
 
 ;;;;
 ;;;;        Core Settings
@@ -183,7 +198,9 @@
   (save-place-mode t)   ;; save cursor position
 
   (blink-cursor-mode t)
-
+  (setq-default cursor-type 'bar)
+  (setq-default cursor-in-non-selected-windows 'hollow)
+  
   (setq inhibit-splash-screen t)
   (setq transient-mark-mode t)
   (setq delete-key-deletes-forward t)
@@ -409,9 +426,9 @@
     "Displays the modification/read-only indicator in the mode-line"
     (if (buffer-file-name)
         (if (buffer-modified-p)
-            (propertize "！ " 'face 'mood-line-modified)
+            (propertize "● " 'face 'mood-line-modified)
           (if (and buffer-read-only (buffer-file-name))
-              (propertize "● " 'face 'mood-line-unimportant)
+              (propertize "🔒 " 'face 'mood-line-unimportant)
             "  "))
         "  ")
     )
