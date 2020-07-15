@@ -419,6 +419,10 @@
 ;;;;
 ;;;;        mode-line
 ;;;;
+(use-package nyan-mode
+  :config
+  (setq nyan-animate-nyancat t
+        nyan-wavy-trail nil))
 (use-package mood-line
   :config (mood-line-mode)
   :config
@@ -434,19 +438,44 @@
     )
   (defun my-mood-line-segment-buffer-name()
     "Display full path of current buffer in the mode-line"
-    (propertize (concat (if (buffer-file-name) default-directory "") "%b ") 'face 'mood-line-buffer-name)
-    )
+    (let ((fmt (concat (if (buffer-file-name) default-directory "") "%b "))
+          (path (if (equal major-mode 'dired-mode) default-directory (buffer-file-name))))
+      (propertize fmt
+                  'face 'mood-line-buffer-name
+                  'help-echo path
+                  'local-map my-mode-line-buffer-name-map
+                  )
+      ))
+  
   (defun my-mood-line-segment-position()
     "Display line:column and percentage in the mode-line"
-    (propertize "(%l:%c) %p%% " 'face 'mood-line-unimportant)
+    (list (propertize "(%l:%c) %p%% " 'face 'mood-line-unimportant 'local-map mode-line-column-line-number-mode-map)
+          " "
+          (nyan-create))
     )
   (advice-add #'mood-line-segment-modified :override #'my-mood-line-segment-modified)
   (advice-add #'mood-line-segment-buffer-name :override #'my-mood-line-segment-buffer-name)
   (advice-add #'mood-line-segment-position :override #'my-mood-line-segment-position)
   :custom
   (mood-line-show-eol-style t)
-  (mood-line-show-encoding-information t)
+  (mood-line-show-encoding-information t)  
   )
+
+(defconst my-mode-line-buffer-name-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mode-line down-mouse-1]
+      (let ((my-file-menu-map (make-sparse-keymap "My File")))
+        (define-key my-file-menu-map
+          [my-file-menu-map-reveal]
+          '("Reveal in Finder" . open-in-finder)
+          )
+        (define-key my-file-menu-map
+          [my-file-menu-map-copy]
+          '("Copy File Path" . copy-file-path)
+          )
+        my-file-menu-map)
+      )
+    map))
 
 ;;;;
 ;;;;        Dired setup
@@ -542,6 +571,18 @@
   (global-set-key (kbd "<mouse-5>") 'fx/mousewheel-scroll-up)
   (global-set-key (kbd "<mouse-4>") 'fx/mousewheel-scroll-down)
   )
+
+
+;;;;
+;;;;        vterm
+;;;;
+(use-package vterm
+  :if (not is-windows)
+  :init (setq
+         vterm-buffer-name-string "vterm %s"
+         vterm-kill-buffer-on-exit t)
+  )
+
 
 ;;;;
 ;;;;        persp
@@ -982,16 +1023,11 @@
 (use-package solarized-theme)
 (use-package cyberpunk-theme)
 (use-package color-theme-sanityinc-tomorrow)
+(use-package kaolin-themes) ;; kaolin-ocean !
 (use-package remember-last-theme
   :ensure t
   :config (remember-last-theme-enable)
   )
-(use-package smart-mode-line
-  :disabled
-  :after (remember-last-theme)
-  :config (add-hook 'after-init-hook #'sml/setup)
-  )
-
 
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file 'noerror)
