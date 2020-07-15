@@ -55,6 +55,14 @@
   ;; To disable collection of benchmark data after init is done.
   (add-hook 'after-init-hook 'benchmark-init/deactivate))
 
+
+(defun buffer-file-path-or-directory()
+  "Return current buffer file path or dired directory"
+  (if (equal major-mode 'dired-mode)
+      default-directory
+    (buffer-file-name))
+  )
+
 ;;;;
 ;;;;           clear the recentf 
 ;;;;
@@ -86,9 +94,7 @@
 (defun copy-file-path ()
   "Copy the current file path to the clipboard"
   (interactive)
-  (let ((filename (if (equal major-mode 'dired-mode)
-                      default-directory
-                    (buffer-file-name))))
+  (let ((filename (buffer-file-path-or-directory)))
     (when filename
       (with-temp-buffer
         (insert filename)
@@ -439,7 +445,7 @@
   (defun my-mood-line-segment-buffer-name()
     "Display full path of current buffer in the mode-line"
     (let ((fmt (concat (if (buffer-file-name) default-directory "") "%b "))
-          (path (if (equal major-mode 'dired-mode) default-directory (buffer-file-name))))
+          (path (buffer-file-path-or-directory)))
       (propertize fmt
                   'face 'mood-line-buffer-name
                   'help-echo path
@@ -461,19 +467,27 @@
   (mood-line-show-encoding-information t)  
   )
 
+(defun make-my-file-menu-map()
+  (let ((my-file-menu-map (make-sparse-keymap "My File")))
+    (define-key my-file-menu-map
+      [my-file-menu-map-code]
+      '("Open with VScode" . (lambda () (interactive) (code (buffer-file-path-or-directory))))
+      )
+    (define-key my-file-menu-map
+      [my-file-menu-map-copy]
+      '("Copy File Path" . copy-file-path)
+      )
+    (define-key my-file-menu-map
+      [my-file-menu-map-reveal]
+      '("Reveal in Finder" . open-in-finder)
+      )
+    my-file-menu-map)
+  )
+
 (defconst my-mode-line-buffer-name-map
   (let ((map (make-sparse-keymap)))
     (define-key map [mode-line down-mouse-1]
-      (let ((my-file-menu-map (make-sparse-keymap "My File")))
-        (define-key my-file-menu-map
-          [my-file-menu-map-reveal]
-          '("Reveal in Finder" . open-in-finder)
-          )
-        (define-key my-file-menu-map
-          [my-file-menu-map-copy]
-          '("Copy File Path" . copy-file-path)
-          )
-        my-file-menu-map)
+      (make-my-file-menu-map)
       )
     map))
 
