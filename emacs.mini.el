@@ -689,14 +689,29 @@
 ;;;;        projectile
 ;;;;
 (use-package helm-projectile
+  :commands (helm-projectile-on)
   :config
   (projectile-global-mode)
   (setq projectile-completion-system 'helm)
   (setq projectile-switch-project-action 'venv-projectile-auto-workon)
+
+  (defun my-find-file-at-point()
+    "Find file at point based on context. See `helm-projectile-find-file-dwim'."
+    (interactive)
+      (let* ((project-root (projectile-project-root))
+         (project-files (projectile-current-project-files))
+         (files (projectile-select-files project-files)))
+    (if (= (length files) 1)
+        (find-file (expand-file-name (car files) (projectile-project-root)))
+      (helm-projectile-find-other-file)
+    )))
+  
   (helm-projectile-on)
   :bind(("C-S-x C-S-f" . helm-projectile-find-file)
         ("C-1" . helm-projectile-find-other-file)
-        ("C-S-b" . projectile-compile-project))
+        ("C-S-b" . projectile-compile-project)
+        :map c-mode-base-map
+        ("C-2" . my-find-file-at-point))
   )
 
 
@@ -715,6 +730,12 @@
   )
 (use-package cmake-mode)
 
+;;;;
+;;;;         dumb-jump
+;;;;
+(use-package dumb-jump
+  :config (setq dumb-jump-selector 'helm)
+  :ensure)
 
 ;;;;
 ;;;;       git
