@@ -459,9 +459,22 @@
           " "
           (nyan-create))
     )
+
+  (defun my-mood-line-segment-eol(orig-fun &rest args)
+    "Displays the EOL style of the current buffer in the mode-line."
+     (let* ((res (apply orig-fun args)))
+       (propertize res
+                   'face 'mode-line-unimportant
+                   'help-echo "mouse-1: EOL menu"
+                   'local-map my-mode-line-eol-map)
+       )
+     )
+  
   (advice-add #'mood-line-segment-modified :override #'my-mood-line-segment-modified)
   (advice-add #'mood-line-segment-buffer-name :override #'my-mood-line-segment-buffer-name)
   (advice-add #'mood-line-segment-position :override #'my-mood-line-segment-position)
+  (advice-add #'mood-line-segment-eol :around #'my-mood-line-segment-eol)
+  
   :custom
   (mood-line-show-eol-style t)
   (mood-line-show-encoding-information t)  
@@ -490,6 +503,28 @@
       (make-my-file-menu-map)
       )
     map))
+
+(defconst my-mode-line-eol-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mode-line down-mouse-1]
+      (let ((my-eol-menu-map (make-sparse-keymap "EOL")))
+        (define-key my-eol-menu-map
+          [my-eol-menu-map-lf]
+          '("LF (unix)" . (lambda () (interactive) (set-buffer-file-coding-system 'unix)))
+          )
+        (define-key my-eol-menu-map
+          [my-eol-menu-map-cr]
+          '("CR (mac)" . (lambda () (interactive) (set-buffer-file-coding-system 'mac)))
+          )
+        (define-key my-eol-menu-map
+          [my-eol-menu-map-crlf]
+          '("CRLF (dos)" . (lambda () (interactive) (set-buffer-file-coding-system 'dos)))
+          )
+        my-eol-menu-map)
+      )
+    map))
+
+
 
 ;;;;
 ;;;;        Dired setup
