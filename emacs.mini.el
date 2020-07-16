@@ -55,6 +55,14 @@
   ;; To disable collection of benchmark data after init is done.
   (add-hook 'after-init-hook 'benchmark-init/deactivate))
 
+
+(defun buffer-file-path-or-directory()
+  "Return current buffer file path or dired directory"
+  (if (equal major-mode 'dired-mode)
+      default-directory
+    (buffer-file-name))
+  )
+
 ;;;;
 ;;;;           clear the recentf 
 ;;;;
@@ -86,9 +94,7 @@
 (defun copy-file-path ()
   "Copy the current file path to the clipboard"
   (interactive)
-  (let ((filename (if (equal major-mode 'dired-mode)
-                      default-directory
-                    (buffer-file-name))))
+  (let ((filename (buffer-file-path-or-directory)))
     (when filename
       (with-temp-buffer
         (insert filename)
@@ -161,6 +167,21 @@
     (shell-command (concat "code " path)))
   )
 
+;;;;
+;;;;          open-with-default-application
+;;;;
+(defun open-with-default-application()
+  "Copy current file with system default application"
+  (interactive)
+  (let ((filename (if (equal major-mode 'dired-mode) default-directory (buffer-file-name))))
+    (when filename
+      (message filename)
+      (cond (is-macos
+             (shell-command (concat "open " (shell-quote-argument filename))))
+            (is-windows
+             (w32-shell-execute "open" filename))
+            ))))
+
 
 ;;;;
 ;;;;        Core Settings
@@ -183,7 +204,9 @@
   (save-place-mode t)   ;; save cursor position
 
   (blink-cursor-mode t)
-
+  (setq-default cursor-type 'bar)
+  (setq-default cursor-in-non-selected-windows 'hollow)
+  
   (setq inhibit-splash-screen t)
   (setq transient-mark-mode t)
   (setq delete-key-deletes-forward t)
@@ -404,6 +427,10 @@
 ;;;;
 ;;;;        mode-line
 ;;;;
+(use-package nyan-mode
+  :config
+  (setq nyan-animate-nyancat t
+        nyan-wavy-trail nil))
 (use-package mood-line
   :config (mood-line-mode)
   :config
@@ -411,7 +438,7 @@
     "Displays the modification/read-only indicator in the mode-line"
     (if (buffer-file-name)
         (if (buffer-modified-p)
-            (propertize "* " 'face 'mood-line-modified)
+            (propertize "● " 'face 'mood-line-modified)
           (if (and buffer-read-only (buffer-file-name))
               (propertize "🔒 " 'face 'mood-line-unimportant)
             "  "))
@@ -419,22 +446,87 @@
     )
   (defun my-mood-line-segment-buffer-name()
     "Display full path of current buffer in the mode-line"
-    (propertize (if dired-directory
-                    dired-directory
-                  (if (buffer-file-name) (buffer-file-name) "%b"))
-                'face 'mood-line-buffer-name)
-    )
+    (let ((fmt (concat (if (buffer-file-name) default-directory "") "%b "))
+          (path (buffer-file-path-or-directory)))
+      (propertize fmt
+                  'face 'mood-line-buffer-name
+                  'help-echo path
+                  'local-map my-mode-line-buffer-name-map
+                  )
+      ))
+  
   (defun my-mood-line-segment-position()
     "Display line:column and percentage in the mode-line"
-    (propertize " (%l:%c) %p%% " 'face 'mood-line-unimportant)
+    (list (propertize "(%l:%c) %p%% " 'face 'mood-line-unimportant 'local-map mode-line-column-line-number-mode-map)
+          " "
+          (nyan-create))
     )
+
+  (defun my-mood-line-segment-eol(orig-fun &rest args)
+    "Displays the EOL style of the current buffer in the mode-line."
+     (let* ((res (apply orig-fun args)))
+       (propertize res
+                   'face 'mode-line-unimportant
+                   'help-echo "mouse-1: EOL menu"
+                   'local-map my-mode-line-eol-map)
+       )
+     )
+  
   (advice-add #'mood-line-segment-modified :override #'my-mood-line-segment-modified)
   (advice-add #'mood-line-segment-buffer-name :override #'my-mood-line-segment-buffer-name)
   (advice-add #'mood-line-segment-position :override #'my-mood-line-segment-position)
+  (advice-add #'mood-line-segment-eol :around #'my-mood-line-segment-eol)
+  
   :custom
   (mood-line-show-eol-style t)
-  (mood-line-show-encoding-information t)
+  (mood-line-show-encoding-information t)  
   )
+
+(defun make-my-file-menu-map()
+  (let ((my-file-menu-map (make-sparse-keymap "My File")))
+    (define-key my-file-menu-map
+      [my-file-menu-map-code]
+      '("Open with VScode" . (lambda () (interactive) (code (buffer-file-path-or-directory))))
+      )
+    (define-key my-file-menu-map
+      [my-file-menu-map-copy]
+      '("Copy File Path" . copy-file-path)
+      )
+    (define-key my-file-menu-map
+      [my-file-menu-map-reveal]
+      '("Reveal in Finder" . open-in-finder)
+      )
+    my-file-menu-map)
+  )
+
+(defconst my-mode-line-buffer-name-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mode-line down-mouse-1]
+      (make-my-file-menu-map)
+      )
+    map))
+
+(defconst my-mode-line-eol-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mode-line down-mouse-1]
+      (let ((my-eol-menu-map (make-sparse-keymap "EOL")))
+        (define-key my-eol-menu-map
+          [my-eol-menu-map-lf]
+          '("LF (unix)" . (lambda () (interactive) (set-buffer-file-coding-system 'unix)))
+          )
+        (define-key my-eol-menu-map
+          [my-eol-menu-map-cr]
+          '("CR (mac)" . (lambda () (interactive) (set-buffer-file-coding-system 'mac)))
+          )
+        (define-key my-eol-menu-map
+          [my-eol-menu-map-crlf]
+          '("CRLF (dos)" . (lambda () (interactive) (set-buffer-file-coding-system 'dos)))
+          )
+        my-eol-menu-map)
+      )
+    map))
+
+
 
 ;;;;
 ;;;;        Dired setup
@@ -450,6 +542,41 @@
               ("^" . (lambda () (interactive) (find-alternate-file ".."))))
   )
 
+
+;;;;
+;;;;          Sidebar
+;;;;
+(use-package neotree
+  :defer t)
+
+;;;;
+;;;;           bm
+;;;;
+(use-package bm
+  :demand t
+  :init
+  (setq bm-restore-repository-on-load t)
+  :config
+  (setq bm-cycle-all-buffers t)
+  (setq bm-repository-file "~/.emacs.d/bm-repository")
+  (setq-default bm-buffer-persistence t)
+  (add-hook 'after-init-hook 'bm-repository-load)
+  (add-hook 'kill-buffer-hook #'bm-buffer-save)
+  (add-hook 'kill-emacs-hook #'(lambda nil
+                                 (bm-buffer-save-all)
+                                 (bm-repository-save)))
+  (add-hook 'after-save-hook #'bm-buffer-save)
+  (add-hook 'find-file-hooks   #'bm-buffer-restore)
+  (add-hook 'after-revert-hook #'bm-buffer-restore)
+  (add-hook 'vc-before-checkin-hook #'bm-buffer-save)
+  :bind (("<left-margin> <mouse-1>" . bm-toggle-mouse))
+  )
+
+(use-package helm-bm
+  :requires bm
+  :init (defalias 'bm 'helm-bm)
+  :bind(("C-c b" . helm-bm))
+  )
 
 ;;;;
 ;;;;           google
@@ -496,6 +623,18 @@
   (global-set-key (kbd "<mouse-5>") 'fx/mousewheel-scroll-up)
   (global-set-key (kbd "<mouse-4>") 'fx/mousewheel-scroll-down)
   )
+
+
+;;;;
+;;;;        vterm
+;;;;
+(use-package vterm
+  :if (not is-windows)
+  :init (setq
+         vterm-buffer-name-string "vterm %s"
+         vterm-kill-buffer-on-exit t)
+  )
+
 
 ;;;;
 ;;;;        persp
@@ -588,14 +727,29 @@
 ;;;;        projectile
 ;;;;
 (use-package helm-projectile
+  :commands (helm-projectile-on)
   :config
   (projectile-global-mode)
   (setq projectile-completion-system 'helm)
   (setq projectile-switch-project-action 'venv-projectile-auto-workon)
+
+  (defun my-find-file-at-point()
+    "Find file at point based on context. See `helm-projectile-find-file-dwim'."
+    (interactive)
+      (let* ((project-root (projectile-project-root))
+         (project-files (projectile-current-project-files))
+         (files (projectile-select-files project-files)))
+    (if (= (length files) 1)
+        (find-file (expand-file-name (car files) (projectile-project-root)))
+      (helm-projectile-find-other-file)
+    )))
+  
   (helm-projectile-on)
   :bind(("C-S-x C-S-f" . helm-projectile-find-file)
         ("C-1" . helm-projectile-find-other-file)
-        ("C-S-b" . projectile-compile-project))
+        ("C-S-b" . projectile-compile-project)
+        :map c-mode-base-map
+        ("C-2" . my-find-file-at-point))
   )
 
 
@@ -615,6 +769,12 @@
 (use-package cmake-mode
   :defer t)
 
+;;;;
+;;;;         dumb-jump
+;;;;
+(use-package dumb-jump
+  :config (setq dumb-jump-selector 'helm)
+  :ensure)
 
 ;;;;
 ;;;;       git
@@ -949,16 +1109,11 @@
 (use-package solarized-theme :defer t)
 (use-package cyberpunk-theme :defer t)
 (use-package color-theme-sanityinc-tomorrow :defer t)
+(use-package kaolin-themes :defer t) ;; kaolin-ocean !
 (use-package remember-last-theme
   :ensure t
   :config (remember-last-theme-enable)
   )
-(use-package smart-mode-line
-  :disabled
-  :after (remember-last-theme)
-  :config (add-hook 'after-init-hook #'sml/setup)
-  )
-
 
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file 'noerror)
