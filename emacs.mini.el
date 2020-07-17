@@ -464,7 +464,7 @@
     "Displays the EOL style of the current buffer in the mode-line."
      (let* ((res (apply orig-fun args)))
        (propertize res
-                   'face 'mode-line-unimportant
+                   'face 'mood-line-unimportant
                    'help-echo "mouse-1: EOL menu"
                    'local-map my-mode-line-eol-map)
        )
@@ -482,6 +482,8 @@
 
 (defun make-my-file-menu-map()
   (let ((my-file-menu-map (make-sparse-keymap "My File")))
+    (define-key my-file-menu-map [menu-bar-replace-menu-sep]
+      '(menu-item "--"))
     (define-key my-file-menu-map
       [my-file-menu-map-code]
       '("Open with VScode" . (lambda () (interactive) (code (buffer-file-path-or-directory))))
@@ -507,7 +509,9 @@
 (defconst my-mode-line-eol-map
   (let ((map (make-sparse-keymap)))
     (define-key map [mode-line down-mouse-1]
-      (let ((my-eol-menu-map (make-sparse-keymap "EOL")))
+      (let ((my-eol-menu-map (make-sparse-keymap "Line Ending")))
+        (define-key my-eol-menu-map [menu-bar-replace-menu-sep]
+          '(menu-item "--"))
         (define-key my-eol-menu-map
           [my-eol-menu-map-lf]
           '("LF (unix)" . (lambda () (interactive) (set-buffer-file-coding-system 'unix)))
@@ -906,6 +910,18 @@
     )
   )
 
+
+;;;;
+;;;;         markdown
+;;;;
+(use-package markdown-mode
+  :ensure t
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init (setq markdown-command "multimarkdown"))
+
 ;;;;
 ;;;;            misc packages
 ;;;;
@@ -1014,40 +1030,9 @@
 
   (use-package help-fns+
     :ensure nil)
+
+  (require 'esko-link-mode)
   )
-
-;;;;
-;;;;    Esko links
-;;;;
-(use-package browse-url
-  :if (not is-windows))
-(use-package goto-addr
-  :if (not is-windows)
-  :init
-  (setq esko-project-codes '("DPP" "DPI" "JP"))  ;; Esko project code
-  (setq esko-project-regexp
-        (string-join (mapcar (lambda (x) (concat x "-[0-9]+"))
-                             esko-project-codes) "\\|"))
-
-  :config
-  ;; trap goto-address-url-regexp
-  (setq goto-address-url-regexp-old goto-address-url-regexp)
-  (setq goto-address-url-regexp
-        (concat
-         goto-address-url-regexp-old
-         "\\|" esko-project-regexp))
-
-  ;; trap browse-url-url-at-point
-  (defadvice browse-url-url-at-point (after fx/browse-url-url-at-point () activate)
-    (if (string-match esko-project-regexp ad-return-value)
-        (setq ad-return-value
-              (concat "http://jira.esko.com/browse/"
-                      (progn (string-match esko-project-regexp ad-return-value)
-                             (match-string 0 ad-return-value))))
-      )
-    )
-  )
-
 
 ;;;;
 ;;;;     General keybindings
