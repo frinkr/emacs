@@ -236,12 +236,13 @@
   (electric-pair-mode 1)
 
   ;; title bar shows full path
-  (setq-default frame-title-format-2
-                (list '((buffer-file-name " %f"
-                                          (dired-directory
-                                           dired-directory
-                                           (revert-buffer-function " %b"
-                                                                   ("%b - Dir:  " default-directory)))))))
+  (when (not is-macos)
+    (setq-default frame-title-format
+                  (list '((buffer-file-name " %f"
+                                            (dired-directory
+                                             dired-directory
+                                             (revert-buffer-function " %b"
+                                                                     ("%b - Dir:  " default-directory))))))))
 
   ;; macOS transparent titlebar
   (when is-macos
@@ -392,6 +393,7 @@
 ;;;;          Highlighting
 ;;;;
 (use-package rainbow-delimiters
+  :if is-macos ;; too slow on Windows
   :config
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
   )
@@ -566,7 +568,8 @@
 ;;;;
 ;;;;          Sidebar
 ;;;;
-(use-package neotree)
+(use-package neotree
+  :defer t)
 
 ;;;;
 ;;;;           bm
@@ -785,7 +788,8 @@
   :config
   (cmake-ide-setup)
   )
-(use-package cmake-mode)
+(use-package cmake-mode
+  :defer t)
 
 ;;;;
 ;;;;         dumb-jump
@@ -810,6 +814,7 @@
   )
 (use-package ediff
   :ensure nil
+  :defer t
   :init
   (setq ediff-split-window-function 'split-window-horizontally
         ediff-window-setup-function 'ediff-setup-windows-plain)
@@ -887,7 +892,7 @@
   (setq company-dabbrev-downcase nil)
 
   (use-package company-c-headers)
-  (use-package company-tabnine)
+  ;;(use-package company-tabnine)
   
   :bind(("C-." . company-complete)
         :map company-active-map
@@ -922,9 +927,18 @@
 ;;;;
 ;;;;            macOS
 ;;;;
-(when is-macos
-  (use-package reveal-in-osx-finder
-    :config (defalias 'open-in-finder 'reveal-in-osx-finder)
+(use-package reveal-in-osx-finder
+  :if is-macos
+  :config (defalias 'open-in-finder 'reveal-in-osx-finder)
+  )
+(when is-windows
+  (defun open-folder-in-explorer ()  
+    "Call when editing a file in a buffer. Open windows explorer in the current directory and select the current file"  
+    (interactive)  
+    (w32-shell-execute 
+     "open" "explorer"  
+     (concat "/e,/select," (convert-standard-filename buffer-file-name))
+     )
     )
   )
 
@@ -1047,6 +1061,7 @@
     :mode "\\.asc\\'")
 
   (use-package help-fns+
+    :if is-macos
     :ensure nil)
 
   (use-package esko-link-mode
@@ -1097,10 +1112,10 @@
 ;;;;
 ;;;;          theme & customization
 ;;;;
-(use-package solarized-theme)
-(use-package cyberpunk-theme)
-(use-package color-theme-sanityinc-tomorrow)
-(use-package kaolin-themes) ;; kaolin-ocean !
+(use-package solarized-theme :defer t)
+(use-package cyberpunk-theme :defer t)
+(use-package color-theme-sanityinc-tomorrow :defer t)
+(use-package kaolin-themes :defer t) ;; kaolin-ocean !
 (use-package remember-last-theme
   :ensure t
   :config (remember-last-theme-enable)
