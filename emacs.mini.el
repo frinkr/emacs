@@ -328,6 +328,24 @@
   (add-hook 'text-mode-hook 'fci-mode)
   )
 
+;;;;
+;;;;         dashboard
+;;;;
+(use-package dashboard
+  :init
+  (setq
+   dashboard-set-init-info t
+   dashboard-banner-logo-title "MAY THE FORCE BE WITH YOU!"
+   dashboard-startup-banner (concat root-dir "banner.png")
+   dashboard-items '((projects . 5)
+                     (recents  . 15))
+   dashboard-set-heading-icons t
+   dashboard-set-file-icons t
+   dashboard-set-footer nil
+   )
+  :config
+  (dashboard-setup-startup-hook))
+
 
 ;;;;
 ;;;;           highlight-thing
@@ -1031,7 +1049,11 @@
   (use-package help-fns+
     :ensure nil)
 
-  (require 'esko-link-mode)
+  (use-package esko-link-mode
+    :commands (esko-link-mode)
+    :ensure nil
+    :requires (goto-addr browse-url))
+  ;;(add-hook 'prog-mode-hook #'esko-link-mode)  
   )
 
 ;;;;

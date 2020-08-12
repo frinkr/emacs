@@ -28,26 +28,40 @@
 (require 'goto-addr)
 (require 'browse-url)
 
-(setq esko-project-codes '("DPP" "DPI" "JP"))  ;; Esko project code
-(setq esko-project-regexp
+(setq esko-link-mode-project-codes '("DPP" "DPI" "JP"))  ;; Esko project code
+(setq esko-link-mode-project-regexp
       (string-join (mapcar (lambda (x) (concat x "-[0-9]+"))
-                           esko-project-codes) "\\|"))
+                           esko-link-mode-project-codes) "\\|"))
 
 ;; trap goto-address-url-regexp
 (setq goto-address-url-regexp-old goto-address-url-regexp)
-(setq goto-address-url-regexp
+(setq goto-address-url-regexp-new
       (concat
        goto-address-url-regexp-old
-       "\\|" esko-project-regexp))
+       "\\|" esko-link-mode-project-regexp))
+
 
 ;; trap browse-url-url-at-point
 (defadvice browse-url-url-at-point (after fx/browse-url-url-at-point () activate)
-  (if (string-match esko-project-regexp ad-return-value)
+  (if (string-match esko-link-mode-project-regexp ad-return-value)
       (setq ad-return-value
             (concat "http://jira.esko.com/browse/"
-                    (progn (string-match esko-project-regexp ad-return-value)
+                    (progn (string-match esko-link-mode-project-regexp ad-return-value)
                            (match-string 0 ad-return-value))))
     )
+  )
+
+;;;###autoload
+(define-minor-mode esko-link-mode
+  "Display clickable esko links"
+  nil
+  ""
+  nil
+  (if esko-link-mode
+      (setq goto-address-url-regexp goto-address-url-regexp-new)
+     (setq goto-address-url-regexp goto-address-url-regexp-old)
+     )
+  (font-lock-flush)
   )
 
 (provide 'esko-link-mode)
