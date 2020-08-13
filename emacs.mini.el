@@ -347,6 +347,14 @@
   :config
   (dashboard-setup-startup-hook))
 
+;;;;
+;;;;           all-the-icons
+;;;;
+(use-package all-the-icons)
+(use-package all-the-icons-dired
+  :config
+  (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
+  )
 
 ;;;;
 ;;;;           highlight-thing
@@ -497,7 +505,8 @@
     "Display line:column and percentage in the mode-line"
     (list (propertize "(%l:%c) %p%% " 'face 'mood-line-unimportant 'local-map mode-line-column-line-number-mode-map)
           " "
-          (nyan-create))
+          (nyan-create)
+          )
     )
 
   (defun my-mood-line-segment-eol(orig-fun &rest args)
@@ -822,9 +831,11 @@
 ;;;;       git
 ;;;;
 (use-package magit
-  :if (not is-windows))
+  :if (not is-windows)
+  :demand t)
 (use-package diff-hl
   :if (not is-windows)
+  :demand t
   :config
   (global-diff-hl-mode)
   (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
@@ -838,6 +849,11 @@
   :init
   (setq ediff-split-window-function 'split-window-horizontally
         ediff-window-setup-function 'ediff-setup-windows-plain)
+  )
+(use-package magit-filenotify
+  :if (not is-windows)
+  :demand t
+  :config (add-hook 'magit-status-mode-hook 'magit-filenotify-mode)
   )
 
 
@@ -1087,8 +1103,8 @@
   (use-package esko-link-mode
     :commands (esko-link-mode)
     :ensure nil
+    :demand t
     :requires (goto-addr browse-url))
-  ;;(add-hook 'prog-mode-hook #'esko-link-mode)  
   )
 
 ;;;;
