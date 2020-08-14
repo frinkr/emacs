@@ -365,36 +365,32 @@
     (dolist (ov (overlays-in begin end))
       (when (overlay-get ov 'hlt-highlight) ;; check if been highlighed
         (return ov)
-        ))
-    )
+        )))
   
   (defun fx/smart-highlight()
     (interactive)
-    (when-let ((symbol (thing-at-point 'symbol)))
-      (let* ((bounds (bounds-of-thing-at-point 'symbol)))
-        (if (fx/get-hlt-ov (car bounds) (cdr bounds))
-            (hlt-unhighlight-symbol symbol)
-          (hlt-highlight-symbol symbol)
-          )
+    (when-let* ((symbol (thing-at-point 'symbol))
+                (bounds (bounds-of-thing-at-point 'symbol)))
+      (if (fx/get-hlt-ov (car bounds) (cdr bounds))
+          (hlt-unhighlight-symbol symbol)
+        (hlt-highlight-symbol symbol)
         )))
 
   (defun fx/hlt-face-at-point()
-    (when-let ((symbol (thing-at-point 'symbol)))
-      (let* ((bounds (bounds-of-thing-at-point 'symbol))
-             (ov (fx/get-hlt-ov (car bounds) (cdr bounds))))
-        (if ov
-            (overlay-get ov 'hlt-highlight)
-            hlt-last-face
-          )
-        ))
-    )
+    (when-let* ((symbol (thing-at-point 'symbol))
+                (bounds (bounds-of-thing-at-point 'symbol))
+                (ov (fx/get-hlt-ov (car bounds) (cdr bounds))))
+      (if ov
+          (overlay-get ov 'hlt-highlight)
+        hlt-last-face
+        )))
+    
   (defun fx/cycle-highlight(next)
     (when (fx/get-hlt-ov 0 (buffer-size))
       (if next
           (hlt-next-highlight nil nil (fx/hlt-face-at-point) nil nil nil t)
         (hlt-previous-highlight nil nil (fx/hlt-face-at-point) nil nil t))
-      )
-    )
+      ))
 
   (setq hlt-auto-faces-flag t)
   :init
