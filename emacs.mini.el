@@ -478,6 +478,7 @@
   (setq nyan-animate-nyancat t
         nyan-wavy-trail nil))
 (use-package mood-line
+  :if (display-graphic-p)
   :config (mood-line-mode)
   :config
   (defun my-mood-line-segment-modified()
