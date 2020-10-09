@@ -514,11 +514,27 @@
                    'local-map my-mode-line-eol-map)
        )
      )
+
+  (defun my-mood-line-segment-vc(orig-fun &rest args)
+    (let* ((res (apply orig-fun args)))
+      (concat
+       res
+       (propertize " "
+                   'face 'mood-line-unimportant
+                   'local-map my-mode-line-vc-diff-next)
+       (propertize " "
+                   'face 'mood-line-unimportant
+                   'local-map my-mode-line-vc-diff-previous)
+       )
+      )
+    )
   
   (advice-add #'mood-line-segment-modified :override #'my-mood-line-segment-modified)
   (advice-add #'mood-line-segment-buffer-name :override #'my-mood-line-segment-buffer-name)
   (advice-add #'mood-line-segment-position :override #'my-mood-line-segment-position)
   (advice-add #'mood-line-segment-eol :around #'my-mood-line-segment-eol)
+
+  (advice-add #'mood-line-segment-vc :around #'my-mood-line-segment-vc)
   
   :custom
   (mood-line-show-eol-style t)
@@ -543,6 +559,19 @@
       )
     my-file-menu-map)
   )
+
+(defconst my-mode-line-vc-diff-next
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mode-line down-mouse-1] #'diff-hl-next-hunk)
+    map)
+  )
+
+(defconst my-mode-line-vc-diff-previous
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mode-line down-mouse-1] #'diff-hl-previous-hunk)
+    map)
+  )
+
 
 (defconst my-mode-line-buffer-name-map
   (let ((map (make-sparse-keymap)))
@@ -583,7 +612,6 @@
   :init
   (setq dired-details-hide-link-targets nil)
   :config
-  (put 'dired-find-alternate-file 'disabled nil)
   :bind (:map dired-mode-map
               ("RET" . dired-find-alternate-file)
               ("^" . (lambda () (interactive) (find-alternate-file ".."))))
@@ -1155,3 +1183,4 @@
 
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file 'noerror)
+(put 'dired-find-alternate-file 'disabled nil)
