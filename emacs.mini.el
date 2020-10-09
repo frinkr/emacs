@@ -196,7 +196,12 @@
 
   ;; mouse in terminal
   (xterm-mouse-mode t)
+
+  ;; tool bar and menu bar
   (tool-bar-mode -1)
+  (unless (display-graphic-p)
+    (menu-bar-mode -1)
+    )
 
   ;; Disable backup and autosave
   (setq backup-inhibited t)
