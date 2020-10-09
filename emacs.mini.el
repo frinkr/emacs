@@ -710,7 +710,7 @@
 ;;;;        vterm
 ;;;;
 (use-package vterm
-  :if (not is-windows)
+  :if (and module-file-suffix (not is-windows))
   :init (setq
          vterm-buffer-name-string "vterm %s"
          vterm-kill-buffer-on-exit t)
