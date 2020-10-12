@@ -2,6 +2,7 @@
 (setq is-macos (eq system-type 'darwin))
 (setq is-windows (eq system-type 'windows-nt))
 (setq is-wsl (eq system-type 'gnu/linux))  ;; windows subsystem for linux
+(setq is-snowmacs is-windows)   ;; slow platform
 
 (when is-macos
   (setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin:/opt/local/bin"))
@@ -192,7 +193,7 @@
   ;; line & column number
   (line-number-mode t)
   (column-number-mode t)
-  (global-linum-mode 1)
+  (global-linum-mode (if is-snowmacs -1 t))
 
   ;; mouse in terminal
   (xterm-mouse-mode t)
@@ -227,7 +228,7 @@
 
   ;; Setup time mode
   (setq display-time-day-and-date t)
-  (setq display-time-format "%I:%M %p %m/%d")
+  (setq display-time-format "%I:%M %Y/%m/%d")
   (setq display-time-default-load-average nil)
   (display-time-mode t)
 
@@ -338,6 +339,7 @@
 ;;;;         dashboard
 ;;;;
 (use-package dashboard
+  :if (not is-snowmacs)
   :init
   (setq
    dashboard-set-init-info t
@@ -355,8 +357,10 @@
 ;;;;
 ;;;;           all-the-icons
 ;;;;
-(use-package all-the-icons)
+(use-package all-the-icons
+  :if (not is-snowmacs))
 (use-package all-the-icons-dired
+  :if (not is-snowmacs)
   :config
   (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
   )
@@ -479,7 +483,7 @@
   (setq nyan-animate-nyancat t
         nyan-wavy-trail nil))
 (use-package mood-line
-  :if (display-graphic-p)
+  :if (and (display-graphic-p) (not is-snowmacs))
   :config (mood-line-mode)
   :config
   (defun my-mood-line-segment-modified()
@@ -861,10 +865,10 @@
 ;;;;       git
 ;;;;
 (use-package magit
-  :if (not is-windows)
+  :if (not is-snowmacs)
   :demand t)
 (use-package diff-hl
-  :if (not is-windows)
+  :if (not is-snowmacs)
   :demand t
   :config
   (global-diff-hl-mode)
@@ -881,7 +885,7 @@
         ediff-window-setup-function 'ediff-setup-windows-plain)
   )
 (use-package magit-filenotify
-  :if (not is-windows)
+  :if (not is-snowmacs)
   :demand t
   :config (add-hook 'magit-status-mode-hook 'magit-filenotify-mode)
   )
@@ -972,7 +976,7 @@
 ;;;;            flyspell
 ;;;;
 (use-package flyspell
-  :if (not is-windows)
+  :if (not is-snowmacs)
   :diminish flyspell-mode
   :config
   (dolist (hook '(text-mode-hook))
