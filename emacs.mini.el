@@ -478,144 +478,14 @@
 (use-package comment-dwim-2
   :bind ("C-/" . comment-dwim-2))
 
+
 ;;;;
-;;;;        mode-line
+;;;;           save-as command
 ;;;;
-(use-package nyan-mode
-  :config
-  (setq nyan-animate-nyancat t
-        nyan-wavy-trail nil))
-(use-package mood-line
-  :if (and (display-graphic-p) (not is-snowmacs))
-  :config (mood-line-mode)
-  :config
-  (defun my-mood-line-segment-modified()
-    "Displays the modification/read-only indicator in the mode-line"
-    (if (buffer-file-name)
-        (if (buffer-modified-p)
-            (propertize "● " 'face 'mood-line-modified)
-          (if (and buffer-read-only (buffer-file-name))
-              (propertize "🔒 " 'face 'mood-line-unimportant)
-            "  "))
-        "  ")
-    )
-  (defun my-mood-line-segment-buffer-name()
-    "Display full path of current buffer in the mode-line"
-    (let ((fmt (concat (if (buffer-file-name) default-directory "") "%b "))
-          (path (buffer-file-path-or-directory)))
-      (propertize fmt
-                  'face 'mood-line-buffer-name
-                  'help-echo path
-                  'local-map my-mode-line-buffer-name-map
-                  )
-      ))
-  
-  (defun my-mood-line-segment-position()
-    "Display line:column and percentage in the mode-line"
-    (list (propertize "(%l:%c) %p%% " 'face 'mood-line-unimportant 'local-map mode-line-column-line-number-mode-map)
-          " "
-          (nyan-create)
-          )
-    )
-
-  (defun my-mood-line-segment-eol(orig-fun &rest args)
-    "Displays the EOL style of the current buffer in the mode-line."
-     (let* ((res (apply orig-fun args)))
-       (propertize res
-                   'face 'mood-line-unimportant
-                   'help-echo "mouse-1: EOL menu"
-                   'local-map my-mode-line-eol-map)
-       )
-     )
-
-  (defun my-mood-line-segment-vc(orig-fun &rest args)
-    (let* ((res (apply orig-fun args)))
-      (concat
-       res
-       (propertize " "
-                   'face 'mood-line-unimportant
-                   'local-map my-mode-line-vc-diff-next)
-       (propertize " "
-                   'face 'mood-line-unimportant
-                   'local-map my-mode-line-vc-diff-previous)
-       )
-      )
-    )
-  
-  (advice-add #'mood-line-segment-modified :override #'my-mood-line-segment-modified)
-  (advice-add #'mood-line-segment-buffer-name :override #'my-mood-line-segment-buffer-name)
-  (advice-add #'mood-line-segment-position :override #'my-mood-line-segment-position)
-  (advice-add #'mood-line-segment-eol :around #'my-mood-line-segment-eol)
-
-  (advice-add #'mood-line-segment-vc :around #'my-mood-line-segment-vc)
-  
-  :custom
-  (mood-line-show-eol-style t)
-  (mood-line-show-encoding-information t)  
+(defun save-as(filename)
+  (interactive "F")
+  (write-region (point-min) (point-max) filename)
   )
-
-(defun make-my-file-menu-map()
-  (let ((my-file-menu-map (make-sparse-keymap "My File")))
-    (define-key my-file-menu-map [menu-bar-replace-menu-sep]
-      '(menu-item "--"))
-    (define-key my-file-menu-map
-      [my-file-menu-map-code]
-      '("Open with VScode" . (lambda () (interactive) (code (buffer-file-path-or-directory))))
-      )
-    (define-key my-file-menu-map
-      [my-file-menu-map-copy]
-      '("Copy File Path" . copy-file-path)
-      )
-    (define-key my-file-menu-map
-      [my-file-menu-map-reveal]
-      '("Reveal in Finder" . open-in-finder)
-      )
-    my-file-menu-map)
-  )
-
-(defconst my-mode-line-vc-diff-next
-  (let ((map (make-sparse-keymap)))
-    (define-key map [mode-line down-mouse-1] #'diff-hl-next-hunk)
-    map)
-  )
-
-(defconst my-mode-line-vc-diff-previous
-  (let ((map (make-sparse-keymap)))
-    (define-key map [mode-line down-mouse-1] #'diff-hl-previous-hunk)
-    map)
-  )
-
-
-(defconst my-mode-line-buffer-name-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map [mode-line down-mouse-1]
-      (make-my-file-menu-map)
-      )
-    map))
-
-(defconst my-mode-line-eol-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map [mode-line down-mouse-1]
-      (let ((my-eol-menu-map (make-sparse-keymap "Line Ending")))
-        (define-key my-eol-menu-map [menu-bar-replace-menu-sep]
-          '(menu-item "--"))
-        (define-key my-eol-menu-map
-          [my-eol-menu-map-lf]
-          '("LF (unix)" . (lambda () (interactive) (set-buffer-file-coding-system 'unix)))
-          )
-        (define-key my-eol-menu-map
-          [my-eol-menu-map-cr]
-          '("CR (mac)" . (lambda () (interactive) (set-buffer-file-coding-system 'mac)))
-          )
-        (define-key my-eol-menu-map
-          [my-eol-menu-map-crlf]
-          '("CRLF (dos)" . (lambda () (interactive) (set-buffer-file-coding-system 'dos)))
-          )
-        my-eol-menu-map)
-      )
-    map))
-
-
 
 ;;;;
 ;;;;        Dired setup
@@ -1143,6 +1013,10 @@
     :ensure nil
     :demand t
     :requires (goto-addr browse-url))
+
+  (require 'clean-mode-line)
+  (clean-mode-line-mode)
+  
   )
 
 ;;;;
