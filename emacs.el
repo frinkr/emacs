@@ -266,7 +266,8 @@
 
   ;; Emacs27 has builtin
   (when (require 'display-fill-column-indicator nil 'noerror)
-      (global-display-fill-column-indicator-mode t)
+      (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
+      (add-hook 'text-mode-hook 'display-fill-column-indicator-mode)
       )
   
   ;; Common packages
@@ -324,19 +325,6 @@
   :bind(("C-+" . default-text-scale-increase)
         ("C-_" . default-text-scale-decrease)))
 
-
-;;;;
-;;;;         fill-column-indicator
-;;;;
-(use-package fill-column-indicator
-  :disabled ;; conflicit with ac and Emacs27 has builtin
-  ;; https://github.com/alpaker/Fill-Column-Indicator/issues/21#issuecomment-6959718
-  :config
-  (setq fci-rule-width 1)
-  (setq fci-rule-column 90)
-  (add-hook 'prog-mode-hook 'fci-mode)
-  (add-hook 'text-mode-hook 'fci-mode)
-  )
 
 ;;;;
 ;;;;         dashboard
