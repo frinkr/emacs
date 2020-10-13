@@ -193,8 +193,11 @@
   ;; line & column number
   (line-number-mode t)
   (column-number-mode t)
-  (global-linum-mode (if is-snowmacs -1 t))
-
+  
+  ;;(global-linum-mode (if is-snowmacs -1 t))
+  (add-hook 'text-mode-hook 'display-line-numbers-mode)
+  (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+  
   ;; mouse in terminal
   (xterm-mouse-mode t)
 
