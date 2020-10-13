@@ -965,6 +965,7 @@
   (setq company-dabbrev-downcase nil)
 
   (use-package company-c-headers)
+  (use-package company-anaconda)
   ;;(use-package company-tabnine)
   
   :bind(("C-." . company-complete)
