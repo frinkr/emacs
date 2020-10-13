@@ -1149,6 +1149,8 @@
 ;;;;     General keybindings
 ;;;;
 (when t
+  (setq fx-next-frame (if (fboundp 'ns-next-frame) 'ns-next-frame 'next-window-any-frame))
+  
   (global-set-key (kbd "M-m") 'set-mark-command)
   (global-set-key (kbd "M-n") (lambda () (interactive) (next-line 5)))
   (global-set-key (kbd "M-p") (lambda () (interactive) (previous-line 5)))
@@ -1159,9 +1161,9 @@
   (global-set-key (kbd "C-q") 'save-buffers-kill-terminal)
   (global-set-key (kbd "C-x r") 'reload)
   ;;(global-set-key (kbd "C-S-n") 'ns-next-frame)
-  (global-set-key (kbd "C-S-o") 'ns-next-frame)
-  (global-set-key (kbd "M-`") 'ns-next-frame)
-  (global-set-key (kbd "C-`") 'ns-next-frame)
+  (global-set-key (kbd "C-S-o") fx-next-frame)
+  (global-set-key (kbd "M-`") fx-next-frame)
+  (global-set-key (kbd "C-`") fx-next-frame)
   ;;(global-set-key (kbd "C-1") 'switch-buffer)
   (global-set-key (kbd "C-x j") 'kill-other-buffers)
   (global-set-key (kbd "C-t") 'new-scratch)
