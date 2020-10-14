@@ -271,9 +271,10 @@
 
   ;; Emacs27 has builtin
   (when (require 'display-fill-column-indicator nil 'noerror)
-      (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
-      (add-hook 'text-mode-hook 'display-fill-column-indicator-mode)
-      )
+    (setq-default display-fill-column-indicator-character ?\u2506)
+    (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
+    (add-hook 'text-mode-hook 'display-fill-column-indicator-mode)
+    )
   
   ;; Common packages
   (require 'cl)
@@ -861,23 +862,10 @@
 
 
 ;;;;
-;;;;            macOS
+;;;;         reveal-in-folder   
 ;;;;
-(use-package reveal-in-osx-finder
-  :if is-macos
-  :config (defalias 'open-in-finder 'reveal-in-osx-finder)
-  )
-(when is-windows
-  (defun open-folder-in-explorer ()  
-    "Call when editing a file in a buffer. Open windows explorer in the current directory and select the current file"  
-    (interactive)  
-    (w32-shell-execute 
-     "open" "explorer"  
-     (concat "/e,/select," (convert-standard-filename buffer-file-name))
-     )
-    )
-  )
-
+(use-package reveal-in-folder
+  :init (defalias 'reveal-in-folder-this-buffer 'show-in-folder))
 
 ;;;;
 ;;;;         markdown

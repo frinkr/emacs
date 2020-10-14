@@ -104,6 +104,10 @@
     (define-key map [mode-line down-mouse-1]
       (let ((my-file-menu-map (make-sparse-keymap "File")))
         (define-key my-file-menu-map
+          [my-file-menu-map-reload]
+          '("Reload" . reload)
+          )
+        (define-key my-file-menu-map
           [my-file-menu-map-code]
           '("Open with VScode" . (lambda () (interactive) (code (buffer-file-path-or-directory))))
           )
@@ -113,7 +117,7 @@
           )
         (define-key my-file-menu-map
           [my-file-menu-map-reveal]
-          '("Reveal in Finder" . open-in-finder)
+          '("Reveal in Folder" . reveal-in-folder-this-buffer)
           )
         my-file-menu-map)
       )
