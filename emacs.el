@@ -50,6 +50,11 @@
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
 
+
+;;;;
+;;;;           performance
+;;;;
+(setq gc-cons-threshold 1000000000)
 (use-package benchmark-init
   :ensure t
   :config
@@ -803,7 +808,6 @@
   (setq company-idle-delay 0
         company-minimum-prefix-length 1
         company-selection-wrap-around t)
-  :init
   (add-hook 'after-init-hook 'global-company-mode)
   :config
   (add-to-list 'company-backends '(company-abbrev
@@ -823,7 +827,7 @@
   (setq company-dabbrev-downcase nil)
 
   (use-package company-c-headers)
-  (use-package company-anaconda)
+  (use-package company-anaconda :defer t)
   ;;(use-package company-tabnine)
   
   :bind(("C-." . company-complete)
