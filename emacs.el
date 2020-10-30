@@ -947,10 +947,12 @@
 ;;;;
 ;;;;     indent
 ;;;;
-(defun fx/setup-indent(n)
+(defun fx/setup-common-lang-indent(n)
   ;; java/c/c++
   (setq c-basic-offset n)
-  ;; web development
+  )
+
+(defun fx/setup-web-lang-indent(n)
   (setq coffee-tab-width n) ; coffeescript
   (setq javascript-indent-level n) ; javascript-mode
   (setq js-indent-level n) ; js-mode
@@ -961,7 +963,8 @@
   (setq css-indent-offset n) ; css-mode
   )
 
-(fx/setup-indent 4)
+(fx/setup-common-lang-indent 4)
+(fx/setup-web-lang-indent 2)
 
 
 ;;;;
