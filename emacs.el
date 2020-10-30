@@ -221,7 +221,11 @@
   (setq delete-key-deletes-forward t)
   (setq mouse-yank-at-point nil)
   (setq bookmark-save-flag 1)  ;; autosave bookmarks
+
+  ;; indent
   (setq-default indent-tabs-mode nil)
+  (when (fboundp 'electric-indent-local-mode) 
+    (add-hook 'text-mode-hook (lambda () (electric-indent-local-mode -1))))
 
   (setq sp-escape-quotes-after-insert nil) ;; don't auto escape in smartparens-mode
 
