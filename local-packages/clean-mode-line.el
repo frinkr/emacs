@@ -93,7 +93,8 @@
                     "UTF-8-SIG")
                    (t (upcase (symbol-name (plist-get sys :name))))))
            "  ")
-
+   
+   'face 'clean-mode-line-unimportant
    'help-echo "mouse-1: Buffer Encoding"
    'local-map clean-mode-line-encoding-map
    ))
