@@ -82,12 +82,22 @@
   (propertize "%m  " 'face 'clean-mode-line-major-mode))
 
 (defun clean-mode-line-segment-encoding ()
-  "Displays the encoding and EOL style of the buffer in the mode-line."
-  (concat (let ((sys (coding-system-plist buffer-file-coding-system)))
-            (cond ((memq (plist-get sys :category) '(coding-category-undecided coding-category-utf-8))
-                   "UTF-8")
-                  (t (upcase (symbol-name (plist-get sys :name))))))
-          "  "))
+  "Displays the encoding of the buffer in the mode-line."
+  (propertize
+   (concat (let* ((sys (coding-system-plist buffer-file-coding-system))
+                  (cat (plist-get sys :category))
+                  )
+             (cond ((memq cat '(coding-category-undecided coding-category-utf-8))
+                    "UTF-8")
+                   ((memq cat '(coding-category-utf-8-sig))
+                    "UTF-8-SIG")
+                   (t (upcase (symbol-name (plist-get sys :name))))))
+           "  ")
+   
+   'face 'clean-mode-line-unimportant
+   'help-echo "mouse-1: Buffer Encoding"
+   'local-map clean-mode-line-encoding-map
+   ))
 
 (defun clean-mode-line-segment-major-mode ()
   "Displays the current major mode in the mode-line."
@@ -140,6 +150,30 @@
           '("CRLF (dos)" . (lambda () (interactive) (set-buffer-file-coding-system 'dos)))
           )
         my-eol-menu-map)
+      )
+    map))
+
+(defconst clean-mode-line-encoding-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mode-line down-mouse-1]
+      (let ((my-enc-menu-map (make-sparse-keymap "Buffer Encoding")))
+        (define-key my-enc-menu-map
+          [my-enc-menu-map-utf16-bom]
+          '("UTF-16 (LE with signature)" . (lambda () (interactive) (set-buffer-file-coding-system 'utf-16le-with-signature)))
+          )
+        (define-key my-enc-menu-map
+          [my-enc-menu-map-utf16]
+          '("UTF-16" . (lambda () (interactive) (set-buffer-file-coding-system 'utf-16)))
+          )
+        (define-key my-enc-menu-map
+          [my-enc-menu-map-utf8]
+          '("UTF-8" . (lambda () (interactive) (set-buffer-file-coding-system 'utf-8)))
+          )
+        (define-key my-enc-menu-map
+          [my-enc-menu-map-utf8-bom]
+          '("UTF-8 (with signature)" . (lambda () (interactive) (set-buffer-file-coding-system 'utf-8-with-signature)))
+          )
+        my-enc-menu-map)
       )
     map))
 

@@ -359,7 +359,9 @@
 ;;;;           all-the-icons
 ;;;;
 (use-package all-the-icons
-  :if (not is-snowmacs))
+  :if (not is-snowmacs)
+  :config (setq all-the-icons-color-icons nil)
+  )
 (use-package all-the-icons-dired
   :if (not is-snowmacs)
   :config
@@ -503,7 +505,8 @@
 ;;;;          Sidebar
 ;;;;
 (use-package neotree
-  :defer t)
+  :defer t
+  :config (setq neo-theme 'icons))
 
 ;;;;
 ;;;;           bm
@@ -828,8 +831,9 @@
           (lambda ()
             (add-to-list (make-local-variable 'company-backends)
                          'company-anaconda)))
-  
-  (setq company-dabbrev-downcase nil)
+
+  (setq company-dabbrev-ignore-case t
+        company-dabbrev-downcase nil)
 
   (use-package company-c-headers)
   (use-package company-anaconda :defer t)
