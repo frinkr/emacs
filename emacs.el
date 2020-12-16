@@ -88,6 +88,15 @@
                                                  '(eshell-mode shell-mode)))
                             (buffer-list)))))
 
+;;;;
+;;;;           erase current buffer
+;;;;
+(defun fx-erase-buffer()
+  (interactive)
+  (when (y-or-n-p "Erase the buffer?")
+    (erase-buffer)
+    )
+  )
 
 ;;;;
 ;;;;           copy file path clipboard
@@ -1021,6 +1030,7 @@
   (global-set-key (kbd "C-z") 'undo)
   (global-set-key (kbd "C-q") 'save-buffers-kill-terminal)
   (global-set-key (kbd "C-x r") 'reload)
+  (global-set-key (kbd "C-S-k") 'fx-erase-buffer)
   ;;(global-set-key (kbd "C-S-n") 'ns-next-frame)
   (global-set-key (kbd "C-S-o") fx-next-frame)
   (global-set-key (kbd "M-`") fx-next-frame)
