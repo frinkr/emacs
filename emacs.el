@@ -621,7 +621,7 @@
    ;;helm-display-function 'helm-display-buffer-in-own-frame
    helm-default-display-buffer-functions '(display-buffer-in-side-window)
    helm-display-buffer-reuse-frame nil
-   helm-use-undecorated-frame-option nil
+   helm-use-undecorated-frame-option t
    helm-echo-input-in-header-line nil ;; hide helm echo
    helm-buffers-fuzzy-matching t
    ;;helm-move-to-line-cycle-in-source t
@@ -644,9 +644,29 @@
                       10000
                     0)))
       (+ res bonus)))
+
+  (defun helm-display-buffer-popup-frame-fix-args (buffer frame-alist)
+    (let* ((parent (selected-frame))
+           (frame-geo (frame-geometry parent))
+           (frame-pos (frame-position parent))
+           (parent-left (car frame-pos))
+           (parent-top (cdr frame-pos))
+           (parent-width (* (frame-char-width parent) (frame-width parent)))
+           (width (* (frame-char-width) (cdr (assoc 'width frame-alist))))
+           (left (+ parent-left (/ (- parent-width width) 2)))
+           (top (+ parent-top
+                   (cdr (cdr (assoc 'title-bar-size frame-geo)))
+                   (cdr (cdr (assoc 'menu-bar-size frame-geo)))
+                   (cdr (cdr (assoc 'tool-bar-size frame-geo)))
+                   )))
+      (setcdr (assq 'left frame-alist) left)
+      (setcdr (assq 'top frame-alist) top)
+      )
+    )
   
   :config
   (advice-add 'helm-score-candidate-for-pattern :around #'helm-score-candidate-fix)
+  (advice-add 'helm-display-buffer-popup-frame :before #'helm-display-buffer-popup-frame-fix-args)
   (helm-autoresize-mode t)
   :bind
   (("M-l" . helm-semantic-or-imenu)
@@ -695,7 +715,8 @@
   (projectile-global-mode)
   (setq projectile-completion-system 'helm)
   (setq projectile-switch-project-action 'venv-projectile-auto-workon)
-
+  (push 'helm-projectile-find-file helm-commands-using-frame)
+  
   (defun my-find-file-at-point()
     "Find file at point based on context. See `helm-projectile-find-file-dwim'."
     (interactive)
@@ -709,6 +730,7 @@
   
   (helm-projectile-on)
   :bind(("C-S-x C-S-f" . helm-projectile-find-file)
+        ("C-S-o" . helm-projectile-find-file)
         ("C-1" . helm-projectile-find-other-file)
         ("C-S-b" . projectile-compile-project)
         :map c-mode-base-map
@@ -892,6 +914,17 @@
   :init (setq markdown-command "multimarkdown"))
 
 ;;;;
+;;;;           uml 
+;;;;
+(use-package plantuml-mode
+  :init (setq plantuml-default-exec-mode 'executable
+              plantuml-indent-level 4)
+  :mode (("\\.plantuml\\'" . plantuml-mode)
+         ("\\.puml\\'" . plantuml-mode)
+         )
+  )
+
+;;;;
 ;;;;            misc packages
 ;;;;
 (use-package p4
@@ -1032,7 +1065,7 @@
   (global-set-key (kbd "C-x r") 'reload)
   (global-set-key (kbd "C-S-k") 'fx-erase-buffer)
   ;;(global-set-key (kbd "C-S-n") 'ns-next-frame)
-  (global-set-key (kbd "C-S-o") fx-next-frame)
+  ;;(global-set-key (kbd "C-S-o") fx-next-frame)
   (global-set-key (kbd "M-`") fx-next-frame)
   (global-set-key (kbd "C-`") fx-next-frame)
   ;;(global-set-key (kbd "C-1") 'switch-buffer)
