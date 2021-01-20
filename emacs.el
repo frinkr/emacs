@@ -1049,14 +1049,11 @@
     :if is-macos
     :ensure nil)
 
-  (use-package esko-link-mode
-    :commands (esko-link-mode)
-    :ensure nil
-    :demand t
-    :requires (goto-addr browse-url))
-
   (require 'clean-mode-line)
   (clean-mode-line-mode)
+
+  (require 'esko-link-mode)
+  (esko-link-mode)
   
   )
 
