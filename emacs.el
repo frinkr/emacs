@@ -504,6 +504,12 @@
               ("^" . (lambda () (interactive) (find-alternate-file ".."))))
   )
 
+(use-package dired-ranger
+  :ensure t
+  :bind (:map dired-mode-map
+              ("W" . dired-ranger-copy)
+              ("X" . dired-ranger-move)
+              ("Y" . dired-ranger-paste)))
 
 ;;;;
 ;;;;          Sidebar
@@ -713,6 +719,8 @@
   :commands (helm-projectile-on)
   :config
   (projectile-global-mode)
+  (setq projectile-sort-order 'recentf)
+  (setq projectile-enable-caching t)
   (setq projectile-completion-system 'helm)
   (setq projectile-switch-project-action 'venv-projectile-auto-workon)
   (push 'helm-projectile-find-file helm-commands-using-frame)
@@ -997,6 +1005,10 @@
 ;;;;
 ;;;;     indent
 ;;;;
+
+(use-package dtrt-indent
+  :init (defalias 'auto-indent-mode 'dtrt-indent-mode)
+  )
 (defun fx/setup-common-lang-indent(n)
   ;; java/c/c++
   (setq c-basic-offset n)
