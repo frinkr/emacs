@@ -56,6 +56,7 @@
 ;;;;
 (setq gc-cons-threshold 1000000000)
 (use-package benchmark-init
+  :if (version< emacs-version "28.0")
   :ensure t
   :config
   ;; To disable collection of benchmark data after init is done.
@@ -349,7 +350,6 @@
 ;;;;         dashboard
 ;;;;
 (use-package dashboard
-  :if (not is-snowmacs)
   :init
   (setq
    dashboard-set-init-info t
@@ -368,11 +368,9 @@
 ;;;;           all-the-icons
 ;;;;
 (use-package all-the-icons
-  :if (not is-snowmacs)
   :config (setq all-the-icons-color-icons nil)
   )
 (use-package all-the-icons-dired
-  :if (not is-snowmacs)
   :config
   (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
   )
@@ -438,7 +436,6 @@
 ;;;;          Highlighting
 ;;;;
 (use-package rainbow-delimiters
-  :if is-macos ;; too slow on Windows
   :config
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
   )
@@ -509,6 +506,12 @@
               ("^" . (lambda () (interactive) (find-alternate-file ".."))))
   )
 
+(use-package dired-ranger
+  :ensure t
+  :bind (:map dired-mode-map
+              ("W" . dired-ranger-copy)
+              ("X" . dired-ranger-move)
+              ("Y" . dired-ranger-paste)))
 
 ;;;;
 ;;;;          Sidebar
@@ -718,6 +721,8 @@
   :commands (helm-projectile-on)
   :config
   (projectile-global-mode)
+  (setq projectile-sort-order 'recentf)
+  (setq projectile-enable-caching t)
   (setq projectile-completion-system 'helm)
   (setq projectile-switch-project-action 'venv-projectile-auto-workon)
   (push 'helm-projectile-find-file helm-commands-using-frame)
@@ -1001,6 +1006,10 @@
 ;;;;
 ;;;;     indent
 ;;;;
+
+(use-package dtrt-indent
+  :init (defalias 'auto-indent-mode 'dtrt-indent-mode)
+  )
 (defun fx/setup-common-lang-indent(n)
   ;; java/c/c++
   (setq c-basic-offset n)
@@ -1041,14 +1050,11 @@
     :if is-macos
     :ensure nil)
 
-  (use-package esko-link-mode
-    :commands (esko-link-mode)
-    :ensure nil
-    :demand t
-    :requires (goto-addr browse-url))
-
   (require 'clean-mode-line)
   (clean-mode-line-mode)
+
+  (require 'esko-link-mode)
+  (esko-link-mode)
   
   )
 
