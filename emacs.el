@@ -51,6 +51,7 @@
 (setq use-package-always-ensure t)
 
 (use-package benchmark-init
+  :if (version< emacs-version "28.0")
   :ensure t
   :config
   ;; To disable collection of benchmark data after init is done.
@@ -344,7 +345,6 @@
 ;;;;         dashboard
 ;;;;
 (use-package dashboard
-  :if (not is-snowmacs)
   :init
   (setq
    dashboard-set-init-info t
@@ -363,11 +363,9 @@
 ;;;;           all-the-icons
 ;;;;
 (use-package all-the-icons
-  :if (not is-snowmacs)
   :config (setq all-the-icons-color-icons nil)
   )
 (use-package all-the-icons-dired
-  :if (not is-snowmacs)
   :config
   (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
   )
@@ -433,7 +431,6 @@
 ;;;;          Highlighting
 ;;;;
 (use-package rainbow-delimiters
-  :if is-macos ;; too slow on Windows
   :config
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
   )
