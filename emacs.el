@@ -702,9 +702,16 @@
 
 (use-package helm-ag
   :commands (helm-do-ag)
-  :init (defalias 'ag 'helm-do-ag)
+  :init (defalias 'hag 'helm-do-ag)
+  :config
+  (setq helm-ag-insert-at-point 'symbol)
   :bind
   ("C-S-s" . helm-do-ag))
+
+(use-package ag
+  :commands (ag ag-files ag-dired)
+  :config
+  (setq ag-highlight-search t))
 
 ;;;;
 ;;;;         swiper
@@ -929,7 +936,7 @@
 ;;;;           uml 
 ;;;;
 (use-package plantuml-mode
-  :init (setq plantuml-default-exec-mode 'server
+  :init (setq plantuml-default-exec-mode 'executable
               plantuml-indent-level 4)
   (with-eval-after-load "org"
     (add-to-list 'org-src-lang-modes '("plantuml" . plantuml)))
