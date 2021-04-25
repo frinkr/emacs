@@ -493,6 +493,13 @@
   (write-region (point-min) (point-max) filename)
   )
 
+
+;;;;
+;;;;            which-key
+;;;;
+(use-package which-key
+  :init (which-key-mode))
+
 ;;;;
 ;;;;        Dired setup
 ;;;;
@@ -700,9 +707,16 @@
 
 (use-package helm-ag
   :commands (helm-do-ag)
-  :init (defalias 'ag 'helm-do-ag)
+  :init (defalias 'hag 'helm-do-ag)
+  :config
+  (setq helm-ag-insert-at-point 'symbol)
   :bind
   ("C-S-s" . helm-do-ag))
+
+(use-package ag
+  :commands (ag ag-files ag-dired)
+  :config
+  (setq ag-highlight-search t))
 
 ;;;;
 ;;;;         swiper
@@ -721,7 +735,7 @@
   :commands (helm-projectile-on)
   :config
   (projectile-global-mode)
-  (setq projectile-sort-order 'recentf)
+  (setq projectile-sort-order 'access-time)
   (setq projectile-enable-caching t)
   (setq projectile-completion-system 'helm)
   (setq projectile-switch-project-action 'venv-projectile-auto-workon)
@@ -753,7 +767,7 @@
 ;;;;
 ;;(use-package rtags)
 (use-package cmake-ide
-  :disabled ;; too slow
+  ;;:disabled ;; too slow
   ;;:requires rtags
   :init
   (setq cmake-ide-header-search-other-file nil
@@ -928,10 +942,46 @@
 (use-package plantuml-mode
   :init (setq plantuml-default-exec-mode 'executable
               plantuml-indent-level 4)
+  (with-eval-after-load "org"
+    (add-to-list 'org-src-lang-modes '("plantuml" . plantuml)))
+  (org-babel-do-load-languages 'org-babel-load-languages '((plantuml . t)))
   :mode (("\\.plantuml\\'" . plantuml-mode)
          ("\\.puml\\'" . plantuml-mode)
          )
   )
+
+;;;;
+;;;;           org
+;;;;
+(defun fx/org-cc (&optional ARG)
+  (interactive)
+  (org-ctrl-c-ctrl-c ARG)
+  (org-display-inline-images)
+  )
+(setq org-confirm-babel-evaluate nil)
+(add-hook 'org-mode-hook
+          (lambda ()
+                  (local-set-key (kbd "C-c C-c") 'fx/org-cc)))
+;;(define-key org-mode-map (kbd "C-c C-c") 'fx/org-cc)
+
+
+;; ;;;;
+;; ;;;;
+;; ;;;;
+;; (use-package lsp-mode :commands lsp :ensure t)
+;; (use-package lsp-ui :commands lsp-ui-mode :ensure t)
+;; (use-package company-lsp
+;;   :ensure t
+;;   :commands company-lsp
+;;   :config (push 'company-lsp company-backends)) ;; add company-lsp as a backend
+;; (use-package ccls
+;;   :ensure t
+;;   :config
+;;   (setq ccls-executable "ccls")
+;;   (setq lsp-prefer-flymake nil)
+;;   (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
+;;   :hook ((c-mode c++-mode objc-mode) .
+;;          (lambda () (require 'ccls) (lsp))))
 
 ;;;;
 ;;;;            misc packages
