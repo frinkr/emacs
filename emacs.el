@@ -289,6 +289,7 @@
   (require 'cl)
   (require 'cl-lib)
   (require 'subr-x)
+  (require 'facemenu) ;; required by 'highlight, new in Emacs28
   )
 
 
