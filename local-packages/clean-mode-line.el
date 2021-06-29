@@ -1,4 +1,4 @@
-;;; clean-mode-line.el --- A minimal mode-line inspired by doom-modeline -*- lexical-binding: t; -*-
+;;; clean-mode-line.el --- A minimal mode-line inspired by mood-line -*- lexical-binding: t; -*-
 
 
 (defun clean-mode-line--format (left right)
@@ -17,6 +17,31 @@
 (defface clean-mode-line-major-mode
   '((t (:inherit (bold))))
   "Face used for major mode indicator in the mode-line."
+  :group 'clean-mode-line)
+
+(defface clean-mode-line-vc-status-neutral
+  '((t (:inherit (bold))))
+  "Face used for neutral or inactive status indicators in the mode-line."
+  :group 'clean-mode-line)
+
+(defface clean-mode-line-vc-status-info
+  '((t (:inherit (font-lock-keyword-face))))
+  "Face used for generic vc status indicators in the mode-line."
+  :group 'clean-mode-line)
+
+(defface clean-mode-line-vc-status-success
+  '((t (:inherit (success) :foreground "green")))
+  "Face used for success vc status indicators in the mode-line."
+  :group 'clean-mode-line)
+
+(defface clean-mode-line-vc-status-warning
+  '((t (:inherit (warning))))
+  "Face for warning vc status indicators in the mode-line."
+  :group 'clean-mode-line)
+
+(defface clean-mode-line-vc-status-error
+  '((t (:inherit (error))))
+  "Face for error vc stauts indicators in the mode-line."
   :group 'clean-mode-line)
 
 (defface clean-mode-line-unimportant
@@ -108,6 +133,38 @@
   (format-mode-line mode-line-misc-info 'clean-mode-line-unimportant)
   )
 
+(defvar-local clean-mode-line--vc-text nil)
+(defun clean-mode-line--update-vc-segment (&rest _)
+  "Update `clean-mode-line--vc-text' against the current VCS state."
+  (setq clean-mode-line--vc-text
+        (when (and vc-mode buffer-file-name)
+          (let ((backend (vc-backend buffer-file-name))
+                (state (vc-state buffer-file-name (vc-backend buffer-file-name))))
+            (let ((face 'clean-mode-line-vc-status-neutral))
+              (concat (cond ((memq state '(edited added))
+                             (setq face 'clean-mode-line-vc-status-info)
+                             (propertize "+ " 'face face))
+                            ((eq state 'needs-merge)
+                             (setq face 'clean-mode-line-vc-status-warning)
+                             (propertize "⟷ " 'face face))
+                            ((eq state 'needs-update)
+                             (setq face 'clean-mode-line-vc-status-warning)
+                             (propertize "↑ " 'face face))
+                            ((memq state '(removed conflict unregistered))
+                             (setq face 'clean-mode-line-vc-status-error)
+                             (propertize "✖ " 'face face))
+                            (t
+                             (setq face 'clean-mode-line-vc-status-success)
+                             (propertize "✔ " 'face face)))
+                      (propertize (substring vc-mode (+ (if (eq backend 'Hg) 2 3) 2))
+                                  'face face
+                                  'mouse-face face)
+                      "  "))))))
+
+
+(defun clean-mode-line-segment-vc ()
+  "Displays color-coded version control information in the mode-line."
+  clean-mode-line--vc-text)
 
 (defconst clean-mode-line-buffer-name-map
   (let ((map (make-sparse-keymap)))
@@ -184,7 +241,12 @@
   :lighter nil
 
   (progn
-    
+
+    ;; Setup VC hooks
+    (add-hook 'find-file-hook #'clean-mode-line--update-vc-segment)
+    (add-hook 'after-save-hook #'clean-mode-line--update-vc-segment)
+    (advice-add #'vc-refresh-state :after #'clean-mode-line--update-vc-segment)
+        
     (setq-default
      mode-line-format
      '((:eval
@@ -203,7 +265,8 @@
           '((:eval (clean-mode-line-segment-eol))
             (:eval (clean-mode-line-segment-encoding))
             (:eval (clean-mode-line-segment-major-mode))
-            (:eval (clean-mode-line-segment-misc-info))
+            (:eval (clean-mode-line-segment-vc))
+            ;;(:eval (clean-mode-line-segment-misc-info))
             " "))))))
     )
   )

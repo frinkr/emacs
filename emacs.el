@@ -22,7 +22,7 @@
 (defun install-extra-packages()
   (require 'package)
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-  (setq package-archives
+  (setq package-archives-unused
         '(("melpa" . "http://elpa.emacs-china.org/melpa/")
           ("org"   . "http://elpa.emacs-china.org/org/")
           ("gnu"   . "http://elpa.emacs-china.org/gnu/")))
@@ -270,6 +270,32 @@
   ;; macOS transparent titlebar
   (when is-macos
     (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+
+    ;; don't create new frame when dnd file
+    (setq ns-pop-up-frames nil)
+    
+    ;; https://lists.gnu.org/archive/html/help-gnu-emacs/2016-01/msg00236.html
+    ;; Directly copied from frame.el but now hide Emacs instead of killing
+    ;; it when last frame will be closed.
+    (defun handle-delete-frame-without-kill-emacs (event)
+      "Handle delete-frame events from the X server."
+      (interactive "e")
+      (let ((frame (posn-window (event-start event)))
+            (i 0)
+            (tail (frame-list)))
+        (while tail
+          (and (frame-visible-p (car tail))
+               (not (eq (car tail) frame))
+               (setq i (1+ i)))
+          (setq tail (cdr tail)))
+        (if (> i 0)
+            (delete-frame frame t)
+          ;; Not (save-buffers-kill-emacs) but instead:
+          (ns-do-hide-emacs))))
+
+    (when (eq system-type 'darwin)
+      (advice-add 'handle-delete-frame :override
+                  #'handle-delete-frame-without-kill-emacs))
     )
 
   ;; font
@@ -505,9 +531,11 @@
   (setq dired-details-hide-link-targets nil)
   :config
   :bind (:map dired-mode-map
-              ("RET" . dired-find-alternate-file)
-              ("^" . (lambda () (interactive) (find-alternate-file ".."))))
-  )
+              ("<mouse-2>" . dired-find-alternate-file)
+              ("RET" . dired-find-file)
+              ("^" . (lambda () (interactive) (find-alternate-file "..")))
+              ("<mouse-3>" . (lambda () (interactive) (find-alternate-file "..")))
+              ))
 
 (use-package dired-ranger
   :ensure t
@@ -622,6 +650,14 @@
   (add-hook 'after-init-hook #'(lambda () (persp-mode 1))))
 
 
+;;;;
+;;;;         dart
+;;;;
+(use-package dart-mode
+  :mode ("\\.dart\\'" . dart-mode)
+  )
+
+(use-package yaml-mode)
 
 ;;;;
 ;;;;        helm 
@@ -1093,9 +1129,9 @@
     :ensure nil
     :mode "\\.asc\\'")
 
-  (use-package help-fns+
-    :if is-macos
-    :ensure nil)
+  ;; (use-package help-fns+
+  ;;   :if is-macos
+  ;;   :ensure nil)
 
   (require 'clean-mode-line)
   (clean-mode-line-mode)
@@ -1143,7 +1179,7 @@
   (global-set-key (kbd "<C-wheel-down>") nil)
 
   ;; Mouse-3
-  (global-set-key (kbd "<mouse-3>") 'mouse-popup-menubar-stuff)
+  ;;(global-set-key (kbd "<mouse-3>") 'ibuffer-mouse-popup-menu)
   )
 
 ;;;;
