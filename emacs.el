@@ -10,15 +10,33 @@
   )
 
 ;;;;
-;;;;          melpa
+;;;;          proxy
 ;;;;
 (when t
-  (setq url-proxy-services
-        '(("no_proxy" . "^\\(localhost\\|10.*\\)")
-          ("http" . "eglbeprx001.esko-graphics.com:8080")
-          ("https" . "eglbeprx001.esko-graphics.com:8080")))
+  (require 'subr-x)
+  
+  ;; read proxy from env
+  (let* ((all_proxy (getenv "ALL_PROXY"))
+         (http_proxy (or (getenv "http_proxy") all_proxy))
+         (https_proxy (or (getenv "https_proxy") http_proxy))
+         )
+    (if (and http_proxy https_proxy)
+        (setq url-proxy-services
+              `(("no_proxy" . "^\\(localhost\\|10.*\\)")
+                ("http" . ,(string-remove-prefix "http://" http_proxy))
+                ("https" . ,(string-remove-prefix "http://" https_proxy))))
+      
+      (setq url-proxy-services-unused
+            '(("no_proxy" . "^\\(localhost\\|10.*\\)")
+              ("http" . "127.0.0.1:6667")
+              ("https" . "127.0.0.1:6667")))
+      )
+    )
   )
 
+;;;;
+;;;;          melpa
+;;;;
 (defun install-extra-packages()
   (require 'package)
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
@@ -50,6 +68,11 @@
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
 
+
+;;;;
+;;;;           performance
+;;;;
+(setq gc-cons-threshold 1000000000)
 (use-package benchmark-init
   :if (version< emacs-version "28.0")
   :ensure t
@@ -759,6 +782,7 @@
         swiper-include-line-number-in-search t)
   :bind (("C-s" . swiper)))
 
+(use-package helm-themes)
 
 ;;;;
 ;;;;        projectile
@@ -898,7 +922,6 @@
   (setq company-idle-delay 0
         company-minimum-prefix-length 1
         company-selection-wrap-around t)
-  :init
   (add-hook 'after-init-hook 'global-company-mode)
   :config
   (add-to-list 'company-backends '(company-abbrev
@@ -920,7 +943,7 @@
         company-dabbrev-downcase nil)
 
   (use-package company-c-headers)
-  (use-package company-anaconda)
+  (use-package company-anaconda :defer t)
   ;;(use-package company-tabnine)
   
   :bind(("C-." . company-complete)
