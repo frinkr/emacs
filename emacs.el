@@ -10,15 +10,33 @@
   )
 
 ;;;;
-;;;;          melpa
+;;;;          proxy
 ;;;;
-(when nil
-  (setq url-proxy-services
-        '(("no_proxy" . "^\\(localhost\\|10.*\\)")
-          ("http" . "127.0.0.1:6667")
-          ("https" . "127.0.0.1:6667")))
+(when t
+  (require 'subr-x)
+  
+  ;; read proxy from env
+  (let* ((all_proxy (getenv "ALL_PROXY"))
+         (http_proxy (or (getenv "http_proxy") all_proxy))
+         (https_proxy (or (getenv "https_proxy") http_proxy))
+         )
+    (if (and http_proxy https_proxy)
+        (setq url-proxy-services
+              `(("no_proxy" . "^\\(localhost\\|10.*\\)")
+                ("http" . ,(string-remove-prefix "http://" http_proxy))
+                ("https" . ,(string-remove-prefix "http://" https_proxy))))
+      
+      (setq url-proxy-services-unused
+            '(("no_proxy" . "^\\(localhost\\|10.*\\)")
+              ("http" . "127.0.0.1:6667")
+              ("https" . "127.0.0.1:6667")))
+      )
+    )
   )
 
+;;;;
+;;;;          melpa
+;;;;
 (defun install-extra-packages()
   (require 'package)
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
@@ -764,6 +782,7 @@
         swiper-include-line-number-in-search t)
   :bind (("C-s" . swiper)))
 
+(use-package helm-themes)
 
 ;;;;
 ;;;;        projectile
