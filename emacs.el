@@ -12,11 +12,11 @@
 ;;;;
 ;;;;          melpa
 ;;;;
-(when nil
+(when t
   (setq url-proxy-services
         '(("no_proxy" . "^\\(localhost\\|10.*\\)")
-          ("http" . "127.0.0.1:6667")
-          ("https" . "127.0.0.1:6667")))
+          ("http" . "eglbeprx001.esko-graphics.com:8080")
+          ("https" . "eglbeprx001.esko-graphics.com:8080")))
   )
 
 (defun install-extra-packages()
@@ -799,7 +799,7 @@
 ;;;;
 ;;(use-package rtags)
 (use-package cmake-ide
-  ;;:disabled ;; too slow
+  :disabled ;; too slow
   ;;:requires rtags
   :init
   (setq cmake-ide-header-search-other-file nil
@@ -908,6 +908,7 @@
                                    company-etags
                                    company-files
                                    company-keywords
+                                   company-capf
                                    ;;company-tabnine
                                    ))
   (add-hook 'python-mode-hook
@@ -929,6 +930,35 @@
              )
   )
 
+(when (not is-snowmacs)
+  (use-package lsp-mode
+    :commands lsp
+    :ensure t
+    :config
+    (setq read-process-output-max (* 1024 10240))
+    (setq gc-cons-threshold 100000000)
+    )
+  (use-package lsp-ui :commands lsp-ui-mode :ensure t)
+
+  ;; c/c++/obj-c
+  (use-package ccls
+    :ensure t
+    :config
+    (setq ccls-executable "ccls")
+    (setq ccls-initialization-options '(:index (:comments 2) :completion (:detailedLabel t)))
+    (setq lsp-prefer-flymake nil)
+    (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
+    :hook ((c-mode c++-mode objc-mode) .
+           (lambda () (require 'ccls) (lsp))))
+
+  ;; python
+  (use-package lsp-python-ms
+    :ensure t
+    :init (setq lsp-python-ms-auto-install-server t)
+    :hook (python-mode . (lambda ()
+                           (require 'lsp-python-ms)
+                           (lsp))))  ; or lsp-deferred
+  )
 
 ;;;;
 ;;;;            flyspell
@@ -996,25 +1026,6 @@
           (lambda ()
                   (local-set-key (kbd "C-c C-c") 'fx/org-cc)))
 ;;(define-key org-mode-map (kbd "C-c C-c") 'fx/org-cc)
-
-
-;; ;;;;
-;; ;;;;
-;; ;;;;
-;; (use-package lsp-mode :commands lsp :ensure t)
-;; (use-package lsp-ui :commands lsp-ui-mode :ensure t)
-;; (use-package company-lsp
-;;   :ensure t
-;;   :commands company-lsp
-;;   :config (push 'company-lsp company-backends)) ;; add company-lsp as a backend
-;; (use-package ccls
-;;   :ensure t
-;;   :config
-;;   (setq ccls-executable "ccls")
-;;   (setq lsp-prefer-flymake nil)
-;;   (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
-;;   :hook ((c-mode c++-mode objc-mode) .
-;;          (lambda () (require 'ccls) (lsp))))
 
 ;;;;
 ;;;;            misc packages
