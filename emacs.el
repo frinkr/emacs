@@ -9,12 +9,16 @@
   (setq exec-path (append exec-path '("/usr/local/bin" "/opt/local/bin")))
   )
 
+;; Common packages
+(require 'subr-x)
+(require 'cl)
+(require 'cl-lib)
+(require 'facemenu) ;; required by 'highlight, new in Emacs28
+
 ;;;;
 ;;;;          proxy
 ;;;;
 (when t
-  (require 'subr-x)
-  
   ;; read proxy from env
   (let* ((all_proxy (getenv "ALL_PROXY"))
          (http_proxy (or (getenv "http_proxy") all_proxy))
@@ -68,19 +72,17 @@
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
 
-
 ;;;;
 ;;;;           performance
 ;;;;
 (setq gc-cons-threshold 1000000000)
 (use-package benchmark-init
   :if (version< emacs-version "28.0")
-  :ensure t
   :config
   ;; To disable collection of benchmark data after init is done.
   (add-hook 'after-init-hook 'benchmark-init/deactivate))
 
-
+;;;###autoload
 (defun buffer-file-path-or-directory()
   "Return current buffer file path or dired directory"
   (if (equal major-mode 'dired-mode)
@@ -91,7 +93,7 @@
 ;;;;
 ;;;;           clear the recentf 
 ;;;;
-
+;;;###autoload
 (defun clear-recentf ()
   "Clear the recent file list."
   (interactive)
@@ -102,6 +104,7 @@
 ;;;;
 ;;;;           kill all other buffers but current one
 ;;;;
+;;;###autoload
 (defun kill-other-buffers ()
   "Kill all other buffers, but eshell and shell."
   (interactive)
@@ -115,6 +118,7 @@
 ;;;;
 ;;;;           erase current buffer
 ;;;;
+;;;###autoload
 (defun fx-erase-buffer()
   (interactive)
   (when (y-or-n-p "Erase the buffer?")
@@ -125,6 +129,7 @@
 ;;;;
 ;;;;           copy file path clipboard
 ;;;;
+;;;###autoload
 (defun copy-file-path ()
   "Copy the current file path to the clipboard"
   (interactive)
@@ -139,6 +144,7 @@
 ;;;;
 ;;;;          reload current buffer
 ;;;;
+;;;###autoload
 (defun reload ()
   "Reload the buffer w/o prompt."
   (interactive)
@@ -148,6 +154,7 @@
 ;;;;
 ;;;;           set buffer modified
 ;;;;
+;;;###autoload
 (defun touch()
   "Touch the buffer"
   (interactive)
@@ -159,6 +166,7 @@
 ;;;;
 ;;;;          new scratch
 ;;;;
+;;;###autoload
 (defun new-scratch ()
   "open up a guaranteed new scratch buffer"
   (interactive)
@@ -173,7 +181,7 @@
 ;;;;            switch buffer
 ;;;;
 (setq switch-buffer-state t)
-
+;;;###autoload
 (defun switch-buffer()
   "Switch next/previous buffer"
   (interactive)
@@ -193,6 +201,7 @@
 ;;;;
 ;;;;           code
 ;;;;
+;;;###autoload
 (defun code (path)
   "Open file or folder  in vscode"
   (interactive "sOpen in vs-code (default current file): ")
@@ -204,6 +213,7 @@
 ;;;;
 ;;;;          open-with-default-application
 ;;;;
+;;;###autoload
 (defun open-with-default-application()
   "Copy current file with system default application"
   (interactive)
@@ -333,12 +343,6 @@
     (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
     (add-hook 'text-mode-hook 'display-fill-column-indicator-mode)
     )
-  
-  ;; Common packages
-  (require 'cl)
-  (require 'cl-lib)
-  (require 'subr-x)
-  (require 'facemenu) ;; required by 'highlight, new in Emacs28
   )
 
 
@@ -395,7 +399,7 @@
 ;;;;         dashboard
 ;;;;
 (use-package dashboard
-  :init
+  :config
   (setq
    dashboard-set-init-info t
    dashboard-banner-logo-title "MAY THE FORCE BE WITH YOU!"
@@ -406,7 +410,6 @@
    dashboard-set-file-icons t
    dashboard-set-footer nil
    )
-  :config
   (dashboard-setup-startup-hook))
 
 ;;;;
@@ -457,7 +460,7 @@
       ))
 
   (setq hlt-auto-faces-flag t)
-  :init
+  :config
   (setq hlt-auto-face-foreground "white")
   (setq hlt-auto-face-backgrounds '("SpringGreen3" 
                                     "MediumPurple1"
@@ -533,6 +536,7 @@
 ;;;;
 ;;;;           save-as command
 ;;;;
+;;;###autoload
 (defun save-as(filename)
   (interactive "F")
   (write-region (point-min) (point-max) filename)
@@ -549,7 +553,7 @@
 ;;;;        Dired setup
 ;;;;
 (use-package dired-x
-  :ensure nil
+  :ensure nil ;; Emacs 27.2 builtin
   :init
   (setq dired-details-hide-link-targets nil)
   :config
@@ -561,7 +565,6 @@
               ))
 
 (use-package dired-ranger
-  :ensure t
   :bind (:map dired-mode-map
               ("W" . dired-ranger-copy)
               ("X" . dired-ranger-move)
@@ -578,7 +581,7 @@
 ;;;;           bm
 ;;;;
 (use-package bm
-  :demand t
+  :disabled
   :init
   (setq bm-restore-repository-on-load t)
   :config
@@ -598,6 +601,7 @@
   )
 
 (use-package helm-bm
+  :disabled
   :requires bm
   :init (defalias 'bm 'helm-bm)
   :bind(("C-c b" . helm-bm))
@@ -751,15 +755,6 @@
    ("C-z"  . helm-select-action))
   )    ;; end of helm
 
-(use-package helm-files
-  :ensure nil
-  :bind
-  (:map helm-find-files-map
-        ("C-s" . helm-ff-run-grep-ag)
-        ("C-r" . helm-ff-run-query-replace-regexp)
-        )
-)
-
 (use-package helm-ag
   :commands (helm-do-ag)
   :init (defalias 'hag 'helm-do-ag)
@@ -777,7 +772,7 @@
 ;;;;         swiper
 ;;;;
 (use-package swiper-helm
-  :init
+  :config
   (setq swiper-goto-start-of-match t
         swiper-include-line-number-in-search t)
   :bind (("C-s" . swiper)))
@@ -838,18 +833,15 @@
 ;;;;         dumb-jump
 ;;;;
 (use-package dumb-jump
-  :config (setq dumb-jump-selector 'helm)
-  :ensure)
+  :config (setq dumb-jump-selector 'helm))
 
 ;;;;
 ;;;;       git
 ;;;;
 (use-package magit
-  :if (not is-snowmacs)
-  :demand t)
+  :if (not is-snowmacs))
 (use-package diff-hl
   :if (not is-snowmacs)
-  :demand t
   :config
   (global-diff-hl-mode)
   (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
@@ -858,15 +850,12 @@
          ("C-S-n" . diff-hl-next-hunk))
   )
 (use-package ediff
-  :ensure nil
-  :defer t
   :init
   (setq ediff-split-window-function 'split-window-horizontally
         ediff-window-setup-function 'ediff-setup-windows-plain)
   )
 (use-package magit-filenotify
   :if (not is-snowmacs)
-  :demand t
   :config (add-hook 'magit-status-mode-hook 'magit-filenotify-mode)
   )
 
@@ -956,16 +945,14 @@
 (when (not is-snowmacs)
   (use-package lsp-mode
     :commands lsp
-    :ensure t
     :config
     (setq read-process-output-max (* 1024 10240))
     (setq gc-cons-threshold 100000000)
     )
-  (use-package lsp-ui :commands lsp-ui-mode :ensure t)
+  (use-package lsp-ui :commands lsp-ui-mode )
 
   ;; c/c++/obj-c
   (use-package ccls
-    :ensure t
     :config
     (setq ccls-executable "ccls")
     (setq ccls-initialization-options '(:index (:comments 2) :completion (:detailedLabel t)))
@@ -976,7 +963,6 @@
 
   ;; python
   (use-package lsp-python-ms
-    :ensure t
     :init (setq lsp-python-ms-auto-install-server t)
     :hook (python-mode . (lambda ()
                            (require 'lsp-python-ms)
@@ -1000,11 +986,6 @@
               ("C-." . nil))
   )
 
-(use-package abbrev
-  :ensure nil
-  :diminish abbrev-mode)
-
-
 ;;;;
 ;;;;         reveal-in-folder   
 ;;;;
@@ -1015,12 +996,11 @@
 ;;;;         markdown
 ;;;;
 (use-package markdown-mode
-  :ensure t
   :commands (markdown-mode gfm-mode)
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
          ("\\.markdown\\'" . markdown-mode))
-  :init (setq markdown-command "multimarkdown"))
+  :config (setq markdown-command "multimarkdown"))
 
 ;;;;
 ;;;;           uml 
@@ -1039,6 +1019,7 @@
 ;;;;
 ;;;;           org
 ;;;;
+;;;###autoload
 (defun fx/org-cc (&optional ARG)
   (interactive)
   (org-ctrl-c-ctrl-c ARG)
@@ -1055,7 +1036,7 @@
 ;;;;
 (use-package p4
   :diminish p4-mode
-  :init (setenv "P4CONFIG" "p4.config")
+  :config (setenv "P4CONFIG" "p4.config")
   :bind (("C-4" . p4-edit)))
 
 
