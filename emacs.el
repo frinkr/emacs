@@ -782,8 +782,11 @@
 ;;;;
 ;;;;        projectile
 ;;;;
+(use-package projectile
+  :defer t)
 (use-package helm-projectile
   :commands (helm-projectile-on)
+  :requires (projectile)
   :config
   (projectile-global-mode)
   (setq projectile-sort-order 'access-time)
@@ -839,9 +842,12 @@
 ;;;;       git
 ;;;;
 (use-package magit
-  :if (not is-snowmacs))
+  :defer t
+  :if (not is-snowmacs)
+  )
 (use-package diff-hl
   :if (not is-snowmacs)
+  :defer t
   :config
   (global-diff-hl-mode)
   (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
@@ -850,11 +856,13 @@
          ("C-S-n" . diff-hl-next-hunk))
   )
 (use-package ediff
-  :init
+  :defer t
+  :config
   (setq ediff-split-window-function 'split-window-horizontally
         ediff-window-setup-function 'ediff-setup-windows-plain)
   )
 (use-package magit-filenotify
+  :defer t
   :if (not is-snowmacs)
   :config (add-hook 'magit-status-mode-hook 'magit-filenotify-mode)
   )
@@ -990,6 +998,7 @@
 ;;;;         reveal-in-folder   
 ;;;;
 (use-package reveal-in-folder
+  :defer t
   :init (defalias 'reveal-in-folder-this-buffer 'show-in-folder))
 
 ;;;;
@@ -1204,10 +1213,6 @@
 (use-package cyberpunk-theme :defer t)
 (use-package color-theme-sanityinc-tomorrow :defer t)
 (use-package kaolin-themes :defer t) ;; kaolin-ocean !
-(use-package remember-last-theme
-  :ensure t
-  :config (remember-last-theme-enable)
-  )
 
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file 'noerror)
