@@ -1,4 +1,4 @@
-(setq root-dir (file-name-directory (file-truename load-file-name)))
+(setq root-dir (if load-file-name (file-name-directory (file-truename load-file-name)) nil))
 (setq is-macos (eq system-type 'darwin))
 (setq is-windows (eq system-type 'windows-nt))
 (setq is-wsl (eq system-type 'gnu/linux))  ;; windows subsystem for linux
@@ -42,7 +42,6 @@
 ;;;;          melpa
 ;;;;
 (defun install-extra-packages()
-  (require 'package)
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
   (setq package-archives-unused
         '(("melpa" . "http://elpa.emacs-china.org/melpa/")
@@ -53,18 +52,21 @@
     (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")) ;;https://www.reddit.com/r/emacs/comments/cdf48c/failed_to_download_gnu_archive/
   (package-initialize)
 
-  (setq package-list '(cl-lib
-                       use-package
-                       ))
+  (setq package-list '(use-package))
 
-  ;; refresh
-  (unless package-archive-contents
-    (package-refresh-contents))
+  ;; install missing packages
+  (unless (cl-every
+           (lambda (package) (package-installed-p package)) package-list)
 
-  ;; install 
-  (dolist (package package-list)
-    (unless (package-installed-p package)
-      (package-install package)))
+    ;; refresh
+    (unless package-archive-contents
+      (package-refresh-contents))
+    
+    ;; install 
+    (dolist (package package-list)
+      (unless (package-installed-p package)
+        (package-install package)))
+    ) 
   )
 
 (install-extra-packages)
@@ -170,7 +172,7 @@
 (defun new-scratch ()
   "open up a guaranteed new scratch buffer"
   (interactive)
-  (switch-to-buffer (loop for num from 0
+  (switch-to-buffer (cl-loop for num from 0
                           for name = (format "*scratch-%03i*" num)
                           while (get-buffer name)
                           finally return name))
@@ -403,7 +405,7 @@
   (setq
    dashboard-set-init-info t
    dashboard-banner-logo-title "MAY THE FORCE BE WITH YOU!"
-   dashboard-startup-banner (concat root-dir "banner.png")
+   ;;dashboard-startup-banner (concat root-dir "banner.png")
    dashboard-items '((projects . 5)
                      (recents  . 15))
    dashboard-set-heading-icons t
@@ -552,17 +554,16 @@
 ;;;;
 ;;;;        Dired setup
 ;;;;
-(use-package dired-x
-  :ensure nil ;; Emacs 27.2 builtin
-  :init
-  (setq dired-details-hide-link-targets nil)
-  :config
-  :bind (:map dired-mode-map
-              ("<mouse-2>" . dired-find-alternate-file)
-              ("RET" . dired-find-file)
-              ("^" . (lambda () (interactive) (find-alternate-file "..")))
-              ("<mouse-3>" . (lambda () (interactive) (find-alternate-file "..")))
-              ))
+(eval-after-load 'dired
+  '(progn
+     (setq dired-details-hide-link-targets nil)
+     (put 'dired-find-alternate-file 'disabled nil)
+     (define-key dired-mode-map (kbd "<mouse-2>") 'dired-find-alternate-file)
+     (define-key dired-mode-map (kbd "RET") 'dired-find-file)
+     (define-key dired-mode-map (kbd "^") (lambda () (interactive) (find-alternate-file "..")))
+     (define-key dired-mode-map (kbd "<mouse-3>")  (lambda () (interactive) (find-alternate-file "..")))
+     )
+  )
 
 (use-package dired-ranger
   :bind (:map dired-mode-map
@@ -1015,6 +1016,7 @@
 ;;;;           uml 
 ;;;;
 (use-package plantuml-mode
+  :disabled
   :init (setq plantuml-default-exec-mode 'executable
               plantuml-indent-level 4)
   (with-eval-after-load "org"
@@ -1140,7 +1142,7 @@
 ;;;;
 ;;;;         local packages
 ;;;;
-(when t
+(when root-dir
   (setq local-packages-dir (concat root-dir "local-packages"))
   (when (file-directory-p local-packages-dir)
     (add-to-list 'load-path local-packages-dir))
@@ -1216,4 +1218,3 @@
 
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file 'noerror)
-(put 'dired-find-alternate-file 'disabled nil)
