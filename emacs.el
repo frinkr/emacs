@@ -1,3 +1,5 @@
+(setq gc-cons-threshold 1000000000)
+
 (setq root-dir (if load-file-name (file-name-directory (file-truename load-file-name)) nil))
 (setq is-macos (eq system-type 'darwin))
 (setq is-windows (eq system-type 'windows-nt))
@@ -42,6 +44,8 @@
 ;;;;          melpa
 ;;;;
 (defun install-extra-packages()
+  (setq package-native-compile t)
+  (package-initialize)
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
   (setq package-archives-unused
         '(("melpa" . "http://elpa.emacs-china.org/melpa/")
@@ -50,7 +54,6 @@
 
   (when is-macos
     (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")) ;;https://www.reddit.com/r/emacs/comments/cdf48c/failed_to_download_gnu_archive/
-  (package-initialize)
 
   (setq package-list '(use-package))
 
@@ -77,9 +80,8 @@
 ;;;;
 ;;;;           performance
 ;;;;
-(setq gc-cons-threshold 1000000000)
 (use-package benchmark-init
-  :if (version< emacs-version "28.0")
+  ;;:if (version< emacs-version "28.0")
   :config
   ;; To disable collection of benchmark data after init is done.
   (add-hook 'after-init-hook 'benchmark-init/deactivate))
@@ -421,6 +423,7 @@
   :config (setq all-the-icons-color-icons nil)
   )
 (use-package all-the-icons-dired
+  :defer t
   :config
   (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
   )
@@ -549,7 +552,7 @@
 ;;;;            which-key
 ;;;;
 (use-package which-key
-  :init (which-key-mode))
+  :config (which-key-mode))
 
 ;;;;
 ;;;;        Dired setup
@@ -659,6 +662,7 @@
 ;;;;        vterm
 ;;;;
 (use-package vterm
+  :commands (vterm)
   :if (and module-file-suffix (not is-windows))
   :init (setq
          vterm-buffer-name-string "vterm %s"
@@ -778,7 +782,8 @@
         swiper-include-line-number-in-search t)
   :bind (("C-s" . swiper)))
 
-(use-package helm-themes)
+(use-package helm-themes
+  :commands (helm-themes))
 
 ;;;;
 ;;;;        projectile
@@ -837,6 +842,7 @@
 ;;;;         dumb-jump
 ;;;;
 (use-package dumb-jump
+  :defer t
   :config (setq dumb-jump-selector 'helm))
 
 ;;;;
@@ -962,6 +968,7 @@
 
   ;; c/c++/obj-c
   (use-package ccls
+    :defer t
     :config
     (setq ccls-executable "ccls")
     (setq ccls-initialization-options '(:index (:comments 2) :completion (:detailedLabel t)))
@@ -972,7 +979,8 @@
 
   ;; python
   (use-package lsp-python-ms
-    :init (setq lsp-python-ms-auto-install-server t)
+    :defer t
+    :config (setq lsp-python-ms-auto-install-server t)
     :hook (python-mode . (lambda ()
                            (require 'lsp-python-ms)
                            (lsp))))  ; or lsp-deferred
@@ -983,6 +991,7 @@
 ;;;;
 (use-package flyspell
   :if (not is-snowmacs)
+  :defer t
   :diminish flyspell-mode
   :config
   (dolist (hook '(text-mode-hook))
@@ -1155,16 +1164,16 @@
     :ensure nil
     :mode "\\.asc\\'")
 
-  ;; (use-package help-fns+
-  ;;   :if is-macos
-  ;;   :ensure nil)
+  (use-package clean-mode-line
+    :ensure nil
+    :config
+    (clean-mode-line-mode)
+  )
 
-  (require 'clean-mode-line)
-  (clean-mode-line-mode)
-
-  (require 'esko-link-mode)
-  (esko-link-mode)
-  
+  (use-package esko-link-mode
+    :defer t
+    :ensure nil
+    :hook (prog-mode text-mode))
   )
 
 ;;;;
@@ -1216,5 +1225,9 @@
 (use-package color-theme-sanityinc-tomorrow :defer t)
 (use-package kaolin-themes :defer t) ;; kaolin-ocean !
 
-(setq custom-file (concat user-emacs-directory "custom.el"))
-(load custom-file 'noerror)
+(use-package remember-last-theme
+  :config
+  (remember-last-theme-enable)
+  (setq custom-file (concat user-emacs-directory "custom.el"))
+  (load custom-file 'noerror)
+  )
