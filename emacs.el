@@ -45,7 +45,8 @@
 ;;;;
 (defun install-extra-packages()
   (setq package-native-compile t)
-  (package-initialize)
+  (require 'package)
+  
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
   (setq package-archives-unused
         '(("melpa" . "http://elpa.emacs-china.org/melpa/")
@@ -61,6 +62,8 @@
   (unless (cl-every
            (lambda (package) (package-installed-p package)) package-list)
 
+    (package-initialize)
+    
     ;; refresh
     (unless package-archive-contents
       (package-refresh-contents))
@@ -81,6 +84,7 @@
 ;;;;           performance
 ;;;;
 (use-package benchmark-init
+  :disabled
   ;;:if (version< emacs-version "28.0")
   :config
   ;; To disable collection of benchmark data after init is done.
@@ -862,12 +866,14 @@
   :bind (("C-S-p" . diff-hl-previous-hunk)
          ("C-S-n" . diff-hl-next-hunk))
   )
-(use-package ediff
-  :defer t
-  :config
-  (setq ediff-split-window-function 'split-window-horizontally
-        ediff-window-setup-function 'ediff-setup-windows-plain)
+
+(eval-after-load 'ediff
+  '(progn
+     (setq ediff-split-window-function 'split-window-horizontally
+           ediff-window-setup-function 'ediff-setup-windows-plain)
+     )
   )
+
 (use-package magit-filenotify
   :defer t
   :if (not is-snowmacs)
@@ -989,19 +995,14 @@
 ;;;;
 ;;;;            flyspell
 ;;;;
-(use-package flyspell
-  :if (not is-snowmacs)
-  :defer t
-  :diminish flyspell-mode
-  :config
-  (dolist (hook '(text-mode-hook))
-    (add-hook hook (lambda () (flyspell-mode 1))))
-  (dolist (hook '(change-log-mode-hook log-edit-mode-hook))
-    (add-hook hook (lambda () (flyspell-mode -1))))
-
-  (add-hook 'c++-mode-hook  (lambda () (flyspell-prog-mode)))
-  :bind (:map flyspell-mode-map
-              ("C-." . nil))
+(eval-after-load 'flyspell
+  '(progn
+     (dolist (hook '(text-mode-hook))
+       (add-hook hook (lambda () (flyspell-mode 1))))
+     (dolist (hook '(change-log-mode-hook log-edit-mode-hook))
+       (add-hook hook (lambda () (flyspell-mode -1))))
+     (add-hook 'c++-mode-hook  (lambda () (flyspell-prog-mode)))
+     )
   )
 
 ;;;;
