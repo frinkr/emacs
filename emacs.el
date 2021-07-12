@@ -78,13 +78,15 @@
 (install-extra-packages)
 (require 'use-package)
 (require 'use-package-ensure)
-(setq use-package-always-ensure t)
+(setq-default use-package-always-ensure t
+              use-package-always-defer t
+              use-package-verbose t)
 
 ;;;;
 ;;;;           performance
 ;;;;
 (use-package benchmark-init
-  :disabled
+  :demand t
   ;;:if (version< emacs-version "28.0")
   :config
   ;; To disable collection of benchmark data after init is done.
@@ -407,6 +409,7 @@
 ;;;;         dashboard
 ;;;;
 (use-package dashboard
+  :demand t
   :config
   (setq
    dashboard-set-init-info t
@@ -427,7 +430,6 @@
   :config (setq all-the-icons-color-icons nil)
   )
 (use-package all-the-icons-dired
-  :defer t
   :config
   (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
   )
@@ -582,7 +584,6 @@
 ;;;;          Sidebar
 ;;;;
 (use-package neotree
-  :defer t
   :config (setq neo-theme 'icons))
 
 ;;;;
@@ -619,6 +620,7 @@
 ;;;;           google
 ;;;;
 (use-package engine-mode
+  :commands (google)
   :config
   (engine-mode t)
   
@@ -626,6 +628,7 @@
     "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s"
     :keybinding "g")
 
+  ;;;###autoload
   (defun google (search)
     (interactive (list (engine/get-query (symbol-name 'google))))
     (engine/search-google search)
@@ -792,8 +795,7 @@
 ;;;;
 ;;;;        projectile
 ;;;;
-(use-package projectile
-  :defer t)
+(use-package projectile)
 (use-package helm-projectile
   :commands (helm-projectile-on)
   :requires (projectile)
@@ -839,26 +841,22 @@
   :config
   (cmake-ide-setup)
   )
-(use-package cmake-mode
-  :defer t)
+(use-package cmake-mode)
 
 ;;;;
 ;;;;         dumb-jump
 ;;;;
 (use-package dumb-jump
-  :defer t
   :config (setq dumb-jump-selector 'helm))
 
 ;;;;
 ;;;;       git
 ;;;;
 (use-package magit
-  :defer t
   :if (not is-snowmacs)
   )
 (use-package diff-hl
   :if (not is-snowmacs)
-  :defer t
   :config
   (global-diff-hl-mode)
   (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
@@ -875,53 +873,14 @@
   )
 
 (use-package magit-filenotify
-  :defer t
   :if (not is-snowmacs)
   :config (add-hook 'magit-status-mode-hook 'magit-filenotify-mode)
   )
-
 
 ;;;;
 ;;;;        auto-complete
 ;;;;
 (use-package pos-tip)  ;; for a nice completion menu and help
-
-(use-package auto-complete
-  :disabled
-  :diminish auto-complete-mode
-  :preface
-  (defun auto-complete-mode-maybe ()
-    "Overwrite auto-complete-mode-maybe which by defaults turns autocomplete only on for buffers listed in ac-modes."
-    (unless (minibufferp (current-buffer))
-      (auto-complete-mode 1)))
-  
-  :init
-  (setq-default ac-sources '(
-                             ac-source-abbrev
-                             ac-source-dictionary
-                             ac-source-words-in-same-mode-buffers
-                             ac-source-words-in-buffer
-                             ;;ac-source-files-in-current-dir  ;; slow    
-                             ))
-  (setq ac-auto-start t
-        ac-use-quick-help nil
-        ac-dwim t
-        ac-use-fuzzy t
-        ac-ignore-case t)
-  :config
-  (global-auto-complete-mode t)
-  (ac-config-default)
-  
-  ;; Face
-  (set-face-background 'popup-scroll-bar-foreground-face "red3")
-
-  ;; Trigger key
-  (if (display-graphic-p)
-      (global-set-key [(control ?/)] 'auto-complete)
-    (ac-set-trigger-key "TAB"))
-
-  (ac-linum-workaround)
-  )
 
 ;;;;
 ;;;;             company
@@ -934,7 +893,8 @@
         company-selection-wrap-around t)
   (add-hook 'after-init-hook 'global-company-mode)
   :config
-  (add-to-list 'company-backends '(company-abbrev
+  (add-to-list 'company-backends '(
+                                   company-abbrev
                                    company-c-headers
                                    company-dabbrev
                                    company-dabbrev-code
@@ -950,7 +910,8 @@
                          'company-anaconda)))
 
   (setq company-dabbrev-ignore-case t
-        company-dabbrev-downcase nil)
+        company-dabbrev-downcase nil
+        company-dabbrev-other-buffers t)
 
   (use-package company-c-headers)
   (use-package company-anaconda :defer t)
@@ -961,6 +922,11 @@
              ("C-n" . company-select-next)
              ("C-p" . company-select-previous)
              )
+  )
+
+(use-package yasnippet
+  :config
+  (yas-global-mode 1)
   )
 
 (when (not is-snowmacs)
@@ -974,7 +940,6 @@
 
   ;; c/c++/obj-c
   (use-package ccls
-    :defer t
     :config
     (setq ccls-executable "ccls")
     (setq ccls-initialization-options '(:index (:comments 2) :completion (:detailedLabel t)))
@@ -985,7 +950,6 @@
 
   ;; python
   (use-package lsp-python-ms
-    :defer t
     :config (setq lsp-python-ms-auto-install-server t)
     :hook (python-mode . (lambda ()
                            (require 'lsp-python-ms)
@@ -1009,7 +973,6 @@
 ;;;;         reveal-in-folder   
 ;;;;
 (use-package reveal-in-folder
-  :defer t
   :init (defalias 'reveal-in-folder-this-buffer 'show-in-folder))
 
 ;;;;
@@ -1166,13 +1129,13 @@
     :mode "\\.asc\\'")
 
   (use-package clean-mode-line
+    :demand t
     :ensure nil
     :config
     (clean-mode-line-mode)
   )
 
   (use-package esko-link-mode
-    :defer t
     :ensure nil
     :hook (prog-mode text-mode))
   )
@@ -1221,12 +1184,13 @@
 ;;;;
 ;;;;          theme & customization
 ;;;;
-(use-package solarized-theme :defer t)
-(use-package cyberpunk-theme :defer t)
-(use-package color-theme-sanityinc-tomorrow :defer t)
-(use-package kaolin-themes :defer t) ;; kaolin-ocean !
+(use-package solarized-theme)
+(use-package cyberpunk-theme)
+(use-package color-theme-sanityinc-tomorrow)
+(use-package kaolin-themes) ;; kaolin-ocean !
 
 (use-package remember-last-theme
+  :demand t
   :config
   (remember-last-theme-enable)
   (setq custom-file (concat user-emacs-directory "custom.el"))

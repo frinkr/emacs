@@ -54,9 +54,9 @@
 ;;;###autoload
 (define-minor-mode esko-link-mode
   "Display clickable esko links"
-  nil
-  ""
-  nil
+  :init-value nil
+  :lighter ""
+  :keymap nil
   (if esko-link-mode
       (setq goto-address-url-regexp goto-address-url-regexp-new)
      (setq goto-address-url-regexp goto-address-url-regexp-old)
