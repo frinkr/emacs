@@ -45,34 +45,29 @@
 ;;;;
 (defun install-extra-packages()
   (setq package-native-compile t)
-  (require 'package)
+  
+  (package-initialize t) ;; initialize but don't activate the packages to improve performance
   
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
   (setq package-archives-unused
         '(("melpa" . "http://elpa.emacs-china.org/melpa/")
           ("org"   . "http://elpa.emacs-china.org/org/")
           ("gnu"   . "http://elpa.emacs-china.org/gnu/")))
-
+   
   (when is-macos
     (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")) ;;https://www.reddit.com/r/emacs/comments/cdf48c/failed_to_download_gnu_archive/
 
-  (setq package-list '(use-package))
-
-  ;; install missing packages
-  (unless (cl-every
-           (lambda (package) (package-installed-p package)) package-list)
-
-    (package-initialize)
-    
-    ;; refresh
-    (unless package-archive-contents
-      (package-refresh-contents))
-    
-    ;; install 
-    (dolist (package package-list)
-      (unless (package-installed-p package)
-        (package-install package)))
-    ) 
+  ;;install or ctivate 'use-package
+  (if (package-installed-p 'use-package)
+      (progn
+        (package-activate 'use-package)
+        )
+    (progn
+      (unless package-archive-contents
+        (package-refresh-contents))
+      (package-install 'use-package)
+      )
+    )
   )
 
 (install-extra-packages)
@@ -86,7 +81,7 @@
 ;;;;           performance
 ;;;;
 (use-package benchmark-init
-  :demand t
+  :disabled
   ;;:if (version< emacs-version "28.0")
   :config
   ;; To disable collection of benchmark data after init is done.
@@ -499,6 +494,7 @@
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
   )
 (use-package highlight-parentheses
+  :demand t
   :diminish highlight-parentheses-mode
   :config
   (setq hl-paren-background-colors '("red"
@@ -932,22 +928,31 @@
 (when (not is-snowmacs)
   (use-package lsp-mode
     :commands lsp
+    :custom
+    (lsp-clangd-binary-path "/usr/local/opt/llvm/bin/clangd")
     :config
     (setq read-process-output-max (* 1024 10240))
-    (setq gc-cons-threshold 100000000)
+    (require 'dap-cpptools)
+    :hook ((c-mode c++-mode objc-mode) . (lambda () (lsp)))
+           (lsp-mode . (lambda () (lsp-enable-which-key-integration)))
+           
     )
+  
   (use-package lsp-ui :commands lsp-ui-mode )
+  (use-package dap-mode)
 
-  ;; c/c++/obj-c
-  (use-package ccls
-    :config
-    (setq ccls-executable "ccls")
-    (setq ccls-initialization-options '(:index (:comments 2) :completion (:detailedLabel t)))
-    (setq lsp-prefer-flymake nil)
-    (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
-    :hook ((c-mode c++-mode objc-mode) .
-           (lambda () (require 'ccls) (lsp))))
-
+  
+  ;; c/c++/obj-c with ccls (windows only. clangd on *nix platforms)
+  (when is-windows
+    (use-package ccls
+      :config
+      (setq ccls-executable "ccls")
+      (setq ccls-initialization-options '(:index (:comments 2) :completion (:detailedLabel t)))
+      (setq lsp-prefer-flymake nil)
+      (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
+      :hook ((c-mode c++-mode objc-mode) .
+             (lambda () (require 'ccls) (lsp))))
+    )
   ;; python
   (use-package lsp-python-ms
     :config (setq lsp-python-ms-auto-install-server t)
