@@ -234,40 +234,50 @@
       )
     map))
 
+(defvar clean-mode-line--default-mode-line-format mode-line-format)
+
 (define-minor-mode clean-mode-line-mode
   "Toggle clean-mode-line on or off."
   :group 'clean-mode-line
   :global t
   :lighter nil
 
-  (progn
-
-    ;; Setup VC hooks
-    (add-hook 'find-file-hook #'clean-mode-line--update-vc-segment)
-    (add-hook 'after-save-hook #'clean-mode-line--update-vc-segment)
-    (advice-add #'vc-refresh-state :after #'clean-mode-line--update-vc-segment)
+  (if clean-mode-line-mode
+      (progn
+        ;; Setup VC hooks
+        (add-hook 'find-file-hook #'clean-mode-line--update-vc-segment)
+        (add-hook 'after-save-hook #'clean-mode-line--update-vc-segment)
+        (advice-add #'vc-refresh-state :after #'clean-mode-line--update-vc-segment)
         
-    (setq-default
-     mode-line-format
-     '((:eval
-        (clean-mode-line--format
-         ;; Left
-         (format-mode-line
-          '(" "
-            (:eval (clean-mode-line-segment-modified))
-            (:eval (clean-mode-line-segment-buffer-name))
-            (:eval (clean-mode-line-segment-position))
-            )
-          )
+        (setq-default
+         mode-line-format
+         '((:eval
+            (clean-mode-line--format
+             ;; Left
+             (format-mode-line
+              '(" "
+                (:eval (clean-mode-line-segment-modified))
+                (:eval (clean-mode-line-segment-buffer-name))
+                (:eval (clean-mode-line-segment-position))
+                )
+              )
 
-         ;; Right
-         (format-mode-line
-          '((:eval (clean-mode-line-segment-eol))
-            (:eval (clean-mode-line-segment-encoding))
-            (:eval (clean-mode-line-segment-major-mode))
-            (:eval (clean-mode-line-segment-vc))
-            ;;(:eval (clean-mode-line-segment-misc-info))
-            " "))))))
+             ;; Right
+             (format-mode-line
+              '((:eval (clean-mode-line-segment-eol))
+                (:eval (clean-mode-line-segment-encoding))
+                (:eval (clean-mode-line-segment-major-mode))
+                (:eval (clean-mode-line-segment-vc))
+                ;;(:eval (clean-mode-line-segment-misc-info))
+                " "))))))
+        )
+    (progn
+      (remove-hook 'find-file-hook #'clean-mode-line--update-vc-segment)
+      (remove-hook 'after-save-hook #'clean-mode-line--update-vc-segment)
+      (advice-remove #'vc-refresh-state #'clean-mode-line--update-vc-segment)
+
+      (setq-default mode-line-format clean-mode-line--default-mode-line-format)
+      )
     )
   )
 
