@@ -887,18 +887,36 @@
         company-minimum-prefix-length 1
         company-selection-wrap-around t)
 
-  
+  (setq company-transformers '(company-sort-by-occurrence
+                               company-sort-by-backend-importance))
+  ;;(setq company-transformers '(company-sort-by-occurrence))
+
   (add-hook 'after-init-hook 'global-company-mode)
 
   :preface
-  (defun company--sort-by-visibility (candidates)
-    (message (format "%s" candidates))
-    candidates
+
+  ;; candidate kind prority list: variable/funcs of self are at the front of list
+  (defconst company--sort-kind-prority
+    [nil property field method constructor variable])
+
+  ;; calculate the candidate score by kind
+  (defun company--candidate-kind-score-cal (cand)
+    (or (cl-position (lsp-completion--candidate-kind cand)
+                     company--sort-kind-prority :test #'equal)
+        999
+        )
     )
+
+  ;; transformer sort by kind
+  (defun company--sort-by-kind (candidates)
+    (sort candidates
+          (lambda (cand1 cand2)
+            (let* ((s1 (company--candidate-kind-score-cal cand1))
+                   (s2 (company--candidate-kind-score-cal cand2)))
+              (< s1 s2)
+              ))))
   
   :config
-  ;; (setq company-transformers '(company-sort-by-occurrence))
-  
   (add-to-list 'company-backends '(
                                    company-abbrev
                                    company-c-headers
@@ -916,8 +934,8 @@
                          'company-anaconda)))
 
 
-;;  (add-to-list 'company-transformers
-;;               'company--sort-by-visibility 'append)
+  (add-to-list 'company-transformers
+               'company--sort-by-kind 'append)
   
   (setq company-dabbrev-ignore-case t
         company-dabbrev-downcase nil
@@ -926,7 +944,7 @@
   (use-package company-c-headers)
   (use-package company-anaconda)
   ;;(use-package company-tabnine)
-  (use-package company-statistics :hook (lsp-mode . company-statistics-mode))
+  ;;(use-package company-statistics :hook (lsp-mode . company-statistics-mode))
   
   :bind(("C-." . company-complete)
         :map company-active-map
