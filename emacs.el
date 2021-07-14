@@ -555,6 +555,11 @@
 (use-package which-key
   :config (which-key-mode))
 
+(use-package hungry-delete
+  :demand t
+  :config
+  (global-hungry-delete-mode))
+
 ;;;;
 ;;;;        Dired setup
 ;;;;
