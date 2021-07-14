@@ -111,14 +111,13 @@
 ;;;;
 ;;;###autoload
 (defun kill-other-buffers ()
-  "Kill all other buffers, but eshell and shell."
+  "Kill all other buffers with file name."
   (interactive)
   (mapc 'kill-buffer
         (delq (current-buffer)
-              ;; keep eshell and shell
-              (cl-remove-if '(lambda (x) (member (buffer-local-value 'major-mode x)
-                                                 '(eshell-mode shell-mode)))
+              (cl-remove-if '(lambda (x) (not (buffer-file-name x)))
                             (buffer-list)))))
+
 
 ;;;;
 ;;;;           erase current buffer
@@ -887,8 +886,19 @@
   (setq company-idle-delay 0
         company-minimum-prefix-length 1
         company-selection-wrap-around t)
+
+  
   (add-hook 'after-init-hook 'global-company-mode)
+
+  :preface
+  (defun company--sort-by-visibility (candidates)
+    (message (format "%s" candidates))
+    candidates
+    )
+  
   :config
+  ;; (setq company-transformers '(company-sort-by-occurrence))
+  
   (add-to-list 'company-backends '(
                                    company-abbrev
                                    company-c-headers
@@ -905,13 +915,18 @@
             (add-to-list (make-local-variable 'company-backends)
                          'company-anaconda)))
 
+
+;;  (add-to-list 'company-transformers
+;;               'company--sort-by-visibility 'append)
+  
   (setq company-dabbrev-ignore-case t
         company-dabbrev-downcase nil
         company-dabbrev-other-buffers t)
 
   (use-package company-c-headers)
-  (use-package company-anaconda :defer t)
+  (use-package company-anaconda)
   ;;(use-package company-tabnine)
+  (use-package company-statistics :hook (lsp-mode . company-statistics-mode))
   
   :bind(("C-." . company-complete)
         :map company-active-map
@@ -932,15 +947,16 @@
     (lsp-clangd-binary-path "/usr/local/opt/llvm/bin/clangd")
     :config
     (setq read-process-output-max (* 1024 10240))
-    (require 'dap-cpptools)
+    ;;(require 'dap-cpptools)
+    (setq lsp-enable-on-type-formatting nil)
+    
     :hook ((c-mode c++-mode objc-mode) . (lambda () (lsp)))
            (lsp-mode . (lambda () (lsp-enable-which-key-integration)))
-           
-    )
+           (lsp-mode . lsp-modeline-code-actions-mode)
+      )
   
   (use-package lsp-ui :commands lsp-ui-mode )
   (use-package dap-mode)
-
   
   ;; c/c++/obj-c with ccls (windows only. clangd on *nix platforms)
   (when is-windows
