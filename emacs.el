@@ -964,10 +964,17 @@
   )
 
 (when (not is-snowmacs)
+  
+  (use-package flycheck 
+    :config (global-flycheck-mode))
+  
+  (use-package helm-flycheck)
+  
   (use-package lsp-mode
     :commands lsp
     :custom
     (lsp-clangd-binary-path "/usr/local/opt/llvm/bin/clangd")
+    (lsp-diagnostics-provider :flycheck)
     :config
     (setq read-process-output-max (* 1024 10240))
     ;;(require 'dap-cpptools)
