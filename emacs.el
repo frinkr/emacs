@@ -925,12 +925,16 @@
 
   ;; transformer sort by kind
   (defun company--sort-by-kind (candidates)
-    (sort candidates
-          (lambda (cand1 cand2)
-            (let* ((s1 (company--candidate-kind-score-cal cand1))
-                   (s2 (company--candidate-kind-score-cal cand2)))
-              (< s1 s2)
-              ))))
+    (if (fboundp 'lsp-completion--candidate-kind)
+        (sort candidates
+              (lambda (cand1 cand2)
+                (let* ((s1 (company--candidate-kind-score-cal cand1))
+                       (s2 (company--candidate-kind-score-cal cand2)))
+                  (< s1 s2)
+                  )))
+      candidates
+      )
+    )
   
   :config
   (add-to-list 'company-backends '(
